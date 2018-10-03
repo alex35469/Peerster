@@ -1,33 +1,68 @@
 // Client Main file. Accept the following arguments:
-//  - UIPort  : port on which the gossiper listen (default "8080")
+//  - UIPort  : port for the UI client (default "8080")
 //  - msg : message to be sent
 
 package main
 
 import (
-  "fmt"
-  "flag"
-  //"github.com/dedis/protobuf"
+	"flag"
+	"fmt"
+	"net"
+	"os"
+
+	"github.com/dedis/protobuf"
 )
 
 // Peer simple message
 type SimpleMessage struct {
-  OriginalName string
-  RelayPeerAddr string
-  Contents string
+	OriginalName  string
+	RelayPeerAddr string
+	Contents      string
 }
 
 type GossipPacket struct {
- Simple *SimpleMessage
+	Simple *SimpleMessage
 }
 
+var UIPort, msg string
 
+// Init
+func init() {
+	flag.StringVar(&UIPort, "UIPort", "8080", "port for the UI client")
+	flag.StringVar(&msg, "msg", "yoo", "message to be sent")
+}
 
+//########################## MAIN ######################
 
-func main(){
-  UIPortPtr := flag.String("UIPort", "8080", "port of the UI client" )
-  msgPtr := flag.String("msg","", "message to be sent")
+func main() {
+	flag.Parse()
+	simplemsg := SimpleMessage{OriginalName: "Herve", RelayPeerAddr: "Null", Contents: msg}
+	packetToSend := GossipPacket{&simplemsg}
+	fmt.Println(UIPort, msg)
+	sendToGossiper(packetToSend)
+	fmt.Println("Done.")
+}
 
-  //packetToSend := GossipPacket{Simple: SimpleMessage}
-  fmt.Println(UIPortPtr, msgPtr)
+func sendToGossiper(packetToSend GossipPacket) {
+
+	packetBytes, err := protobuf.Encode(&packetToSend)
+	checkError(err)
+
+	udpAddr, err := net.ResolveUDPAddr("udp4", "localhost:"+UIPort)
+	checkError(err)
+	udpConn, err := net.DialUDP("udp4", nil, udpAddr)
+	checkError(err)
+	defer udpConn.Close()
+
+	_, err = udpConn.Write(packetBytes)
+	fmt.Println("HERE")
+	checkError(err)
+
+}
+
+func checkError(err error) {
+	if err != nil {
+		fmt.Println("Fatal error ", os.Stderr, err.Error())
+		os.Exit(1)
+	}
 }
