@@ -29,14 +29,14 @@ var UIPort, msg string
 // Init
 func init() {
 	flag.StringVar(&UIPort, "UIPort", "8080", "port for the UI client")
-	flag.StringVar(&msg, "msg", "yoo", "message to be sent")
+	flag.StringVar(&msg, "msg", "", "message to be sent")
 }
 
 //########################## MAIN ######################
 
 func main() {
 	flag.Parse()
-	simplemsg := SimpleMessage{OriginalName: "Herve", RelayPeerAddr: "Null", Contents: msg}
+	simplemsg := SimpleMessage{OriginalName: "Client", RelayPeerAddr: "Null", Contents: msg}
 	packetToSend := GossipPacket{&simplemsg}
 	fmt.Println(UIPort, msg)
 	sendToGossiper(packetToSend)

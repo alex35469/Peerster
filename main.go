@@ -32,11 +32,10 @@ type Gossiper struct {
 	address *net.UDPAddr
 	conn    *net.UDPConn
 	Name    string
+	peers   string
 }
 
 const UDP_PACKET_SIZE = 1024
-
-var peers string
 
 var myGossiper *Gossiper
 
@@ -50,7 +49,7 @@ func init() {
 
 	flag.StringVar(&UIPort, "UIPort", "8080", "port for the UI client")
 	flag.StringVar(&gossipAddr, "gossipAddr", "127.0.0.1:5000", "ip:port for the gossiper")
-	flag.StringVar(&name, "name", "", "name of the gossiper")
+	flag.StringVar(&name, "name", "NoName", "name of the gossiper")
 	flag.StringVar(&peersInit, "peers", "", "name of the gossiper")
 	flag.BoolVar(&simple, "simple", true, "run gossiper in simple broadcast modified")
 
@@ -59,19 +58,21 @@ func init() {
 //######################################## MAIN #####################################
 
 func main() {
+	// Parsing flags
 	flag.Parse()
-	myGossiper = NewGossiper(gossipAddr, name)
+	myGossiper = NewGossiper(gossipAddr, name, peersInit)
 
 	fmt.Println(UIPort)
 	// Do a goroutine to listen to Client
-	listenToClient()
+	go listenToClient()
 
+	listenToGossipers()
 	// Do a go routine to listen to other peers gossipers
 }
 
 //######################################## END MAIN #####################################
 
-func NewGossiper(address, name string) *Gossiper {
+func NewGossiper(address, name, peersInit string) *Gossiper {
 	udpAddr, err := net.ResolveUDPAddr("udp4", address)
 	checkError(err)
 	udpConn, err := net.ListenUDP("udp4", udpAddr)
@@ -81,6 +82,7 @@ func NewGossiper(address, name string) *Gossiper {
 		address: udpAddr,
 		conn:    udpConn,
 		Name:    name,
+		peers:   peersInit,
 	}
 }
 
@@ -93,46 +95,84 @@ func checkError(err error) {
 }
 
 // When a message is received,
-func sendToPeers(packet *GossipPacket, sender string) {
+func sendToPeers(packet *GossipPacket, relayer string) {
 
-	peersList := strings.Split(peers, ",")
+	peersList := strings.Split(myGossiper.peers, ",")
 	for _, v := range peersList {
-		if v != sender {
+		if v != relayer {
 			packetBytes, err := protobuf.Encode(packet)
 			checkError(err)
 
-			udpAddr, err := net.ResolveUDPAddr("udp4", v)
-			checkError(err)
-			udpConn, err := net.DialUDP("udp4", myGossiper.address, udpAddr)
+			remoteGossiperAddr, err := net.ResolveUDPAddr("udp4", v)
 			checkError(err)
 
-			_, err = udpConn.WriteToUDP(packetBytes, udpAddr)
+			// Would be better to use the real myGossiper.address instead of nil but already used error
+			remoteGossiperConn, err := net.DialUDP("udp4", nil, remoteGossiperAddr)
+			checkError(err)
+
+			_, err = remoteGossiperConn.Write(packetBytes)
 			if err != nil {
 				fmt.Printf("Error: UDP write error: %v", err)
 				continue
 			}
+			remoteGossiperConn.Close()
 
 		}
 	}
 }
 
-func listenToClient() {
+func listenToGossipers() {
 	// Setup the listener for the client's UIPort
-	udpAddr, err := net.ResolveUDPAddr("udp4", "127.0.0.1:"+UIPort)
-	checkError(err)
-	udpConn, err := net.ListenUDP("udp4", udpAddr)
-	checkError(err)
-
-	defer udpConn.Close()
-
-	fmt.Println(udpAddr)
-	// Listennig
 	for {
-		newPacket := fetchMessages(udpConn)
+		newPacket := fetchMessages(myGossiper.conn)
 
-		fmt.Println(newPacket.Simple.Contents)
+		fmt.Printf("SIMPLE MESSAGE origin %s from %s contents %s\n",
+			newPacket.Simple.RelayPeerAddr,
+			newPacket.Simple.OriginalName,
+			newPacket.Simple.Contents,
+		)
+		sendMsgFromGossiper(newPacket)
+		fmt.Println("PEERS " + myGossiper.peers)
 
 	}
+}
+
+func sendMsgFromGossiper(packetToSend *GossipPacket) {
+	// Add the relayer to the peers'field
+	relayer := packetToSend.Simple.RelayPeerAddr
+	addPeer(relayer)
+	packetToSend.Simple.RelayPeerAddr = myGossiper.address.String()
+	sendToPeers(packetToSend, relayer)
+
+}
+
+func listenToClient() {
+	// Setup the listener for the client's UIPort
+	UIAddr, err := net.ResolveUDPAddr("udp4", "127.0.0.1:"+UIPort)
+	checkError(err)
+	UIConn, err := net.ListenUDP("udp4", UIAddr)
+	checkError(err)
+
+	defer UIConn.Close()
+
+	// Listennig
+	for {
+		newPacket := fetchMessages(UIConn)
+
+		fmt.Println("CLIENT MESSAGE " + newPacket.Simple.Contents)
+
+		// Do maybe a go routine here or maybe not because of concurency
+		sendMsgFromClient(newPacket)
+
+		//sendToPeers(newPacket, sender)
+	}
+}
+
+func sendMsgFromClient(packetToSend *GossipPacket) {
+	packetToSend.Simple.OriginalName = myGossiper.Name
+	packetToSend.Simple.RelayPeerAddr = myGossiper.address.String()
+	// it's comming from the client so the send field should have none effects
+	sendToPeers(packetToSend, "client")
 
 }
 
@@ -150,10 +190,10 @@ func fetchMessages(udpConn *net.UDPConn) *GossipPacket {
 
 // When receiving a msg from another gossiper
 func addPeer(peer string) {
-	alreadyThere := strings.Contains(peers, peer)
+	alreadyThere := strings.Contains(myGossiper.peers, peer)
 
-	if alreadyThere {
-		peers += peer
+	if !alreadyThere {
+		myGossiper.peers += "," + peer
 	}
 
 }
