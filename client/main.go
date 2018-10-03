@@ -38,9 +38,7 @@ func main() {
 	flag.Parse()
 	simplemsg := SimpleMessage{OriginalName: "Client", RelayPeerAddr: "Null", Contents: msg}
 	packetToSend := GossipPacket{&simplemsg}
-	fmt.Println(UIPort, msg)
 	sendToGossiper(packetToSend)
-	fmt.Println("Done.")
 }
 
 func sendToGossiper(packetToSend GossipPacket) {
@@ -55,7 +53,6 @@ func sendToGossiper(packetToSend GossipPacket) {
 	defer udpConn.Close()
 
 	_, err = udpConn.Write(packetBytes)
-	fmt.Println("HERE")
 	checkError(err)
 
 }

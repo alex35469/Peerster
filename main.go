@@ -62,7 +62,6 @@ func main() {
 	flag.Parse()
 	myGossiper = NewGossiper(gossipAddr, name, peersInit)
 
-	fmt.Println(UIPort)
 	// Do a goroutine to listen to Client
 	go listenToClient()
 
@@ -127,8 +126,9 @@ func listenToGossipers() {
 		newPacket := fetchMessages(myGossiper.conn)
 
 		fmt.Printf("SIMPLE MESSAGE origin %s from %s contents %s\n",
-			newPacket.Simple.RelayPeerAddr,
 			newPacket.Simple.OriginalName,
+			newPacket.Simple.RelayPeerAddr,
+
 			newPacket.Simple.Contents,
 		)
 		sendMsgFromGossiper(newPacket)
