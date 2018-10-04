@@ -24,8 +24,24 @@ type SimpleMessage struct {
 	Contents      string
 }
 
+type RumorMessage struct {
+	Origin string
+	ID     uint32
+	Text   string
+}
+
+type PeerStatus struct {
+	Identifier string
+	NextID     uint32
+}
+type StatusPacket struct {
+	Want []PeerStatus
+}
+
 type GossipPacket struct {
 	Simple *SimpleMessage
+	Rumor  *RumorMessage
+	Status *StatusPacket
 }
 
 type Gossiper struct {
@@ -71,55 +87,9 @@ func main() {
 
 //######################################## END MAIN #####################################
 
-func NewGossiper(address, name, peersInit string) *Gossiper {
-	udpAddr, err := net.ResolveUDPAddr("udp4", address)
-	checkError(err)
-	udpConn, err := net.ListenUDP("udp4", udpAddr)
-	checkError(err)
+//###############################  Gossiper connexion ##################
 
-	return &Gossiper{
-		address: udpAddr,
-		conn:    udpConn,
-		Name:    name,
-		peers:   peersInit,
-	}
-}
-
-// Code retrieved from https://astaxie.gitbooks.io/build-web-application-with-golang/en/08.1.html
-func checkError(err error) {
-	if err != nil {
-		fmt.Println("Fatal error ", os.Stderr, err.Error())
-		os.Exit(1)
-	}
-}
-
-// When a message is received,
-func sendToPeers(packet *GossipPacket, relayer string) {
-
-	peersList := strings.Split(myGossiper.peers, ",")
-	for _, v := range peersList {
-		if v != relayer {
-			packetBytes, err := protobuf.Encode(packet)
-			checkError(err)
-
-			remoteGossiperAddr, err := net.ResolveUDPAddr("udp4", v)
-			checkError(err)
-
-			// Would be better to use the real myGossiper.address instead of nil but already used error
-			remoteGossiperConn, err := net.DialUDP("udp4", nil, remoteGossiperAddr)
-			checkError(err)
-
-			_, err = remoteGossiperConn.Write(packetBytes)
-			if err != nil {
-				fmt.Printf("Error: UDP write error: %v", err)
-				continue
-			}
-			remoteGossiperConn.Close()
-
-		}
-	}
-}
-
+// Listen to the Gossiper
 func listenToGossipers() {
 	// Setup the listener for the client's UIPort
 	for {
@@ -137,6 +107,7 @@ func listenToGossipers() {
 	}
 }
 
+// Send a message comming from another peer (not UI Client) port to all the peers
 func sendMsgFromGossiper(packetToSend *GossipPacket) {
 	// Add the relayer to the peers'field
 	relayer := packetToSend.Simple.RelayPeerAddr
@@ -145,6 +116,16 @@ func sendMsgFromGossiper(packetToSend *GossipPacket) {
 	sendToPeers(packetToSend, relayer)
 
 }
+
+func addPeer(peer string) {
+	alreadyThere := strings.Contains(myGossiper.peers, peer)
+
+	if !alreadyThere {
+		myGossiper.peers += "," + peer
+	}
+}
+
+//############################### UI Connexion ##########################
 
 func listenToClient() {
 	// Setup the listener for the client's UIPort
@@ -168,32 +149,75 @@ func listenToClient() {
 	}
 }
 
+// Send a message comming from the UIport to all the peers
 func sendMsgFromClient(packetToSend *GossipPacket) {
 	packetToSend.Simple.OriginalName = myGossiper.Name
 	packetToSend.Simple.RelayPeerAddr = myGossiper.address.String()
-	// it's comming from the client so the send field should have none effects
+
+	// it's comming from the client so the send field should have no effects
 	sendToPeers(packetToSend, "client")
 
 }
 
+//############################### HELPER Functions (Called in both side) ######################
+
+// Fetch a message that has been sent through a particular connection
 func fetchMessages(udpConn *net.UDPConn) *GossipPacket {
 	var newPacket GossipPacket
 	buffer := make([]byte, UDP_PACKET_SIZE)
 
-	n, _, err := udpConn.ReadFromUDP(buffer)
+	n, addr, err := udpConn.ReadFromUDP(buffer)
 	checkError(err)
 	err = protobuf.Decode(buffer[0:n], &newPacket)
 	checkError(err)
+	fmt.Println(addr)
 
 	return &newPacket
 }
 
-// When receiving a msg from another gossiper
-func addPeer(peer string) {
-	alreadyThere := strings.Contains(myGossiper.peers, peer)
+// Send a packet to every peers known by the gossiper (except the relayer)
+func sendToPeers(packet *GossipPacket, relayer string) {
 
-	if !alreadyThere {
-		myGossiper.peers += "," + peer
+	// Extracting the peers
+	peersList := strings.Split(myGossiper.peers, ",")
+	for _, v := range peersList {
+		if v != relayer {
+			packetBytes, err := protobuf.Encode(packet)
+			checkError(err)
+
+			remoteGossiperAddr, err := net.ResolveUDPAddr("udp4", v)
+			checkError(err)
+
+			_, err = myGossiper.conn.WriteTo(packetBytes, remoteGossiperAddr)
+			if err != nil {
+				fmt.Printf("Error: UDP write error: %v", err)
+				continue
+			}
+
+		}
 	}
+}
 
+// Code retrieved from https://astaxie.gitbooks.io/build-web-application-with-golang/en/08.1.html
+// Used to ckeck if an error occured
+func checkError(err error) {
+	if err != nil {
+		fmt.Println("Fatal error ", os.Stderr, err.Error())
+		os.Exit(1)
+	}
+}
+
+// Create the Gossiper
+func NewGossiper(address, name, peersInit string) *Gossiper {
+	udpAddr, err := net.ResolveUDPAddr("udp4", address)
+	checkError(err)
+	udpConn, err := net.ListenUDP("udp4", udpAddr)
+	checkError(err)
+
+	return &Gossiper{
+		address: udpAddr,
+		conn:    udpConn,
+		Name:    name,
+		peers:   peersInit,
+	}
 }

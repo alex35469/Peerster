@@ -41,6 +41,9 @@ func main() {
 	sendToGossiper(packetToSend)
 }
 
+//########################## END MAIN ######################
+
+// Send a packet to the Gossiper
 func sendToGossiper(packetToSend GossipPacket) {
 
 	packetBytes, err := protobuf.Encode(&packetToSend)
