@@ -83,6 +83,49 @@ func TestCompareStatusPacket(t *testing.T) {
 		t.Errorf("%v receives \n             %v  ===> Expected outcome = 1, Identifier = E, NextID = 0 but got (%v, %v, %v) respectively", sp2, sp1, outcome, id, next)
 	}
 
+	sp1 = StatusPacket{}
+	sp2 = StatusPacket{}
+
+	sp1.Want = append(sp1.Want,
+		PeerStatus{Identifier: "B", NextID: 4},
+		PeerStatus{Identifier: "D", NextID: 3},
+		PeerStatus{Identifier: "R", NextID: 6},
+	)
+
+	sp2.Want = append(sp2.Want,
+		PeerStatus{Identifier: "B", NextID: 6},
+		PeerStatus{Identifier: "C", NextID: 4},
+		PeerStatus{Identifier: "D", NextID: 3},
+		PeerStatus{Identifier: "E", NextID: 2},
+		PeerStatus{Identifier: "R", NextID: 5},
+	)
+
+	outcome, id, next = sp1.CompareStatusPacket(&sp2)
+	if outcome != 1 || id != "R" || next != 5 {
+
+		t.Errorf("%v receives \n             %v  ===> Expected outcome = 1, Identifier = E, NextID = 0 but got (%v, %v, %v) respectively", sp1, sp2, outcome, id, next)
+	}
+
+	sp1 = StatusPacket{}
+	sp2 = StatusPacket{}
+
+	sp1.Want = append(sp1.Want,
+		PeerStatus{Identifier: "B", NextID: 4},
+		PeerStatus{Identifier: "D", NextID: 6},
+	)
+
+	sp2.Want = append(sp2.Want,
+		PeerStatus{Identifier: "A", NextID: 3},
+		PeerStatus{Identifier: "B", NextID: 4},
+		PeerStatus{Identifier: "D", NextID: 6},
+	)
+
+	outcome, id, next = sp1.CompareStatusPacket(&sp2)
+	if outcome != -1 {
+
+		t.Errorf("%v receives \n             %v  ===> Expected outcome = 1, Identifier = E, NextID = 0 but got (%v, %v, %v) respectively", sp1, sp2, outcome, id, next)
+	}
+
 }
 
 func TestCreateGossiper(t *testing.T) {

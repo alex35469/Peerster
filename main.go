@@ -263,7 +263,7 @@ func NewGossiper(address, name, neighborsInit string) *Gossiper {
 	}
 }
 
-// Function to compare myVC and other VC's
+// Function to compare myVC and other VC's (Run in O(n))
 // Takes to SORTED VC and compare them
 // To make no ambiguity (Both VC have msg that other doesn't have), we try to send the rumor first
 // return : (case , identifier, nextID)
@@ -271,58 +271,90 @@ func NewGossiper(address, name, neighborsInit string) *Gossiper {
 // Case -1 means we are late => todo: send myVC to the neighbors (only if the other VC has every msgs we have)
 // Case  0 means uptodate
 func (myVC *StatusPacket) CompareStatusPacket(otherVC *StatusPacket) (int, string, uint32) {
-
-	/// NAYBE SIMPLE DO A DOUBLE LOOP it's  Simpler
-	otherIsInadvance := false
-
 	// If otherVC is emty, just fetch the first elem in myVC
+
 	if len(otherVC.Want) == 0 && len(myVC.Want) != 0 {
 		return 1, myVC.Want[0].Identifier, 0
-
 	}
 
-	var idx int = min(len(myVC.Want), len(otherVC.Want))
-
-	for i := 0; i < idx; i++ {
-		identifier := myVC.Want[i].Identifier
-		nextID := myVC.Want[i].NextID
-
-		if (identifier != otherVC.Want[i].Identifier) && (identifier < otherVC.Want[i].Identifier) {
-			return 1, identifier, 0
-		}
-
-		if identifier > otherVC.Want[i].Identifier {
-			otherIsInadvance = true
-			continue
-		}
-
-		if nextID > otherVC.Want[i].NextID {
-			return 1, identifier, otherVC.Want[i].NextID
-		}
-
-		if nextID < otherVC.Want[i].NextID {
-			otherIsInadvance = true
-		}
-
+	if len(otherVC.Want) == 0 && len(myVC.Want) == 0 {
+		return 0, "", 0
 	}
 
-	if len(myVC.Want) > len(otherVC.Want) {
+	if len(otherVC.Want) != 0 && len(myVC.Want) == 0 {
+		return -1, "", 0
+	}
+
+	otherIsInadvance := false
+
+	var maxMe, maxHim int = len(myVC.Want), len(otherVC.Want)
+	i, j := 0, 0
+
+	for i < maxMe && j < maxHim {
+
+		if myVC.Want[i].Identifier == otherVC.Want[j].Identifier {
+			if myVC.Want[i].NextID > otherVC.Want[j].NextID {
+				return 1, otherVC.Want[j].Identifier, otherVC.Want[j].NextID
+
+			} else if myVC.Want[i].NextID < otherVC.Want[j].NextID {
+				otherIsInadvance = true
+				i = i + 1
+				j = j + 1
+				continue
+
+			} else {
+				i = i + 1
+				j = j + 1
+				continue
+			}
+		}
+
+		if myVC.Want[i].Identifier < otherVC.Want[j].Identifier {
+
+			return 1, myVC.Want[i].Identifier, 0
+		}
+
+		if myVC.Want[i].Identifier > otherVC.Want[j].Identifier {
+			j = j + 1
+			if j == maxHim && i == maxMe {
+				return 1, myVC.Want[i].Identifier, 0
+			}
+		}
+	}
+
+	if i < maxMe {
 		return 1, myVC.Want[len(myVC.Want)-1].Identifier, 0
+
 	}
 
-	// At this point, we know that we are at least not in advance
-
-	if (len(myVC.Want) < len(otherVC.Want)) || otherIsInadvance {
-		// The other one is in advance ... let him do all the computation
+	if len(myVC.Want) < len(otherVC.Want) || otherIsInadvance {
 		return -1, "", 0
 	}
 
 	return 0, "", 0
+
 }
 
-func min(a, b int) int {
-	if a < b {
-		return a
+/// NAYBE SIMPLE DO A DOUBLE LOOP it's  Simpler
+/*
+	otherIsInadvance := false
+	IamInAdvance := false
+
+	myVC.Want[0].Identifier
+
+
+	for myS := range myVC.Want{
+		id := myS.Identifier
+		nextID := myS.NextID
+		for otherS := range otherVC.Want{
+				if id == otherS.Identifier {
+					if nextID < otherS.NextID {
+
+					}
+				}
+
+		}
+
+
 	}
-	return b
-}
+*/
