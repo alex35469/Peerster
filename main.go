@@ -118,13 +118,12 @@ func listenToGossipers() {
 
 		}
 
-		if packet := newPacket.Status; packet != nil {
+		if otherVC := newPacket.Status; otherVC != nil {
 
-			vcOther := newPacket.Status.Want
 			// perform the sort just after reveiving the packet (Cannot rely on others in a decentralized system ;))
-			sort.Slice(vcOther, func(i, j int) bool {
-				return vcOther[i].Identifier < vcOther[j].Identifier
-			})
+			otherVC.SortVC()
+			myGossiper.myVC.Compare
+
 		}
 
 		fmt.Println(addr.String())
@@ -263,7 +262,18 @@ func NewGossiper(address, name, neighborsInit string) *Gossiper {
 	}
 }
 
-// Function to compare myVC and other VC's (Run in O(n))
+func (myVC *StatusPacket) SortVC() {
+
+	// Since SliceSort use quick sort (best case O(n)) it's better to check if it's already sorted
+	if sort.IsSorted(myVC) {
+		return
+	}
+
+	sort.Sort(myVC)
+
+}
+
+// Function to compare myVC and other VC's (Run in O(n) 2n if the two VC are shifted )
 // Takes to SORTED VC and compare them
 // To make no ambiguity (Both VC have msg that other doesn't have), we try to send the rumor first
 // return : (case , identifier, nextID)
@@ -296,17 +306,13 @@ func (myVC *StatusPacket) CompareStatusPacket(otherVC *StatusPacket) (int, strin
 			if myVC.Want[i].NextID > otherVC.Want[j].NextID {
 				return 1, otherVC.Want[j].Identifier, otherVC.Want[j].NextID
 
-			} else if myVC.Want[i].NextID < otherVC.Want[j].NextID {
-				otherIsInadvance = true
-				i = i + 1
-				j = j + 1
-				continue
-
-			} else {
-				i = i + 1
-				j = j + 1
-				continue
 			}
+			if myVC.Want[i].NextID < otherVC.Want[j].NextID {
+				otherIsInadvance = true
+			}
+			i = i + 1
+			j = j + 1
+			continue
 		}
 
 		if myVC.Want[i].Identifier < otherVC.Want[j].Identifier {
@@ -322,6 +328,8 @@ func (myVC *StatusPacket) CompareStatusPacket(otherVC *StatusPacket) (int, strin
 		}
 	}
 
+	// We couldn't go to the end of myVC, thus otherVC could be scanned entirely
+	// meaning: All the entries in myVC after i are not in otherVC
 	if i < maxMe {
 		return 1, myVC.Want[len(myVC.Want)-1].Identifier, 0
 
@@ -331,30 +339,11 @@ func (myVC *StatusPacket) CompareStatusPacket(otherVC *StatusPacket) (int, strin
 		return -1, "", 0
 	}
 
+	// The two lists are the same
 	return 0, "", 0
-
 }
 
-/// NAYBE SIMPLE DO A DOUBLE LOOP it's  Simpler
-/*
-	otherIsInadvance := false
-	IamInAdvance := false
-
-	myVC.Want[0].Identifier
-
-
-	for myS := range myVC.Want{
-		id := myS.Identifier
-		nextID := myS.NextID
-		for otherS := range otherVC.Want{
-				if id == otherS.Identifier {
-					if nextID < otherS.NextID {
-
-					}
-				}
-
-		}
-
-
-	}
-*/
+// Making Satus message implementing interface sort
+func (VC StatusPacket) Len() int           { return len(VC.Want) }
+func (VC StatusPacket) Less(i, j int) bool { return VC.Want[i].Identifier < VC.Want[j].Identifier }
+func (VC StatusPacket) Swap(i, j int)      { VC.Want[i], VC.Want[j] = VC.Want[j], VC.Want[i] }
