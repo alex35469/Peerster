@@ -4,6 +4,7 @@
 //  - name : name of the gossiper
 //  - peers : coma separated list of peers of the form ip:UIPort
 //  - simple : run gossiper in simple broadcast modified
+// VC = Vector Clock
 
 package main
 
@@ -58,8 +59,8 @@ type Gossiper struct {
 	conn            *net.UDPConn
 	Name            string
 	neighbors       string
-	myVC            *[]PeerStatus
-	messagesHistory map[string][]string
+	myVC            *StatusPacket
+	messagesHistory map[string][]*RumorMessage
 }
 
 const UDP_PACKET_SIZE = 1024
@@ -106,44 +107,68 @@ func listenToGossipers() {
 	for {
 		newPacket, addr := fetchMessages(myGossiper.conn)
 
-		if packet := newPacket.Simple; packet != nil {
-			fmt.Printf("SIMPLE MESSAGE origin %s from %s contents %s\n",
-				newPacket.Simple.OriginalName,
-				newPacket.Simple.RelayPeerAddr,
-				newPacket.Simple.Contents,
-			)
-		}
-
-		if packet := newPacket.Rumor; packet != nil {
-
-		}
-
-		if otherVC := newPacket.Status; otherVC != nil {
-
-			// perform the sort just after reveiving the packet (Cannot rely on others in a decentralized system ;))
-			otherVC.SortVC()
-			myGossiper.myVC.Compare
-
-		}
-
-		fmt.Println(addr.String())
-		sendMsgFromGossiper(newPacket)
-		fmt.Println("PEERS " + myGossiper.neighbors)
-
+		// make a go routine here
+		go proccessPacketAndSend(newPacket, addr)
 	}
 }
 
-// Send a message comming from another peer (not UI Client) port to all the peers
-func sendMsgFromGossiper(packetToSend *GossipPacket) {
-	// Add the relayer to the peers'field
-	relayer := packetToSend.Simple.RelayPeerAddr
-	addPeer(relayer)
-	packetToSend.Simple.RelayPeerAddr = myGossiper.address.String()
-	sendToPeers(packetToSend, relayer)
+func proccessPacketAndSend(newPacket *GossipPacket, addr *net.UDPAddr) {
+
+	if packet := newPacket.Simple; packet != nil && simple {
+		fmt.Printf("SIMPLE MESSAGE origin %s from %s contents %s\n",
+			newPacket.Simple.OriginalName,
+			newPacket.Simple.RelayPeerAddr,
+			newPacket.Simple.Contents,
+		)
+
+		sendMsgFromGossiperSimpleMode(newPacket)
+		fmt.Println("PEERS " + myGossiper.neighbors)
+
+	}
+
+	if packet := newPacket.Rumor; packet != nil {
+		// Maybe set timer here or just after sending (Maybe more sense)
+
+	}
+
+	// ################### NEW StatusPacket ##############
+	if otherVC := newPacket.Status; otherVC != nil {
+
+		// perform the sort just after reveiving the packet (Cannot rely on others to send sorted VC in a decentralized system ;))
+		otherVC.SortVC()
+		outcome, identifier, nextID := myGossiper.myVC.CompareStatusPacket(otherVC)
+
+		if outcome == 0 {
+
+		}
+
+		if outcome == -1 {
+			sendMsgToGossiper(addr.String(), &GossipPacket{Status: myGossiper.myVC})
+		}
+
+		if outcome == 1 {
+
+			// fetch identifier, nextID from list
+
+			msg := myGossiper.messagesHistory[identifier][nextID]
+			sendMsgToGossiper(addr.String(), &GossipPacket{Rumor: msg})
+		}
+
+	}
 
 }
 
-func addPeer(neighbors string) {
+// Send a message comming from another peer (not UI Client) port to all the peers
+func sendMsgFromGossiperSimpleMode(packetToSend *GossipPacket) {
+	// Add the relayer to the peers'field
+	relayer := packetToSend.Simple.RelayPeerAddr
+	addNeighbor(relayer)
+	packetToSend.Simple.RelayPeerAddr = myGossiper.address.String()
+	sendToAllNeighbors(packetToSend, relayer)
+
+}
+
+func addNeighbor(neighbors string) {
 	alreadyThere := strings.Contains(myGossiper.neighbors, neighbors)
 
 	if !alreadyThere {
@@ -169,21 +194,27 @@ func listenToClient() {
 		fmt.Println("CLIENT MESSAGE " + newPacket.Simple.Contents)
 
 		// Do maybe a go routine here or maybe not because of concurency
-		sendMsgFromClient(newPacket)
+		if simple {
+			sendMsgFromClientSimpleMode(newPacket)
+		} else {
 
-		//sendToPeers(newPacket, sender)
+		}
+		//sendToAllNeighbors(newPacket, sender)
 	}
 }
 
-// Send a message comming from the UIport to all the peers
-func sendMsgFromClient(packetToSend *GossipPacket) {
+func sendMsgFromClientRumongering(packetToSend *GossipPacket) {
 
-	if simple {
+}
+
+// Send a message comming from the UIport to all the peers
+func sendMsgFromClientSimpleMode(packetToSend *GossipPacket) {
+	if packetToSend.Simple != nil {
 		packetToSend.Simple.OriginalName = myGossiper.Name
 		packetToSend.Simple.RelayPeerAddr = myGossiper.address.String()
 
 		// it's comming from the client so the send field should have no effects
-		sendToPeers(packetToSend, "client")
+		sendToAllNeighbors(packetToSend, "client")
 	}
 
 }
@@ -205,7 +236,7 @@ func fetchMessages(udpConn *net.UDPConn) (*GossipPacket, *net.UDPAddr) {
 }
 
 // Send a packet to every peers known by the gossiper (except the relayer)
-func sendToPeers(packet *GossipPacket, relayer string) {
+func sendToAllNeighbors(packet *GossipPacket, relayer string) {
 
 	// Extracting the peers
 	peersList := strings.Split(myGossiper.neighbors, ",")
@@ -243,21 +274,22 @@ func NewGossiper(address, name, neighborsInit string) *Gossiper {
 	udpConn, err := net.ListenUDP("udp4", udpAddr)
 	checkError(err)
 
-	initVC := make([]PeerStatus, 1)
+	sp := StatusPacket{}
+	sp.Want = make([]PeerStatus, 1)
 
-	messagesHistoryInit := make(map[string][]string)
+	messagesHistoryInit := make(map[string][]*RumorMessage)
 
 	//messagesHistoryInit[name] = append(messagesHistoryInit[name], "NewMsg" )
 
 	// Init the gossiper's own record
-	initVC[0] = PeerStatus{Identifier: name, NextID: 0}
+	sp.Want[0] = PeerStatus{Identifier: name, NextID: 0}
 
 	return &Gossiper{
 		address:         udpAddr,
 		conn:            udpConn,
 		Name:            name,
 		neighbors:       neighborsInit,
-		myVC:            &initVC,
+		myVC:            &sp,
 		messagesHistory: messagesHistoryInit,
 	}
 }
@@ -276,10 +308,10 @@ func (myVC *StatusPacket) SortVC() {
 // Function to compare myVC and other VC's (Run in O(n) 2n if the two VC are shifted )
 // Takes to SORTED VC and compare them
 // To make no ambiguity (Both VC have msg that other doesn't have), we try to send the rumor first
-// return : (case , identifier, nextID)
-// Case +1 means we are in advance => todo : send a rumor message that the otherone does not have (using id & nextID)
-// Case -1 means we are late => todo: send myVC to the neighbors (only if the other VC has every msgs we have)
-// Case  0 means uptodate
+// return : (outcome , identifier, nextID)
+// outcome +1 means we are in advance => todo : send a rumor message that the otherone does not have (using id & nextID)
+// outcome -1 means we are late => todo: send myVC to the neighbors (only if the other VC has every msgs we have)
+// outcome  0 means uptodate
 func (myVC *StatusPacket) CompareStatusPacket(otherVC *StatusPacket) (int, string, uint32) {
 	// If otherVC is emty, just fetch the first elem in myVC
 
@@ -341,6 +373,10 @@ func (myVC *StatusPacket) CompareStatusPacket(otherVC *StatusPacket) (int, strin
 
 	// The two lists are the same
 	return 0, "", 0
+}
+
+func sendMsgToGossiper(addr string, msg *GossipPacket) {
+
 }
 
 // Making Satus message implementing interface sort
