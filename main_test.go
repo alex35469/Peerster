@@ -34,8 +34,8 @@ func TestCompareStatusPacket(t *testing.T) {
 
 	outcome, id, next = sp1.CompareStatusPacket(&sp2)
 
-	if outcome != 1 || id != "A" || next != 0 {
-		t.Errorf("Init Test: Expected outcome = 0, Identifier = A, NextID = 0 but got (%v, %v, %v) respectively", outcome, id, next)
+	if outcome != 1 || id != "A" || next != 1 {
+		t.Errorf("Init Test: Expected outcome = 1, Identifier = A, NextID = 0 but got (%v, %v, %v) respectively", outcome, id, next)
 	}
 
 	outcome, id, next = sp2.CompareStatusPacket(&sp1)
@@ -79,9 +79,9 @@ func TestCompareStatusPacket(t *testing.T) {
 	}
 
 	outcome, id, next = sp2.CompareStatusPacket(&sp1)
-	if outcome != 1 || id != "E" || next != 0 {
+	if outcome != 1 || id != "E" || next != 1 {
 
-		t.Errorf("%v receives \n             %v  ===> Expected outcome = 1, Identifier = D, NextID = 0 but got (%v, %v, %v) respectively", sp2, sp1, outcome, id, next)
+		t.Errorf("%v receives \n             %v  ===> Expected outcome = 1, Identifier = D, NextID = 1 but got (%v, %v, %v) respectively", sp2, sp1, outcome, id, next)
 	}
 
 	sp1.Want = append(sp1.Want,
@@ -89,9 +89,9 @@ func TestCompareStatusPacket(t *testing.T) {
 	)
 
 	outcome, id, next = sp2.CompareStatusPacket(&sp1)
-	if outcome != 1 || id != "E" || next != 0 {
+	if outcome != 1 || id != "E" || next != 1 {
 
-		t.Errorf("%v receives \n             %v  ===> Expected outcome = 1, Identifier = E, NextID = 0 but got (%v, %v, %v) respectively", sp2, sp1, outcome, id, next)
+		t.Errorf("%v receives \n             %v  ===> Expected outcome = 1, Identifier = E, NextID = 1 but got (%v, %v, %v) respectively", sp2, sp1, outcome, id, next)
 	}
 
 	sp1 = StatusPacket{}
@@ -115,6 +115,72 @@ func TestCompareStatusPacket(t *testing.T) {
 	if outcome != 1 || id != "R" || next != 5 {
 
 		t.Errorf("%v receives \n             %v  ===> Expected outcome = 1, Identifier = E, NextID = 0 but got (%v, %v, %v) respectively", sp1, sp2, outcome, id, next)
+	}
+
+	sp1 = StatusPacket{}
+	sp2 = StatusPacket{}
+
+	sp1.Want = append(sp1.Want,
+		PeerStatus{Identifier: "B", NextID: 4},
+		PeerStatus{Identifier: "F", NextID: 3},
+		PeerStatus{Identifier: "R", NextID: 6},
+	)
+
+	sp2.Want = append(sp2.Want,
+		PeerStatus{Identifier: "B", NextID: 6},
+		PeerStatus{Identifier: "C", NextID: 4},
+		PeerStatus{Identifier: "D", NextID: 3},
+		PeerStatus{Identifier: "E", NextID: 2},
+		PeerStatus{Identifier: "G", NextID: 5},
+	)
+
+	outcome, id, next = sp1.CompareStatusPacket(&sp2)
+	if outcome != 1 || id != "F" || next != 1 {
+
+		t.Errorf("%v receives \n             %v  ===> Expected outcome = 1, Identifier = F, NextID = 1 but got (%v, %v, %v) respectively", sp1, sp2, outcome, id, next)
+	}
+
+	sp1 = StatusPacket{}
+	sp2 = StatusPacket{}
+
+	sp1.Want = append(sp1.Want,
+		PeerStatus{Identifier: "B", NextID: 4},
+		PeerStatus{Identifier: "F", NextID: 3},
+		PeerStatus{Identifier: "T", NextID: 10},
+	)
+
+	sp2.Want = append(sp2.Want,
+		PeerStatus{Identifier: "B", NextID: 4},
+		PeerStatus{Identifier: "F", NextID: 3},
+		PeerStatus{Identifier: "R", NextID: 6},
+	)
+
+	outcome, id, next = sp1.CompareStatusPacket(&sp2)
+	if outcome != 1 || id != "T" || next != 1 {
+
+		t.Errorf("%v receives \n             %v  ===> Expected outcome = 1, Identifier = T, NextID = 1 but got (%v, %v, %v) respectively", sp1, sp2, outcome, id, next)
+	}
+
+	sp1 = StatusPacket{}
+	sp2 = StatusPacket{}
+
+	sp1.Want = append(sp1.Want,
+		PeerStatus{Identifier: "P", NextID: 7},
+		PeerStatus{Identifier: "H", NextID: 7},
+	)
+
+	sp2.Want = append(sp2.Want,
+		PeerStatus{Identifier: "A", NextID: 1},
+		PeerStatus{Identifier: "B", NextID: 1},
+		PeerStatus{Identifier: "P", NextID: 7},
+		PeerStatus{Identifier: "H", NextID: 7},
+		PeerStatus{Identifier: "Z", NextID: 1},
+	)
+
+	outcome, id, next = sp1.CompareStatusPacket(&sp2)
+	if outcome != 0 {
+
+		t.Errorf("%v receives \n             %v  ===> Expected outcome = 0 but got %v", sp1, sp2, outcome)
 	}
 
 	sp1 = StatusPacket{}
