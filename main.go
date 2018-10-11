@@ -128,18 +128,18 @@ func main() {
 
 // Listen to the Gossiper
 func listenToGossipers() {
-	// Setup the listener for the client's UIPort
+	// Setup the listener for the gossiper Port
 	for {
 		newPacket, addr := fetchMessages(myGossiper.conn)
 
-		// make a go routine here
-		go proccessPacketAndSend(newPacket, addr)
+		// Process packet in a goroutine
+		go proccessPacketAndSend(newPacket, addr.String())
 	}
 }
 
-func proccessPacketAndSend(newPacket *GossipPacket, addr *net.UDPAddr) {
+func proccessPacketAndSend(newPacket *GossipPacket, receivedFrom string) {
 
-	addNeighbor(addr.String())
+	addNeighbor(receivedFrom)
 
 	if packet := newPacket.Simple; packet != nil && simple {
 		fmt.Printf("SIMPLE MESSAGE origin %s from %s contents %s\n",
@@ -156,24 +156,25 @@ func proccessPacketAndSend(newPacket *GossipPacket, addr *net.UDPAddr) {
 
 		msgs, knownRecord := myGossiper.messagesHistory[packet.Origin]
 
+		// Ignor message if it is a old or too new one (i.e. if it is out of order)
 		if (!knownRecord && packet.ID == 1) || (knownRecord && packet.ID == uint32(len(msgs)+1)) {
 
-			fmt.Printf("RUMOR origin %s from %s ID %d contents %s", packet.Origin, addr.String(), packet.ID, packet.Text)
+			fmt.Printf("RUMOR origin %s from %s ID %d contents %s", packet.Origin, receivedFrom, packet.ID, packet.Text)
 			fmt.Println()
 			fmt.Println("PEERS " + strings.Join(myGossiper.neighbors[:], ","))
 
 			//fmt.Printf("We have : known record = %v,  msgs = %v and we received: %v", knownRecord, msgs, packet)
-
+			// keep trace of that incoming packet
 			updateRecord(packet, knownRecord)
 
 			// Send The Satus Packet as an Ack to sender
-			sendTo(&GossipPacket{Status: myGossiper.myVC}, addr.String())
+			sendTo(&GossipPacket{Status: myGossiper.myVC}, receivedFrom)
 
 			// Send Rumor packet ( Handle timer, flip coin etc..)
 			// No sense to send the rumor back (which will append the peer is isolated i.e len(neigbors) = 1)
 
 			if len(myGossiper.neighbors) > 1 {
-				sendRumor(packet, addr.String())
+				sendRumor(packet, receivedFrom)
 			}
 		}
 
@@ -184,33 +185,33 @@ func proccessPacketAndSend(newPacket *GossipPacket, addr *net.UDPAddr) {
 		// perform the sort just after receiving the packet (Cannot rely on others to send sorted VC in a decentralized system ;))
 		otherVC.SortVC()
 
-		fmt.Print("STATUS from ", addr.String())
+		fmt.Print("STATUS from ", receivedFrom)
 		for i, _ := range otherVC.Want {
 			fmt.Printf(" peer %s nextID %d", otherVC.Want[i].Identifier, otherVC.Want[i].NextID)
 		}
 		fmt.Println()
 		fmt.Println("PEERS " + strings.Join(myGossiper.neighbors[:], ","))
 
-		timerForAcks, ok := myGossiper.safeTimersRecord.timersRecord[addr.String()]
+		timerForAcks, ok := myGossiper.safeTimersRecord.timersRecord[receivedFrom]
 		wasAnAck := false
 		var rumor = &RumorMessage{}
 
 		if ok {
-			rumor, wasAnAck = stopCorrespondingTimerAndTargetedRumor(timerForAcks, otherVC, addr.String())
+			rumor, wasAnAck = stopCorrespondingTimerAndTargetedRumor(timerForAcks, otherVC, receivedFrom)
 		}
 
 		outcome, identifier, nextID := myGossiper.myVC.CompareStatusPacket(otherVC)
 
 		if outcome == 0 {
-			fmt.Printf("IN SYNC WITH %v​", addr.String())
+			fmt.Printf("IN SYNC WITH %v​", receivedFrom)
 			fmt.Println()
 			if wasAnAck {
-				flipACoinAndSend(rumor, addr.String())
+				flipACoinAndSend(rumor, receivedFrom)
 			}
 		}
 
 		if outcome == -1 {
-			sendTo(&GossipPacket{Status: myGossiper.myVC}, addr.String())
+			sendTo(&GossipPacket{Status: myGossiper.myVC}, receivedFrom)
 		}
 
 		if outcome == 1 {
@@ -219,10 +220,10 @@ func proccessPacketAndSend(newPacket *GossipPacket, addr *net.UDPAddr) {
 
 			// Restart the Rumongering process by sending a message
 			// the other peer doesn't have
-			//sendRumor(msg, addr.String())
-			sendTo(&GossipPacket{Rumor: msg}, addr.String())
+			//sendRumor(msg, receivedFrom)
+			sendTo(&GossipPacket{Rumor: msg}, receivedFrom)
 			// Do we have to set a timer here ???
-			//setTimer(msg, addr.String())
+			//setTimer(msg, receivedFrom)
 		}
 
 	}
@@ -243,24 +244,28 @@ func fireTicker() {
 }
 
 // Find associated timer of a partcicular Ack
+// Return the corresponding Rumor Message of the ACK and True of it VC was here because of an Ack
+// Return an empty Rumor Message and False if the VC is not related to an ACK (Comes from independent ticker on the other peer's machine)
 func stopCorrespondingTimerAndTargetedRumor(timersForAcks []*TimerForAck, packet *StatusPacket, addr string) (*RumorMessage, bool) {
 	//fmt.Println("Seeking for a timer to stop in ", timersForAcks)
 
 	myGossiper.safeTimersRecord.mux.Lock()
 	defer myGossiper.safeTimersRecord.mux.Unlock()
 
+	// This loop shouldn't take a lot of time
+	// Since for one peer, we delete the timers
 	for j, t := range timersForAcks {
 
+		// Find where the ID of the message
 		in, i := packet.seekInVC(t.rumor.Origin)
 
-		//fmt.Printf("t= %v in = %v, i = %v", t, in, i)
-
+		// Here
 		if in && packet.Want[i].NextID == t.rumor.ID+1 {
 
 			// Stop the timer and Delete from the array
 			// If we can stop it, we have to consider it as an ack
 			stopped := t.timer.Stop()
-			fmt.Println("Stopped it")
+			//fmt.Println("Stopped it")
 			timersForAcks = append(timersForAcks[:j], timersForAcks[j+1:]...)
 			//println("Array after delatation: ", timersForAcks)
 			myGossiper.safeTimersRecord.timersRecord[addr] = timersForAcks
