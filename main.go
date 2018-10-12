@@ -13,13 +13,16 @@ import (
 	"fmt"
 	"math/rand"
 	"net"
+	"net/http"
 	"os"
 	"sort"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/bitly/go-simplejson"
 	"github.com/dedis/protobuf"
+	"github.com/gorilla/mux"
 )
 
 // Set the time out to 1 second
@@ -118,11 +121,41 @@ func main() {
 
 	go listenToClient()
 
+	go listenToGUI()
+
 	listenToGossipers()
 
 }
 
 //######################################## END MAIN #####################################
+
+//###############################  Webserver connexion ##################
+func sendID(w http.ResponseWriter, r *http.Request) {
+	json := simplejson.New()
+	json.Set("ID", myGossiper.Name)
+	json.Set("addr", myGossiper.address.String())
+
+	payload, err := json.MarshalJSON()
+	checkError(err)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(payload)
+
+}
+
+func msgsPost(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func listenToGUI() {
+
+	r := mux.NewRouter()
+	r.HandleFunc("/id", sendID).Methods("GET")
+	r.HandleFunc("/message", msgsPost).Methods("POST")
+
+	http.Handle("/", r)
+
+	http.ListenAndServe(":8080", nil)
+}
 
 //###############################  Gossiper connexion ##################
 
@@ -235,7 +268,7 @@ func fireTicker() {
 	ticker := time.NewTicker(TICKER_DURATION)
 	go func() {
 		for range ticker.C {
-			fmt.Println("Fired")
+			//fmt.Println("Fired")
 			neighbor := pickOneNeighbor("")
 			sendTo(&GossipPacket{Status: myGossiper.myVC}, neighbor)
 		}

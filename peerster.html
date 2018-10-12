@@ -23,31 +23,81 @@
 <main class="width-limited">
 
 
-	<h4>How to use</h4>
-	<p>
-	Here we would tell you how to interact with the plot below.
-	Sadly, it is not interactive at this stage of the project.
-	Please imagine that the plot is interactive and that clicking on it
-	activates captivating animations.
+
+	<h4 id="nodeBox">Your Peer ID is : <span style="color: #ff0000" id="peerID"> not enabled yet</span></h4>
+	<p >
+
 	</p>
-	<div>
-		<h5>
-			Sending
-		</h5>
-		<button type="button">
-			send
-		</button>
+
+	<div class="flex">
+		<div class="flex-child">
+			<h5>
+				Please, enter a message, <br /> and
+				press send to broadcast it
+			</h5>
+
+			<input type="text" id="send-in" name="send-input"
+						 pattern="[a-z]{4,8}">
+
+			<button type="button" id="send-btn">
+				Send
+			</button>
+
+			<div class="flex-child">
+				<h5>
+					Chat box
+				</h5>
+				<div class="fixed-box" id="chat-box">
+
+				</div>
+
+
+
+			</div>
+
+		</div>
+		<div class="flex-child">
+			<h5>
+				Please, enter a new Peer <br />
+				and press Add to connect with it
+			</h5>
+
+			<input type="text" name="add-input" id="add-peer-in"
+						 pattern="[a-z]{4,8}">
+
+			<button type="button" id="add-btn">
+				Add
+			</button>
+
+			<div class="flex-child">
+				<h5>
+					Node box
+				</h5>
+
+			</div>
+
+			<div class="fixed-box" id="chat-box">
+				ddnjd ewa dje dhlea wd eawd eaw dhjelwa djhlae widedea
+				fjaif jehaflaf ra fhajr fraj flaerfv raehfaelrf rea fh
+				f ajeif cehjrlfaer f raek faer fhaer f
+
+
+			</div>
+
+	  </div>
+  </div>
+
+	<div class="flex">
+
 
 	</div>
 
-	<button type="button">
-		Add Peer
-	</button>
+
 </main>
 
+<script src="peerster.js"></script>
 
 
-<footer></footer>
 
 </body>
 </html>
