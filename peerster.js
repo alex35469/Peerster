@@ -27,8 +27,19 @@ function fetchAndSendMessage(){
 		return
 	}
 
+	$.post(
+		"http://localhost:8080/message",
+		msg,
+		function(json) {
+			$("#chat-box")
+			json.msgs.split(",").forEach(m => {
+				const origin = m.split(":")[0];
+				const msg = m.split(":")[1];
+				$("#chat-box").append(origin +" : "+ msg +"<br />");
+			})
+		}
+	)
 
-	console.log(msg)
 
 }
 
@@ -66,9 +77,16 @@ function addPeer(){
 		return
 	}
 
-/* 	$.ajax({type: "POST", url: "http://localhost:8080/", success: function(result){
-			$("#div1").html(result);
-	}}); */
+	$.post(
+		"http://localhost:8080/node",
+		addr,
+		function(json) {
+			$("#node-box").empty()
+			json.nodes.forEach(n => {
+				$("#node-box").append(n+"<br />");
+			})
+ 		}
+	)
 
 }
 
@@ -76,28 +94,42 @@ function addPeer(){
 
 whenDocumentLoaded(() => {
 
-
-	(function() {$.getJSON(
-		"http://127.0.0.1:8080/id",
+	// Fetch the Peer ID
+	$.getJSON(
+		backendAddr+ID_PATH,
 		function(json) {
-			console.log( "JSON Data: " + json.ID );
+			document.getElementById("peerID").innerText = json.ID;
+			document.getElementById("addr").innerText = json.addr;
  		}
-	);})()
+	);
 
-	//document.getElementById("peerID").innerText = Name + " - " + Peer_ID
 
-	// Load jQuery
-	const script = document.createElement('script');
-	script.src = 'http://code.jquery.com/jquery-1.11.0.min.js';
-	script.type = 'text/javascript';
-	document.getElementsByTagName('head')[0].appendChild(script);
+	// Fetch the neihbors nodes add to be setup each
+	$.getJSON(
+		backendAddr+NODE_PATH,
+		function(json) {
+			$("#node-box").empty()
+			json.nodes.forEach(n => {
+				$("#node-box").append(n+"<br />");
+			})
+ 		}
+	);
 
-	let send = document.getElementById("send-btn");
 
-	send.addEventListener("click", () => fetchAndSendMessage())
+	// get new
 
+
+	// Post new node
 	let add = document.getElementById("add-btn");
 	add.addEventListener("click", () => addPeer())
+
+
+	// Post new messages
+	let send = document.getElementById("send-btn");
+	send.addEventListener("click", () => fetchAndSendMessage())
+
+
+
 
 
 

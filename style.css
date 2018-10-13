@@ -191,6 +191,15 @@ button {
 	margin: auto;
 }
 
+h6 {
+
+	margin-top: 5px;
+
+}
+
+h4{
+	margin-bottom: 0;
+}
 
 h5 {
     -webkit-box-align:center;
