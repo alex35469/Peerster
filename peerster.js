@@ -33,9 +33,12 @@ function fetchAndSendMessage(){
 		function(json) {
 			$("#chat-box")
 			json.msgs.split(",").forEach(m => {
-				const origin = m.split(":")[0];
-				const msg = m.split(":")[1];
-				$("#chat-box").append(origin +" : "+ msg +"<br />");
+				if (m !== "") {
+
+					const origin = m.split(":")[0];
+					const msg = m.split(":")[1];
+					$("#chat-box").append(origin +" : "+ msg +"<br />");
+				}
 			})
 		}
 	)
@@ -90,18 +93,55 @@ function addPeer(){
 
 }
 
+var getNewNode = function(){
+	$.getJSON(
+		backendAddr+NODE_PATH,
+		function(json) {
+			$("#node-box").empty()
+			json.nodes.forEach(n => {
+				$("#node-box").append(n+"<br />");
+			})
+ 		}
+	);
 
+}
 
-whenDocumentLoaded(() => {
+var getNewMsg = function(){
+	// get new msgs
+	$.get(
+		"http://localhost:8080/message",
+		function(json) {
+			$("#chat-box")
+			json.msgs.split(",").forEach(m => {
+				if (m !== "") {
 
+					const origin = m.split(":")[0];
+					const msg = m.split(":")[1];
+					$("#chat-box").append(origin +" : "+ msg +"<br />");
+				}
+			})
+		}
+	)
+}
+
+var getPeerId = function(){
 	// Fetch the Peer ID
 	$.getJSON(
 		backendAddr+ID_PATH,
 		function(json) {
 			document.getElementById("peerID").innerText = json.ID;
 			document.getElementById("addr").innerText = json.addr;
- 		}
+		}
 	);
+
+}
+
+whenDocumentLoaded(() => {
+
+
+	getPeerId()
+	setInterval(getNewNode, 2*1000);
+	setInterval(getNewMsg, 2*1000);
 
 
 	// Fetch the neihbors nodes add to be setup each
@@ -116,7 +156,7 @@ whenDocumentLoaded(() => {
 	);
 
 
-	// get new
+
 
 
 	// Post new node

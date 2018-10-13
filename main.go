@@ -31,9 +31,6 @@ import (
 var TIME_OUT time.Duration = time.Second
 var TICKER_DURATION time.Duration = time.Second
 
-var s = rand.NewSource(time.Now().UnixNano())
-var R = rand.New(s)
-
 // Peer simple message
 type SimpleMessage struct {
 	OriginalName  string
@@ -120,7 +117,9 @@ func main() {
 	flag.Parse()
 	myGossiper = NewGossiper(gossipAddr, name, neighborsInit)
 
-	fireTicker()
+	if !simple {
+		fireTicker()
+	}
 
 	go listenToGUI()
 
@@ -133,6 +132,7 @@ func main() {
 //######################################## END MAIN #####################################
 
 //###############################  Webserver connexion ##################
+
 func sendID(w http.ResponseWriter, r *http.Request) {
 	json := simplejson.New()
 	json.Set("ID", myGossiper.Name)
@@ -437,6 +437,9 @@ func flipACoinAndSend(packet *RumorMessage, notSupposeToSendTo string) {
 	if len(myGossiper.neighbors) < 1 {
 		return
 	}
+	var s = rand.NewSource(time.Now().UnixNano())
+	var R = rand.New(s)
+
 	if R.Int()%2 == 0 {
 		addrNeighbor := pickOneNeighbor(notSupposeToSendTo)
 		fmt.Println("FLIPPED COIN sending rumor to", addrNeighbor)
@@ -507,6 +510,9 @@ func processMsgFromClient(newPacket *GossipPacket) {
 // Pick one neighbor (But not the exception) we don't want to send back a rumor
 // to the one that made us discovered it
 func pickOneNeighbor(exception string) string {
+
+	var s = rand.NewSource(time.Now().UnixNano())
+	var R = rand.New(s)
 
 	if len(myGossiper.neighbors) == 1 {
 		return myGossiper.neighbors[0]
@@ -598,6 +604,11 @@ func NewGossiper(address, name, neighborsInit string) *Gossiper {
 	messagesHistoryInit := make(map[string][]*RumorMessage)
 	timersRecordInit := make(map[string][]*TimerForAck)
 	safetimersRecord := SafeTimerRecord{timersRecord: timersRecordInit}
+
+	if neighborsInit == "" {
+		fmt.Println("Fatal error: Please provide at least one neighbor")
+		os.Exit(1)
+	}
 	// Init the gossiper's own record
 
 	return &Gossiper{
