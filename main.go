@@ -95,7 +95,7 @@ var myGossiper *Gossiper
 
 var UIPort, gossipAddr, name, neighborsInit string
 var simple bool
-var stack string
+var stack = make([]string, 0)
 
 //######################################## INIT #####################################
 
@@ -164,7 +164,7 @@ func msgsGet(w http.ResponseWriter, r *http.Request) {
 	json.Set("msgs", stack)
 
 	// flush the stack
-	stack = ""
+	stack = make([]string, 0)
 
 	payload, err := json.MarshalJSON()
 	checkError(err)
@@ -249,6 +249,7 @@ func proccessPacketAndSend(newPacket *GossipPacket, receivedFrom string) {
 			//fmt.Printf("We have : known record = %v,  msgs = %v and we received: %v", knownRecord, msgs, packet)
 			// keep trace of that incoming packet
 			updateRecord(packet, knownRecord)
+			fmt.Println("######## ", stack)
 
 			// Send The Satus Packet as an Ack to sender
 			sendTo(&GossipPacket{Status: myGossiper.myVC}, receivedFrom)
@@ -400,7 +401,7 @@ func updateRecord(packet *RumorMessage, knownRecord bool) {
 	if len(myGossiper.myVC.Want) == 0 {
 		myGossiper.myVC.Want = append(myGossiper.myVC.Want, ps)
 		myGossiper.messagesHistory[packet.Origin] = append(myGossiper.messagesHistory[packet.Origin], packet)
-
+		stack = append(stack, packet.Origin+":@"+packet.Text)
 		//fmt.Printf("Inside updateRecord: %v  And VC %v", myGossiper.messagesHistory, myGossiper.myVC.Want)
 		return
 
@@ -421,7 +422,7 @@ func updateRecord(packet *RumorMessage, knownRecord bool) {
 		copy(myGossiper.myVC.Want[i+1:], myGossiper.myVC.Want[i:])
 	}
 
-	stack = stack + packet.Origin + ":" + packet.Text + ","
+	stack = append(stack, packet.Origin+":@"+packet.Text)
 
 	myGossiper.myVC.Want[i] = ps
 
@@ -502,6 +503,7 @@ func processMsgFromClient(newPacket *GossipPacket) {
 		packet := &RumorMessage{Origin: myGossiper.Name, ID: uint32(id), Text: newPacket.Simple.Contents}
 
 		updateRecord(packet, knownRecord)
+		fmt.Println("######## ", stack)
 		sendRumor(packet, myGossiper.address.String())
 
 	}

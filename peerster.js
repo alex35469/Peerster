@@ -32,11 +32,10 @@ function fetchAndSendMessage(){
 		msg,
 		function(json) {
 			$("#chat-box")
-			json.msgs.split(",").forEach(m => {
+			json.msgs.forEach(m => {
 				if (m !== "") {
-
-					const origin = m.split(":")[0];
-					const msg = m.split(":")[1];
+					const origin = m.split(":@")[0];
+					const msg = m.split(":@")[1];
 					$("#chat-box").append(origin +" : "+ msg +"<br />");
 				}
 			})
@@ -112,11 +111,10 @@ var getNewMsg = function(){
 		"http://localhost:8080/message",
 		function(json) {
 			$("#chat-box")
-			json.msgs.split(",").forEach(m => {
+			json.msgs.forEach(m => {
 				if (m !== "") {
-
-					const origin = m.split(":")[0];
-					const msg = m.split(":")[1];
+					const origin = m.split(":@")[0];
+					const msg = m.split(":@")[1];
 					$("#chat-box").append(origin +" : "+ msg +"<br />");
 				}
 			})
