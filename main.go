@@ -11,6 +11,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"math/rand"
 	"net"
 	"net/http"
@@ -22,6 +23,7 @@ import (
 
 	"github.com/bitly/go-simplejson"
 	"github.com/dedis/protobuf"
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
@@ -96,6 +98,7 @@ var myGossiper *Gossiper
 
 var UIPort, gossipAddr, name, neighborsInit string
 var simple bool
+var stack string
 
 //######################################## INIT #####################################
 
@@ -119,11 +122,11 @@ func main() {
 
 	fireTicker()
 
-	go listenToClient()
-
 	go listenToGUI()
 
-	listenToGossipers()
+	go listenToGossipers()
+
+	listenToClient()
 
 }
 
@@ -136,6 +139,7 @@ func sendID(w http.ResponseWriter, r *http.Request) {
 	json.Set("addr", myGossiper.address.String())
 
 	payload, err := json.MarshalJSON()
+
 	checkError(err)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(payload)
@@ -143,7 +147,50 @@ func sendID(w http.ResponseWriter, r *http.Request) {
 }
 
 func msgsPost(w http.ResponseWriter, r *http.Request) {
+	// from https://stackoverflow.com/questions/15672556/handling-json-post-request-in-go
+	body, err := ioutil.ReadAll(r.Body)
+	checkError(err)
+	content := string(body)
+	newPacket := SimpleMessage{Contents: content, OriginalName: myGossiper.Name, RelayPeerAddr: myGossiper.address.String()}
+	processMsgFromClient(&GossipPacket{Simple: &newPacket})
 
+	msgsGet(w, r)
+
+}
+
+func msgsGet(w http.ResponseWriter, r *http.Request) {
+
+	json := simplejson.New()
+	json.Set("msgs", stack)
+
+	// flush the stack
+	stack = ""
+
+	payload, err := json.MarshalJSON()
+	checkError(err)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(payload)
+}
+
+func nodePost(w http.ResponseWriter, r *http.Request) {
+	// from https://stackoverflow.com/questions/15672556/handling-json-post-request-in-go
+	body, err := ioutil.ReadAll(r.Body)
+	checkError(err)
+
+	addNeighbor(string(body))
+
+	nodeGet(w, r)
+
+}
+
+func nodeGet(w http.ResponseWriter, r *http.Request) {
+	json := simplejson.New()
+	json.Set("nodes", myGossiper.neighbors)
+
+	payload, err := json.MarshalJSON()
+	checkError(err)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(payload)
 }
 
 func listenToGUI() {
@@ -151,10 +198,13 @@ func listenToGUI() {
 	r := mux.NewRouter()
 	r.HandleFunc("/id", sendID).Methods("GET")
 	r.HandleFunc("/message", msgsPost).Methods("POST")
+	r.HandleFunc("/message", msgsGet).Methods("GET")
+	r.HandleFunc("/node", nodePost).Methods("POST")
+	r.HandleFunc("/node", nodeGet).Methods("GET")
 
 	http.Handle("/", r)
 
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":8080", handlers.CORS()(r))
 }
 
 //###############################  Gossiper connexion ##################
@@ -256,7 +306,7 @@ func proccessPacketAndSend(newPacket *GossipPacket, receivedFrom string) {
 			//sendRumor(msg, receivedFrom)
 			sendTo(&GossipPacket{Rumor: msg}, receivedFrom)
 			// Do we have to set a timer here ???
-			//setTimer(msg, receivedFrom)
+			setTimer(msg, receivedFrom)
 		}
 
 	}
@@ -337,9 +387,9 @@ func setTimer(packet *RumorMessage, addrNeighbor string) {
 	go func() {
 		<-t.C
 		//fmt.Println("Time Out")
-		// Could also find a way to not send back to the
-		//
-		flipACoinAndSend(packet, addrNeighbor)
+		// notSupposeToSendTo field = "" Because if there is a time out occure
+		// for a peer, we might want to retry to send the message back to him
+		flipACoinAndSend(packet, "")
 	}()
 
 }
@@ -371,19 +421,24 @@ func updateRecord(packet *RumorMessage, knownRecord bool) {
 		copy(myGossiper.myVC.Want[i+1:], myGossiper.myVC.Want[i:])
 	}
 
+	stack = stack + packet.Origin + ":" + packet.Text + ","
+
 	myGossiper.myVC.Want[i] = ps
 
 	myGossiper.messagesHistory[packet.Origin] = append(myGossiper.messagesHistory[packet.Origin], packet)
 }
 
-func flipACoinAndSend(packet *RumorMessage, sender string) {
-	// We don't want to send again and again the same msg to the
-	// same peer
-	if len(myGossiper.neighbors) < 2 {
+// packet is the packet we are
+// notSupposeToSendTo is the peer we dont want to send the message:
+// 	Typically the peer from which we received the message from¨
+// 	Or the peer which send us an ACK
+func flipACoinAndSend(packet *RumorMessage, notSupposeToSendTo string) {
+	// If there is no neighbors
+	if len(myGossiper.neighbors) < 1 {
 		return
 	}
 	if R.Int()%2 == 0 {
-		addrNeighbor := pickOneNeighbor(sender)
+		addrNeighbor := pickOneNeighbor(notSupposeToSendTo)
 		fmt.Println("FLIPPED COIN sending rumor to", addrNeighbor)
 		sendTo(&GossipPacket{Rumor: packet}, addrNeighbor)
 		setTimer(packet, addrNeighbor)
@@ -401,12 +456,15 @@ func sendMsgFromGossiperSimpleMode(packetToSend *GossipPacket) {
 }
 
 func addNeighbor(neighbor string) {
-	nbs := strings.Join(myGossiper.neighbors[:], ",")
-	alreadyThere := strings.Contains(nbs, neighbor)
 
-	if !alreadyThere {
-		myGossiper.neighbors = append(myGossiper.neighbors, neighbor)
+	for _, n := range myGossiper.neighbors {
+		if n == neighbor {
+			return
+		}
 	}
+
+	myGossiper.neighbors = append(myGossiper.neighbors, neighbor)
+
 }
 
 //############################### UI Connexion ##########################
@@ -424,30 +482,32 @@ func listenToClient() {
 	for {
 		newPacket, _ := fetchMessages(UIConn)
 
-		fmt.Println("CLIENT MESSAGE " + newPacket.Simple.Contents)
-
-		// Do maybe a go routine here or maybe not because of concurency
-		if simple {
-			sendMsgFromClientSimpleMode(newPacket)
-		} else {
-			msgList, knownRecord := myGossiper.messagesHistory[myGossiper.Name]
-			id := len(msgList) + 1
-			packet := &RumorMessage{Origin: myGossiper.Name, ID: uint32(id), Text: newPacket.Simple.Contents}
-
-			updateRecord(packet, knownRecord)
-			sendRumor(packet, myGossiper.address.String())
-
-		}
+		go processMsgFromClient(newPacket)
 		//sendToAllNeighbors(newPacket, sender)
 	}
 }
 
-func sendMsgFromClientRumongering(packetToSend *GossipPacket) {
+func processMsgFromClient(newPacket *GossipPacket) {
 
+	fmt.Println("CLIENT MESSAGE " + newPacket.Simple.Contents)
+
+	if simple {
+		sendMsgFromClientSimpleMode(newPacket)
+	} else {
+		msgList, knownRecord := myGossiper.messagesHistory[myGossiper.Name]
+		id := len(msgList) + 1
+		packet := &RumorMessage{Origin: myGossiper.Name, ID: uint32(id), Text: newPacket.Simple.Contents}
+
+		updateRecord(packet, knownRecord)
+		sendRumor(packet, myGossiper.address.String())
+
+	}
 }
 
 // Pick one neighbor (But not the exception) we don't want to send back a rumor
+// to the one that made us discovered it
 func pickOneNeighbor(exception string) string {
+
 	if len(myGossiper.neighbors) == 1 {
 		return myGossiper.neighbors[0]
 	}
@@ -495,6 +555,8 @@ func sendToAllNeighbors(packet *GossipPacket, relayer string) {
 	// Extracting the peers
 
 	for _, neighbor := range myGossiper.neighbors {
+		fmt.Println("Neighbor : ", neighbor)
+		fmt.Println("Relayer : ", relayer)
 		if neighbor != relayer {
 			sendTo(packet, neighbor)
 		}
