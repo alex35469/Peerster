@@ -1,26 +1,25 @@
 
-/*
-	Run the action when we are sure the DOM has been loaded
-*/
+
 const backendAddr = "http://127.0.0.1:8080";
 const ID_PATH = "/id";
 const MESSAGES_PATH = "/message"
 const NODE_PATH = "/node"
 
 
+/*
+	Run the action when we are sure the DOM has been loaded (FROM dataviz course)
+*/
 function whenDocumentLoaded(action) {
 	if (document.readyState === "loading") {
 		document.addEventListener("DOMContentLoaded", action);
 	} else {
-		// `DOMContentLoaded` already fired
-
 		action();
 	}
 }
 
 
 
-
+// Send msg to backend
 function fetchAndSendMessage(){
 	let msg = document.getElementsByName("send-input")[0].value;
 	if (msg === "") {
@@ -28,7 +27,7 @@ function fetchAndSendMessage(){
 	}
 
 	$.post(
-		"http://localhost:8080/message",
+		backendAddr+MESSAGES_PATH,
 		msg,
 		function(json) {
 			$("#chat-box")
@@ -45,6 +44,7 @@ function fetchAndSendMessage(){
 
 }
 
+// inform the backend about the new peer
 function addPeer(){
 	let addr = document.getElementsByName("add-input")[0].value;
 	if (addr === "") {
@@ -137,7 +137,8 @@ var getPeerId = function(){
 whenDocumentLoaded(() => {
 
 
-	getPeerId()
+	setInterval(getPeerId, 2*1000);
+
 	setInterval(getNewNode, 2*1000);
 	setInterval(getNewMsg, 2*1000);
 

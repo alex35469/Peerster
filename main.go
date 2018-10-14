@@ -48,6 +48,7 @@ type PeerStatus struct {
 	Identifier string
 	NextID     uint32
 }
+
 type StatusPacket struct {
 	Want []PeerStatus
 }
@@ -70,13 +71,20 @@ type SafeTimerRecord struct {
 	mux          sync.Mutex
 }
 
+// The list
+type SafeMsgsOrginHistory struct {
+	history []*RumorMessage
+	mux     sync.Mutex
+}
+
 // The Gossiper struct.
 // address : address of the Gossiper
 // connexion : connexion through which the gossiper speaks and listen
 // Name used to identify his own messages
 // neighbors : Peers that are "Onlink" i.e. We know their IP address
-// myVC : Vector clock of all known peers
-// messagesHistory : Maybe have a dict with all messages from all known peers we don't earse any... in case one peer joins and have no way to recover all the messages
+// messagesHistory : Will eventually countain all the messages from all peers in the net.
+//									All the records from different origin can be locked independently due to SafeMsgsOrginHistory
+// safeTimersRecord : Records of the timers regarding a particular rumor packet Can be locked
 
 type Gossiper struct {
 	address          *net.UDPAddr
@@ -85,8 +93,7 @@ type Gossiper struct {
 	neighbors        []string
 	myVC             *StatusPacket
 	safeTimersRecord SafeTimerRecord
-	messagesHistory  map[string][]*RumorMessage
-	mux              sync.Mutex
+	messagesHistory  map[string]*SafeMsgsOrginHistory
 }
 
 const UDP_PACKET_SIZE = 1024
@@ -237,10 +244,18 @@ func proccessPacketAndSend(newPacket *GossipPacket, receivedFrom string) {
 
 	if packet := newPacket.Rumor; packet != nil {
 
-		msgs, knownRecord := myGossiper.messagesHistory[packet.Origin]
+		safeHist, knownRecord := myGossiper.messagesHistory[packet.Origin]
+		if !knownRecord {
+			myGossiper.messagesHistory[packet.Origin] = &SafeMsgsOrginHistory{}
+		}
+
+		// We lock on a specific origin so that packets from different origin can still go
+		// through. Only to packet that has two be process from the same origin have to wait
+		myGossiper.messagesHistory[packet.Origin].mux.Lock()
+		defer myGossiper.messagesHistory[packet.Origin].mux.Unlock()
 
 		// Ignor message if it is a old or too new one (i.e. if it is out of order)
-		if (!knownRecord && packet.ID == 1) || (knownRecord && packet.ID == uint32(len(msgs)+1)) {
+		if (!knownRecord && packet.ID == 1) || (knownRecord && packet.ID == uint32(len(safeHist.history)+1)) {
 
 			fmt.Printf("RUMOR origin %s from %s ID %d contents %s", packet.Origin, receivedFrom, packet.ID, packet.Text)
 			fmt.Println()
@@ -249,7 +264,7 @@ func proccessPacketAndSend(newPacket *GossipPacket, receivedFrom string) {
 			//fmt.Printf("We have : known record = %v,  msgs = %v and we received: %v", knownRecord, msgs, packet)
 			// keep trace of that incoming packet
 			updateRecord(packet, knownRecord)
-			fmt.Println("######## ", stack)
+			//myGossiper.messagesHistory[packet.Origin].mux.Unlock()
 
 			// Send The Satus Packet as an Ack to sender
 			sendTo(&GossipPacket{Status: myGossiper.myVC}, receivedFrom)
@@ -299,14 +314,12 @@ func proccessPacketAndSend(newPacket *GossipPacket, receivedFrom string) {
 		}
 
 		if outcome == 1 {
-			// -1 to addapt to Lists
-			msg := myGossiper.messagesHistory[identifier][nextID-1]
+
+			msg := myGossiper.messagesHistory[identifier].history[nextID-1]
 
 			// Restart the Rumongering process by sending a message
 			// the other peer doesn't have
-			//sendRumor(msg, receivedFrom)
 			sendTo(&GossipPacket{Rumor: msg}, receivedFrom)
-			// Do we have to set a timer here ???
 			setTimer(msg, receivedFrom)
 		}
 
@@ -314,24 +327,10 @@ func proccessPacketAndSend(newPacket *GossipPacket, receivedFrom string) {
 
 }
 
-func fireTicker() {
-
-	ticker := time.NewTicker(TICKER_DURATION)
-	go func() {
-		for range ticker.C {
-			//fmt.Println("Fired")
-			neighbor := pickOneNeighbor("")
-			sendTo(&GossipPacket{Status: myGossiper.myVC}, neighbor)
-		}
-
-	}()
-}
-
 // Find associated timer of a partcicular Ack
 // Return the corresponding Rumor Message of the ACK and True of it VC was here because of an Ack
 // Return an empty Rumor Message and False if the VC is not related to an ACK (Comes from independent ticker on the other peer's machine)
 func stopCorrespondingTimerAndTargetedRumor(timersForAcks []*TimerForAck, packet *StatusPacket, addr string) (*RumorMessage, bool) {
-	//fmt.Println("Seeking for a timer to stop in ", timersForAcks)
 
 	myGossiper.safeTimersRecord.mux.Lock()
 	defer myGossiper.safeTimersRecord.mux.Unlock()
@@ -343,7 +342,6 @@ func stopCorrespondingTimerAndTargetedRumor(timersForAcks []*TimerForAck, packet
 		// Find where the ID of the message
 		in, i := packet.seekInVC(t.rumor.Origin)
 
-		// Here
 		if in && packet.Want[i].NextID == t.rumor.ID+1 {
 
 			// Stop the timer and Delete from the array
@@ -351,7 +349,7 @@ func stopCorrespondingTimerAndTargetedRumor(timersForAcks []*TimerForAck, packet
 			stopped := t.timer.Stop()
 			//fmt.Println("Stopped it")
 			timersForAcks = append(timersForAcks[:j], timersForAcks[j+1:]...)
-			//println("Array after delatation: ", timersForAcks)
+
 			myGossiper.safeTimersRecord.timersRecord[addr] = timersForAcks
 
 			return &t.rumor, stopped
@@ -387,7 +385,7 @@ func setTimer(packet *RumorMessage, addrNeighbor string) {
 
 	go func() {
 		<-t.C
-		//fmt.Println("Time Out")
+		fmt.Println("Time Out")
 		// notSupposeToSendTo field = "" Because if there is a time out occure
 		// for a peer, we might want to retry to send the message back to him
 		flipACoinAndSend(packet, "")
@@ -400,7 +398,8 @@ func updateRecord(packet *RumorMessage, knownRecord bool) {
 	//fmt.Printf("Inside updateRecord, outside if : %v  And VC %v with len %v", myGossiper.messagesHistory, myGossiper.myVC.Want, len(myGossiper.myVC.Want))
 	if len(myGossiper.myVC.Want) == 0 {
 		myGossiper.myVC.Want = append(myGossiper.myVC.Want, ps)
-		myGossiper.messagesHistory[packet.Origin] = append(myGossiper.messagesHistory[packet.Origin], packet)
+		myGossiper.messagesHistory[packet.Origin] = &SafeMsgsOrginHistory{}
+		myGossiper.messagesHistory[packet.Origin].history = append(myGossiper.messagesHistory[packet.Origin].history, packet)
 		stack = append(stack, packet.Origin+":@"+packet.Text)
 		//fmt.Printf("Inside updateRecord: %v  And VC %v", myGossiper.messagesHistory, myGossiper.myVC.Want)
 		return
@@ -426,7 +425,7 @@ func updateRecord(packet *RumorMessage, knownRecord bool) {
 
 	myGossiper.myVC.Want[i] = ps
 
-	myGossiper.messagesHistory[packet.Origin] = append(myGossiper.messagesHistory[packet.Origin], packet)
+	myGossiper.messagesHistory[packet.Origin].history = append(myGossiper.messagesHistory[packet.Origin].history, packet)
 }
 
 // packet is the packet we are
@@ -459,18 +458,6 @@ func sendMsgFromGossiperSimpleMode(packetToSend *GossipPacket) {
 
 }
 
-func addNeighbor(neighbor string) {
-
-	for _, n := range myGossiper.neighbors {
-		if n == neighbor {
-			return
-		}
-	}
-
-	myGossiper.neighbors = append(myGossiper.neighbors, neighbor)
-
-}
-
 //############################### UI Connexion ##########################
 
 func listenToClient() {
@@ -487,7 +474,6 @@ func listenToClient() {
 		newPacket, _ := fetchMessages(UIConn)
 
 		go processMsgFromClient(newPacket)
-		//sendToAllNeighbors(newPacket, sender)
 	}
 }
 
@@ -499,18 +485,70 @@ func processMsgFromClient(newPacket *GossipPacket) {
 		sendMsgFromClientSimpleMode(newPacket)
 	} else {
 		msgList, knownRecord := myGossiper.messagesHistory[myGossiper.Name]
-		id := len(msgList) + 1
+
+		id := len(msgList.history) + 1
+
 		packet := &RumorMessage{Origin: myGossiper.Name, ID: uint32(id), Text: newPacket.Simple.Contents}
 
 		updateRecord(packet, knownRecord)
-		fmt.Println("######## ", stack)
 		sendRumor(packet, myGossiper.address.String())
 
 	}
 }
 
+// Send a message comming from the UIport to all the peers
+func sendMsgFromClientSimpleMode(packetToSend *GossipPacket) {
+	if packetToSend.Simple != nil {
+		packetToSend.Simple.OriginalName = myGossiper.Name
+		packetToSend.Simple.RelayPeerAddr = myGossiper.address.String()
+
+		// it's comming from the client so the send field should have no effects
+		sendToAllNeighbors(packetToSend, "client")
+	}
+
+}
+
+//################## HELPER Functions (Might be call in all above section) ###################
+
+// Fetch a message that has been sent through a particular connection
+func fetchMessages(udpConn *net.UDPConn) (*GossipPacket, *net.UDPAddr) {
+	var newPacket GossipPacket
+	buffer := make([]byte, UDP_PACKET_SIZE)
+
+	n, addr, err := udpConn.ReadFromUDP(buffer)
+	checkError(err)
+	err = protobuf.Decode(buffer[0:n], &newPacket)
+	checkError(err)
+
+	return &newPacket, addr
+}
+
+func addNeighbor(neighbor string) {
+
+	for _, n := range myGossiper.neighbors {
+		if n == neighbor {
+			return
+		}
+	}
+
+	myGossiper.neighbors = append(myGossiper.neighbors, neighbor)
+
+}
+
+func fireTicker() {
+
+	ticker := time.NewTicker(TICKER_DURATION)
+	go func() {
+		for range ticker.C {
+			neighbor := pickOneNeighbor("")
+			sendTo(&GossipPacket{Status: myGossiper.myVC}, neighbor)
+		}
+
+	}()
+}
+
 // Pick one neighbor (But not the exception) we don't want to send back a rumor
-// to the one that made us discovered it
+// to the one that made us discovered it for exemple
 func pickOneNeighbor(exception string) string {
 
 	var s = rand.NewSource(time.Now().UnixNano())
@@ -528,33 +566,6 @@ func pickOneNeighbor(exception string) string {
 
 	return myGossiper.neighbors[picked]
 
-}
-
-// Send a message comming from the UIport to all the peers
-func sendMsgFromClientSimpleMode(packetToSend *GossipPacket) {
-	if packetToSend.Simple != nil {
-		packetToSend.Simple.OriginalName = myGossiper.Name
-		packetToSend.Simple.RelayPeerAddr = myGossiper.address.String()
-
-		// it's comming from the client so the send field should have no effects
-		sendToAllNeighbors(packetToSend, "client")
-	}
-
-}
-
-//############################### HELPER Functions (Called in both side) ######################
-
-// Fetch a message that has been sent through a particular connection
-func fetchMessages(udpConn *net.UDPConn) (*GossipPacket, *net.UDPAddr) {
-	var newPacket GossipPacket
-	buffer := make([]byte, UDP_PACKET_SIZE)
-
-	n, addr, err := udpConn.ReadFromUDP(buffer)
-	checkError(err)
-	err = protobuf.Decode(buffer[0:n], &newPacket)
-	checkError(err)
-
-	return &newPacket, addr
 }
 
 // Send a packet to every peers known by the gossiper (except the relayer)
@@ -603,7 +614,9 @@ func NewGossiper(address, name, neighborsInit string) *Gossiper {
 	sp := StatusPacket{}
 	sp.Want = make([]PeerStatus, 0)
 
-	messagesHistoryInit := make(map[string][]*RumorMessage)
+	messagesHistoryInit := make(map[string]*SafeMsgsOrginHistory)
+	messagesHistoryInit[name] = &SafeMsgsOrginHistory{}
+
 	timersRecordInit := make(map[string][]*TimerForAck)
 	safetimersRecord := SafeTimerRecord{timersRecord: timersRecordInit}
 

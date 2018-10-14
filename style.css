@@ -181,9 +181,9 @@ button {
 .fixed-box{
 	text-align: left;
 	padding: 10px;
-	overflow: auto;
-	min-height: 250px;
-	max-height: 350px;
+	overflow:scroll;
+	min-height: 270px;
+	max-height: 270px;
 	min-width: 300px;
 	border: 2px rgb(10, 100, 150) solid;
 	width: 90%;
