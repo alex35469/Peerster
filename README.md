@@ -5,10 +5,10 @@ author: Alexandre Dumur
 
 
 ## Files description
-./main.go : the Gossiper programme (backend)
-./client/main.go : the CLI client programme (frontend)
-./peerster.html ./peerster.js ./style css : the GUI client interface (frontend)
-./main_test.go use to test that some of the functions in main.go work as expected
+- ./main.go : the Gossiper programme (backend)
+- ./client/main.go : the CLI client programme (frontend)
+- ./peerster.html ./peerster.js ./style css : the GUI client interface (frontend)
+- ./main_test.go use to test that some of the functions in main.go work as expected
 
 
 ## Set Up
