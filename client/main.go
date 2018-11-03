@@ -20,24 +20,44 @@ type SimpleMessage struct {
 	Contents      string
 }
 
+type PrivateMessage struct {
+	Origin      string
+	ID          uint32
+	Text        string
+	Destination string
+	HopLimit    uint32
+}
+
 type GossipPacket struct {
-	Simple *SimpleMessage
+	Simple  *SimpleMessage
+	Private *PrivateMessage
 }
 
 var UIPort, msg string
+var dest string
 
 // Init
 func init() {
 	flag.StringVar(&UIPort, "UIPort", "8080", "port for the UI client")
 	flag.StringVar(&msg, "msg", "", "message to be sent")
+	flag.StringVar(&dest, "dest", "", "destination for the private message")
 }
 
 //########################## MAIN ######################
 
 func main() {
 	flag.Parse()
-	simplemsg := SimpleMessage{OriginalName: "Client", RelayPeerAddr: "Null", Contents: msg}
-	packetToSend := GossipPacket{&simplemsg}
+	packetToSend := GossipPacket{}
+	if dest == "" {
+		packetToSend = GossipPacket{Simple: &SimpleMessage{OriginalName: "Client", RelayPeerAddr: "Null", Contents: msg}}
+	} else {
+		packetToSend = GossipPacket{Private: &PrivateMessage{
+			Text:        msg,
+			Destination: dest,
+		}}
+
+	}
+
 	sendToGossiper(packetToSend)
 }
 
