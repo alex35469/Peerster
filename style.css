@@ -3,9 +3,7 @@
 	box-sizing: border-box;
 }
 
-/*
-Make the document fill the whole viewport, this overrides any weird defaults that browsers might have.
-*/
+
 html, body, figure {
 	width: 100%;
 	padding: 0;
@@ -20,7 +18,7 @@ input {
 	min-width: 70%
 }
 
-/* Default font and size */
+
 body {
 	font-family: sans-serif;
 	font-size: 1.1rem;
@@ -46,32 +44,21 @@ body {
 
 
 /*
-It is easier to read if the text is not too wide, so we limit the width.
-We use the class selector ".", so this style will be applied to elements with class="width-limited"
-
-The various units of measurement available in CSS:
-	https://developer.mozilla.org/en-US/docs/Learn/CSS/Introduction_to_CSS/Values_and_units
+From dataviz Course
 */
 .width-limited {
 	max-width: 50rem;
-
-	/* Center horizontally: */
 	margin-left: auto;
 	margin-right: auto;
 }
 
-/* Links: apply our theme color and remove underline */
-a {
-	color: rgb(10, 100, 150);
-	text-decoration: none;
-}
 
-/* Justify paragraphs */
+
 p {
 	text-align: justify;
 }
 
-/* Titles: set color and sizes */
+
 h1, h2, h3, h4, h5, h6
 {
 	color: rgb(10, 100, 150);
@@ -81,42 +68,10 @@ h2 { font-size: 1.75rem; }
 h3 { font-size: 1.75rem; }
 h4 { font-size: 1.25rem; }
 
-/* Top navigation bar */
-nav {
-	width: 100%;
 
-	padding-top: 1rem;
-	padding-bottom: 1rem;
-}
 
-/* Make the links in the navbar bold */
-nav a {
-	font-weight: bold;
-}
 
-/* Style of the list of links in the navbar */
-nav ul {
-	/* Clear defaults */
-	margin: 0;
-	padding: 0;
 
-	/* Remove list bullet points */
-	list-style-type: none;
-
-	/*
-	Flexbox is a modern mechanism for arranging elements
-		https://css-tricks.com/snippets/css/a-guide-to-flexbox/
-	This will arrange the elements in a row
-	*/
-	display: flex;
-	flex-flow: row wrap;
-	justify-content: flex-start;
-}
-
-/* Space between links */
-nav li {
-	margin-right: 3rem;
-}
 
 
 /* The box with a dark background and our site's title */
@@ -211,6 +166,19 @@ h5 {
 
 
 }
+
+.option {
+
+
+}
+
+.option:hover {
+	color: white;
+  background-color : rgb(10, 100, 150);
+	cursor: pointer;
+}
+
+
 
 input {
 

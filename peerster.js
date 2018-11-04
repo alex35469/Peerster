@@ -26,19 +26,11 @@ function fetchAndSendMessage(){
 		return
 	}
 
+
 	$.post(
 		backendAddr+MESSAGES_PATH,
-		msg,
-		function(json) {
-			$("#chat-box")
-			json.msgs.forEach(m => {
-				if (m !== "") {
-					const origin = m.split(":@")[0];
-					const msg = m.split(":@")[1];
-					$("#chat-box").append(origin +" : "+ msg +"<br />");
-				}
-			})
-		}
+		{Msg:msg, Dest:"All"},
+		'jsonp'
 	)
 
 
@@ -81,15 +73,10 @@ function addPeer(){
 
 	$.post(
 		"http://localhost:8080/node",
-		addr,
-		function(json) {
-			$("#node-box").empty()
-			json.nodes.forEach(n => {
-				$("#node-box").append(n+"<br />");
-			})
- 		}
+		{Addr: addr},
+		'jsonp'
 	)
-
+	getNewNode()
 }
 
 var getNewNode = function(){
@@ -97,9 +84,19 @@ var getNewNode = function(){
 		backendAddr+NODE_PATH,
 		function(json) {
 			$("#node-box").empty()
-			json.nodes.forEach(n => {
-				$("#node-box").append(n+"<br />");
+			json["peers"].forEach(p => {
+				$("#node-box").append(p+"<br />");
 			})
+			json["nodes"].forEach(n => {
+				nodes.add(n)
+			})
+			$("#chat-option").empty()
+			nodes.forEach(n => {
+
+				$("#chat-option").append("<span class='option' id = '"+n+"'>"+n+"</span> <br />");
+
+			})
+
  		}
 	);
 
@@ -113,9 +110,19 @@ var getNewMsg = function(){
 			$("#chat-box")
 			json.msgs.forEach(m => {
 				if (m !== "") {
-					const origin = m.split(":@")[0];
-					const msg = m.split(":@")[1];
-					$("#chat-box").append(origin +" : "+ msg +"<br />");
+
+					const origin = m["Origin"];
+					const msg = m["Msg"];
+
+					if (m["Dest"] == "All"){
+
+
+						$("#chat-box").append(origin +" : "+ msg +"<br />");
+					}
+					if (m["Dest"] == "Private"){
+						$("#chat-box").append(origin +" private : "+ msg +"<br />");
+					}
+
 				}
 			})
 		}
@@ -134,25 +141,18 @@ var getPeerId = function(){
 
 }
 
+let nodes = new Set(["Broadcast"])
+
 whenDocumentLoaded(() => {
 
+	getPeerId()
+	getNewNode()
 
 	setInterval(getPeerId, 2*1000);
 
 	setInterval(getNewNode, 2*1000);
 	setInterval(getNewMsg, 2*1000);
 
-
-	// Fetch the neihbors nodes add to be setup each
-	$.getJSON(
-		backendAddr+NODE_PATH,
-		function(json) {
-			$("#node-box").empty()
-			json.nodes.forEach(n => {
-				$("#node-box").append(n+"<br />");
-			})
- 		}
-	);
 
 
 

@@ -15,6 +15,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"reflect"
 	"sort"
 	"strings"
 	"sync"
@@ -102,8 +103,19 @@ type Gossiper struct {
 	myVC             *StatusPacket
 	safeTimersRecord SafeTimerRecord
 	messagesHistory  map[string]*SafeMsgsOrginHistory
-	routingTable     map[string]string
+	routingTable     map[string]*RoutingTableEntry
 	mux              sync.Mutex
+}
+
+type RoutingTableEntry struct {
+	link     string
+	freshest uint32
+}
+
+type StackElem struct {
+	Msg    string
+	Origin string
+	Dest   string
 }
 
 const UDP_PACKET_SIZE = 1024
@@ -115,7 +127,7 @@ var UIPort, gossipAddr, name, neighborsInit string
 var simple bool
 var rtimer int
 
-var stack = make([]string, 0)
+var stack = make([]StackElem, 0)
 
 //######################################## INIT #####################################
 
@@ -143,6 +155,11 @@ func main() {
 	}
 
 	if rtimer > 0 {
+		// Quickly Send an routinge rumor to be be known
+		routeMsg := SimpleMessage{
+			Contents: "",
+		}
+		initiateRumorFromClient(&GossipPacket{Simple: &routeMsg})
 
 		fireRumor(rtimer)
 
@@ -176,10 +193,20 @@ func sendID(w http.ResponseWriter, r *http.Request) {
 func msgsPost(w http.ResponseWriter, r *http.Request) {
 	// from https://stackoverflow.com/questions/15672556/handling-json-post-request-in-go
 	content := r.FormValue("Msg")
-	newPacket := SimpleMessage{Contents: content, OriginalName: myGossiper.Name, RelayPeerAddr: myGossiper.address.String()}
-	processMsgFromClient(&GossipPacket{Simple: &newPacket})
+	dest := r.FormValue("Dest")
 
-	msgsGet(w, r)
+	fmt.Println(dest)
+	fmt.Println(content)
+	if dest == "All" {
+		packet := &GossipPacket{Simple: &SimpleMessage{OriginalName: "Client", RelayPeerAddr: "Null", Contents: content}}
+		processMsgFromClient(packet)
+	} else {
+		packet := PrivateMessage{Text: content, Destination: dest}
+		processMsgFromClient(&GossipPacket{Private: &packet})
+
+	}
+
+	//msgsGet(w, r)
 
 }
 
@@ -189,7 +216,7 @@ func msgsGet(w http.ResponseWriter, r *http.Request) {
 	json.Set("msgs", stack)
 
 	// flush the stack
-	stack = make([]string, 0)
+	stack = make([]StackElem, 0)
 
 	payload, err := json.MarshalJSON()
 	checkError(err)
@@ -211,7 +238,16 @@ func nodePost(w http.ResponseWriter, r *http.Request) {
 
 func nodeGet(w http.ResponseWriter, r *http.Request) {
 	json := simplejson.New()
-	json.Set("nodes", myGossiper.neighbors)
+	json.Set("peers", myGossiper.neighbors)
+
+	// Retrieved from https://stackoverflow.com/questions/41690156/how-to-get-the-keys-as-string-array-from-map-in-go-lang/41691320
+	keys := reflect.ValueOf(myGossiper.routingTable).MapKeys()
+	nodes := make([]string, len(keys))
+	for i := 0; i < len(keys); i++ {
+		nodes[i] = keys[i].String()
+	}
+
+	json.Set("nodes", nodes)
 
 	payload, err := json.MarshalJSON()
 	checkError(err)
@@ -242,7 +278,7 @@ func listenToGossipers() {
 		newPacket, addr := fetchMessages(myGossiper.conn)
 
 		// Process packet in a goroutine
-		go proccessPacketAndSend(newPacket, addr.String())
+		proccessPacketAndSend(newPacket, addr.String())
 	}
 }
 
@@ -261,14 +297,40 @@ func proccessPacketAndSend(newPacket *GossipPacket, receivedFrom string) {
 		fmt.Println("PEERS " + strings.Join(myGossiper.neighbors[:], ","))
 	}
 
-	if packet := newPacket.Private; packet != nil {
+	// ################################ NEW PRIVATE ####################
 
+	if packet := newPacket.Private; packet != nil {
+		// We received a private Message
+		if packet.Destination == myGossiper.Name {
+			fmt.Printf("PRIVATE origin %s hop-limit %d contents %s\n", packet.Origin, packet.HopLimit, packet.Text)
+
+			// Fill the stack
+			stack = append(stack, StackElem{Origin: packet.Origin, Msg: packet.Text, Dest: "Private"})
+			return
+		}
+
+		// We don't know where to forward the PrivateMessage
+		if myGossiper.routingTable[packet.Destination] == nil {
+			return
+		}
+
+		// We can send it
+		if hl := packet.HopLimit - 1; hl > 0 {
+			packet.HopLimit = hl
+			sendTo(&GossipPacket{Private: packet}, myGossiper.routingTable[packet.Destination].link)
+		}
 	}
+
+	// ################################ NEW RUMOR ####################
 
 	if packet := newPacket.Rumor; packet != nil {
 
+		updateRoutingTable(packet, receivedFrom)
+
 		myGossiper.mux.Lock()
+
 		safeHist, knownRecord := myGossiper.messagesHistory[packet.Origin]
+
 		if !knownRecord {
 			// Not very efficient to lock on the whole gossiper struct, should have put a mutex inside the message history and just
 			// lock it for this part
@@ -308,7 +370,7 @@ func proccessPacketAndSend(newPacket *GossipPacket, receivedFrom string) {
 
 	}
 
-	// ################### NEW StatusPacket ##############
+	// ############################# NEW STATUS ##############
 	if otherVC := newPacket.Status; otherVC != nil {
 		// perform the sort just after receiving the packet (Cannot rely on others to send sorted VC in a decentralized system ;))
 		otherVC.SortVC()
@@ -424,16 +486,31 @@ func setTimer(packet *RumorMessage, addrNeighbor string) {
 
 }
 
+func updateRoutingTable(packet *RumorMessage, receivedFrom string) {
+	// Updating the routing table:
+
+	// Create a record if new
+	if myGossiper.routingTable[packet.Origin] == nil {
+		myGossiper.routingTable[packet.Origin] = &RoutingTableEntry{freshest: packet.ID, link: receivedFrom}
+		fmt.Println("DSDV " + packet.Origin + " " + receivedFrom)
+		return
+	}
+
+	// Skip if same records
+	if myGossiper.routingTable[packet.Origin].link == receivedFrom {
+		return
+	}
+
+	// Update if the packet is fresher
+	if packet.ID > myGossiper.routingTable[packet.Origin].freshest {
+		myGossiper.routingTable[packet.Origin].freshest = packet.ID
+		myGossiper.routingTable[packet.Origin].link = receivedFrom
+		fmt.Println("DSDV " + packet.Origin + " " + receivedFrom)
+	}
+}
+
 func updateRecord(packet *RumorMessage, knownRecord bool, receivedFrom string) {
 	// If we end up here it means it's a packet we have never seen before
-
-	// Updating the routing table:
-	if myGossiper.routingTable[packet.Origin] != receivedFrom {
-
-		myGossiper.routingTable[packet.Origin] = receivedFrom
-		fmt.Println("DSDV " + packet.Origin + " " + receivedFrom)
-
-	}
 
 	ps := PeerStatus{Identifier: packet.Origin, NextID: packet.ID + 1}
 	//fmt.Printf("Inside updateRecord, outside if : %v  And VC %v with len %v", myGossiper.messagesHistory, myGossiper.myVC.Want, len(myGossiper.myVC.Want))
@@ -443,7 +520,7 @@ func updateRecord(packet *RumorMessage, knownRecord bool, receivedFrom string) {
 		myGossiper.messagesHistory[packet.Origin].history = append(myGossiper.messagesHistory[packet.Origin].history, packet)
 
 		if packet.Text != "" {
-			stack = append(stack, packet.Origin+":@"+packet.Text)
+			stack = append(stack, StackElem{Origin: packet.Origin, Msg: packet.Text, Dest: "All"})
 		}
 
 		//fmt.Printf("Inside updateRecord: %v  And VC %v", myGossiper.messagesHistory, myGossiper.myVC.Want)
@@ -467,7 +544,7 @@ func updateRecord(packet *RumorMessage, knownRecord bool, receivedFrom string) {
 	}
 
 	if packet.Text != "" {
-		stack = append(stack, packet.Origin+":@"+packet.Text)
+		stack = append(stack, StackElem{Origin: packet.Origin, Msg: packet.Text, Dest: "All"})
 	}
 
 	myGossiper.myVC.Want[i] = ps
@@ -522,24 +599,47 @@ func listenToClient() {
 	for {
 		newPacket, _ := fetchMessages(UIConn)
 
-		go processMsgFromClient(newPacket)
+		processMsgFromClient(newPacket)
 	}
 }
 
 func processMsgFromClient(newPacket *GossipPacket) {
 
-	fmt.Println("CLIENT MESSAGE " + newPacket.Simple.Contents)
+	if packet := newPacket.Simple; packet != nil {
+		fmt.Println("CLIENT MESSAGE " + packet.Contents)
 
-	if simple {
-		sendMsgFromClientSimpleMode(newPacket)
-	} else {
+		if simple {
+			sendMsgFromClientSimpleMode(&GossipPacket{Simple: packet})
+		}
 
-		sendMsgFromClient(newPacket)
+		if !simple {
+			initiateRumorFromClient(&GossipPacket{Simple: packet})
+		}
+
+	}
+
+	if packet := newPacket.Private; packet != nil {
+		fmt.Println("CLIENT MESSAGE " + packet.Text + " DEST " + packet.Destination)
+
+		processPrivateMsgFromClient(packet)
 
 	}
 }
 
-func sendMsgFromClient(newPacket *GossipPacket) {
+func processPrivateMsgFromClient(packetToSend *PrivateMessage) {
+
+	// We drop the packet if we don't have a proper entry in the table
+	if rtEntry := myGossiper.routingTable[packetToSend.Destination]; rtEntry != nil {
+		packetToSend.HopLimit = HOP_LIMIT
+		packetToSend.ID = 0
+		packetToSend.Origin = myGossiper.Name
+		sendTo(&GossipPacket{Private: packetToSend}, rtEntry.link)
+	}
+	// We can also pick one random neighbor in the hop that he has an entry for that dest
+
+}
+
+func initiateRumorFromClient(newPacket *GossipPacket) {
 
 	msgList, knownRecord := myGossiper.messagesHistory[myGossiper.Name]
 
@@ -617,7 +717,7 @@ func fireRumor(rtimer int) {
 			routeMsg := SimpleMessage{
 				Contents: "",
 			}
-			sendMsgFromClient(&GossipPacket{Simple: &routeMsg})
+			initiateRumorFromClient(&GossipPacket{Simple: &routeMsg})
 		}
 
 	}()
@@ -697,13 +797,12 @@ func NewGossiper(address, name, neighborsInit string) *Gossiper {
 	timersRecordInit := make(map[string][]*TimerForAck)
 	safetimersRecord := SafeTimerRecord{timersRecord: timersRecordInit}
 
-	routingTableInit := make(map[string]string)
+	routingTableInit := make(map[string]*RoutingTableEntry)
 
 	if neighborsInit == "" {
 		fmt.Println("Fatal error: Please provide at least one neighbor")
 		os.Exit(1)
 	}
-	// Init the gossiper's own record
 
 	return &Gossiper{
 		address:          udpAddr,
