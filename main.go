@@ -21,6 +21,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Alex/Peerster/utils"
+
 	"github.com/bitly/go-simplejson"
 	"github.com/dedis/protobuf"
 	"github.com/gorilla/handlers"
@@ -185,7 +187,7 @@ func sendID(w http.ResponseWriter, r *http.Request) {
 
 	payload, err := json.MarshalJSON()
 
-	checkError(err)
+	utils.CheckError(err)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(payload)
 
@@ -385,6 +387,8 @@ func proccessPacketAndSend(newPacket *GossipPacket, receivedFrom string) {
 		fmt.Println()
 		fmt.Println("PEERS " + strings.Join(myGossiper.neighbors[:], ","))
 
+		myGossiper.safeTimersRecord.mux.Lock()
+
 		timerForAcks, ok := myGossiper.safeTimersRecord.timersRecord[receivedFrom]
 		wasAnAck := false
 		var rumor = &RumorMessage{}
@@ -392,6 +396,8 @@ func proccessPacketAndSend(newPacket *GossipPacket, receivedFrom string) {
 		if ok {
 			rumor, wasAnAck = stopCorrespondingTimerAndTargetedRumor(timerForAcks, otherVC, receivedFrom)
 		}
+
+		myGossiper.safeTimersRecord.mux.Unlock()
 
 		outcome, identifier, nextID := myGossiper.myVC.CompareStatusPacket(otherVC)
 
@@ -425,9 +431,6 @@ func proccessPacketAndSend(newPacket *GossipPacket, receivedFrom string) {
 // Return the corresponding Rumor Message of the ACK and True of it VC was here because of an Ack
 // Return an empty Rumor Message and False if the VC is not related to an ACK (Comes from independent ticker on the other peer's machine)
 func stopCorrespondingTimerAndTargetedRumor(timersForAcks []*TimerForAck, packet *StatusPacket, addr string) (*RumorMessage, bool) {
-
-	myGossiper.safeTimersRecord.mux.Lock()
-	defer myGossiper.safeTimersRecord.mux.Unlock()
 
 	// This loop shouldn't take a lot of time
 	// Since for one peer, we delete the timers
@@ -490,8 +493,13 @@ func setTimer(packet *RumorMessage, addrNeighbor string) {
 }
 
 func updateRoutingTable(packet *RumorMessage, receivedFrom string) {
-	// Updating the routing table:
 
+	// We don't care about our own routing origin
+	if packet.Origin == myGossiper.Name {
+		return
+	}
+
+	// Updating the routing table
 	// Create a record if new
 	if myGossiper.routingTable[packet.Origin] == nil {
 		myGossiper.routingTable[packet.Origin] = &RoutingTableEntry{freshest: packet.ID, link: receivedFrom}
@@ -500,7 +508,8 @@ func updateRoutingTable(packet *RumorMessage, receivedFrom string) {
 	}
 
 	// Skip if same records
-	if myGossiper.routingTable[packet.Origin].link == receivedFrom {
+	if myGossiper.routingTable[packet.Origin].link == receivedFrom && myGossiper.routingTable[packet.Origin].freshest < packet.ID {
+		myGossiper.routingTable[packet.Origin].freshest = packet.ID
 		return
 	}
 
