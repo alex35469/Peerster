@@ -116,6 +116,7 @@ type StackElem struct {
 	Msg    string
 	Origin string
 	Dest   string
+	Mode   string
 }
 
 const UDP_PACKET_SIZE = 1024
@@ -242,9 +243,11 @@ func nodeGet(w http.ResponseWriter, r *http.Request) {
 
 	// Retrieved from https://stackoverflow.com/questions/41690156/how-to-get-the-keys-as-string-array-from-map-in-go-lang/41691320
 	keys := reflect.ValueOf(myGossiper.routingTable).MapKeys()
-	nodes := make([]string, len(keys))
+	nodes := make([]string, 0)
 	for i := 0; i < len(keys); i++ {
-		nodes[i] = keys[i].String()
+		if keys[i].String() != myGossiper.Name {
+			nodes = append(nodes, keys[i].String())
+		}
 	}
 
 	json.Set("nodes", nodes)
@@ -305,7 +308,7 @@ func proccessPacketAndSend(newPacket *GossipPacket, receivedFrom string) {
 			fmt.Printf("PRIVATE origin %s hop-limit %d contents %s\n", packet.Origin, packet.HopLimit, packet.Text)
 
 			// Fill the stack
-			stack = append(stack, StackElem{Origin: packet.Origin, Msg: packet.Text, Dest: "Private"})
+			stack = append(stack, StackElem{Origin: packet.Origin, Msg: packet.Text, Dest: packet.Destination, Mode: "Private"})
 			return
 		}
 
@@ -520,7 +523,7 @@ func updateRecord(packet *RumorMessage, knownRecord bool, receivedFrom string) {
 		myGossiper.messagesHistory[packet.Origin].history = append(myGossiper.messagesHistory[packet.Origin].history, packet)
 
 		if packet.Text != "" {
-			stack = append(stack, StackElem{Origin: packet.Origin, Msg: packet.Text, Dest: "All"})
+			stack = append(stack, StackElem{Origin: packet.Origin, Msg: packet.Text, Dest: "", Mode: "All"})
 		}
 
 		//fmt.Printf("Inside updateRecord: %v  And VC %v", myGossiper.messagesHistory, myGossiper.myVC.Want)
@@ -544,7 +547,7 @@ func updateRecord(packet *RumorMessage, knownRecord bool, receivedFrom string) {
 	}
 
 	if packet.Text != "" {
-		stack = append(stack, StackElem{Origin: packet.Origin, Msg: packet.Text, Dest: "All"})
+		stack = append(stack, StackElem{Origin: packet.Origin, Msg: packet.Text, Dest: "", Mode: "All"})
 	}
 
 	myGossiper.myVC.Want[i] = ps
@@ -634,6 +637,9 @@ func processPrivateMsgFromClient(packetToSend *PrivateMessage) {
 		packetToSend.ID = 0
 		packetToSend.Origin = myGossiper.Name
 		sendTo(&GossipPacket{Private: packetToSend}, rtEntry.link)
+
+		// Fill the stack
+		stack = append(stack, StackElem{Origin: packetToSend.Origin, Msg: packetToSend.Text, Dest: packetToSend.Destination, Mode: "Private"})
 	}
 	// We can also pick one random neighbor in the hop that he has an entry for that dest
 

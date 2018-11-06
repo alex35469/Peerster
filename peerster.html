@@ -37,22 +37,22 @@
 	<div class="flex">
 		<div class="flex-child">
 			<h5>
-				Please, select your chat, <br /> and
-				press select to open it
+				Please, select a file<br /> and
+				press upload
 			</h5>
 
-			<input type="text" id="select-in" name="select-input">
+			<input id="file-input" type="file" name="name" style="position:center;" />
 
 			<button type="button" id="select-btn">
-				Select
+				Upload
 			</button>
 
 			<div class="flex-child">
 				<h5>
-					Chat Option
+					Option
 				</h5>
 				<div class="fixed-box" id="chat-option">
-
+					<span class='option' onclick='openChat(this.id)' id = 'All'>All</span> <br />
 				</div>
 
 
@@ -76,7 +76,7 @@
 
 				<div class="flex-child">
 					<h5>
-						Chat box
+						Chat box : <span style="color: #ff0000" id = "selection">Select Option (default: All)</span>
 					</h5>
 					<div class="fixed-box" id="chat-box">
 

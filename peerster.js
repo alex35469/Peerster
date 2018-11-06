@@ -2,10 +2,12 @@
 
 const backendAddr = "http://127.0.0.1:8080";
 const ID_PATH = "/id";
-const MESSAGES_PATH = "/message"
-const NODE_PATH = "/node"
-
-
+const MESSAGES_PATH = "/message";
+const NODE_PATH = "/node";
+let select = "All";
+let msgs = [];
+let nodes = new Set(["All"])
+let myId = ""
 /*
 	Run the action when we are sure the DOM has been loaded (FROM dataviz course)
 */
@@ -29,9 +31,12 @@ function fetchAndSendMessage(){
 
 	$.post(
 		backendAddr+MESSAGES_PATH,
-		{Msg:msg, Dest:"All"},
+		{Msg:msg, Dest:select},
 		'jsonp'
 	)
+
+
+	updateChatBox()
 
 
 }
@@ -88,18 +93,28 @@ var getNewNode = function(){
 				$("#node-box").append(p+"<br />");
 			})
 			json["nodes"].forEach(n => {
-				nodes.add(n)
-			})
-			$("#chat-option").empty()
-			nodes.forEach(n => {
-
-				$("#chat-option").append("<span class='option' id = '"+n+"'>"+n+"</span> <br />");
-
+				updateNodeBox(n, nodes)
 			})
 
  		}
 	);
 
+}
+
+function updateNodeBox(newElem, nodes){
+	if (!nodes.has(newElem)) {
+		nodes.add(newElem)
+		$("#chat-option").append("<span class='option' onclick='openChat(this.id)' id = '"+newElem+"'>"+newElem+"</span> <br />");
+
+	}
+
+}
+
+function openChat(id){
+	$("#selection").html(id)
+	$("#"+id).html(id)
+	select = id
+	updateChatBox()
 }
 
 var getNewMsg = function(){
@@ -109,24 +124,43 @@ var getNewMsg = function(){
 		function(json) {
 			$("#chat-box")
 			json.msgs.forEach(m => {
+
+
+
 				if (m !== "") {
 
-					const origin = m["Origin"];
-					const msg = m["Msg"];
+					msgs.push({'origin':m["Origin"], 'msg':m["Msg"], "dest":m["Dest"], "mode":m["Mode"]})
 
-					if (m["Dest"] == "All"){
-
-
-						$("#chat-box").append(origin +" : "+ msg +"<br />");
+					if (m["Mode"] == "All" && select != "All"){
+						$("#All").html("All    <span style='color: #ff0000;text-align=right'>New Messages</spane>")
 					}
-					if (m["Dest"] == "Private"){
-						$("#chat-box").append(origin +" private : "+ msg +"<br />");
+
+					if (m["Mode"] == "Private" && select != m["Origin"]){
+						$("#"+m["Origin"]).html(m["Origin"]+"  <span style='color: #ff0000;text-align=right'>New Messages</spane>")
 					}
 
 				}
 			})
 		}
 	)
+}
+
+
+var updateChatBox = function(){
+	$("#chat-box").empty()
+	msgs.forEach(e => {
+		if (e.origin === select && e.mode === "Private" || select == "All" &&  e.mode !=  "Private") {
+			if (e.origin != myId){
+				$("#chat-box").append(e.origin +" : "+ e.msg +"<br />");
+			}
+		}
+		if (e.origin == myId && (e.dest == select || e.mode == select)){
+			$("#chat-box").append(e.origin +" : "+ e.msg +"<br />");
+		}
+
+		}
+	)
+
 }
 
 var getPeerId = function(){
@@ -136,12 +170,18 @@ var getPeerId = function(){
 		function(json) {
 			document.getElementById("peerID").innerText = json.ID;
 			document.getElementById("addr").innerText = json.addr;
+			myId = json.ID
 		}
 	);
 
 }
 
-let nodes = new Set(["Broadcast"])
+
+
+
+
+
+
 
 whenDocumentLoaded(() => {
 
@@ -152,8 +192,7 @@ whenDocumentLoaded(() => {
 
 	setInterval(getNewNode, 2*1000);
 	setInterval(getNewMsg, 2*1000);
-
-
+	setInterval(updateChatBox, 1*1000);
 
 
 
