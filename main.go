@@ -13,20 +13,12 @@ import (
 	"fmt"
 	"math/rand"
 	"net"
-	"net/http"
 	"os"
-	"reflect"
-	"sort"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/Alex/Peerster/utils"
-
-	"github.com/bitly/go-simplejson"
 	"github.com/dedis/protobuf"
-	"github.com/gorilla/handlers"
-	"github.com/gorilla/mux"
 )
 
 // Set the time out to 1 second
@@ -179,100 +171,6 @@ func main() {
 //######################################## END MAIN #####################################
 
 //###############################  Webserver connexion ##################
-
-func sendID(w http.ResponseWriter, r *http.Request) {
-	json := simplejson.New()
-	json.Set("ID", myGossiper.Name)
-	json.Set("addr", myGossiper.address.String())
-
-	payload, err := json.MarshalJSON()
-
-	utils.CheckError(err)
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(payload)
-
-}
-
-func msgsPost(w http.ResponseWriter, r *http.Request) {
-	// from https://stackoverflow.com/questions/15672556/handling-json-post-request-in-go
-	content := r.FormValue("Msg")
-	dest := r.FormValue("Dest")
-
-	fmt.Println(dest)
-	fmt.Println(content)
-	if dest == "All" {
-		packet := &GossipPacket{Simple: &SimpleMessage{OriginalName: "Client", RelayPeerAddr: "Null", Contents: content}}
-		processMsgFromClient(packet)
-	} else {
-		packet := PrivateMessage{Text: content, Destination: dest}
-		processMsgFromClient(&GossipPacket{Private: &packet})
-
-	}
-
-	//msgsGet(w, r)
-
-}
-
-func msgsGet(w http.ResponseWriter, r *http.Request) {
-
-	json := simplejson.New()
-	json.Set("msgs", stack)
-
-	// flush the stack
-	stack = make([]StackElem, 0)
-
-	payload, err := json.MarshalJSON()
-	checkError(err)
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(payload)
-}
-
-func nodePost(w http.ResponseWriter, r *http.Request) {
-	// from https://stackoverflow.com/questions/15672556/handling-json-post-request-in-go
-
-	body := r.FormValue("Addr")
-	//checkError(err)
-
-	addNeighbor(string(body))
-
-	nodeGet(w, r)
-
-}
-
-func nodeGet(w http.ResponseWriter, r *http.Request) {
-	json := simplejson.New()
-	json.Set("peers", myGossiper.neighbors)
-
-	// Retrieved from https://stackoverflow.com/questions/41690156/how-to-get-the-keys-as-string-array-from-map-in-go-lang/41691320
-	keys := reflect.ValueOf(myGossiper.routingTable).MapKeys()
-	nodes := make([]string, 0)
-	for i := 0; i < len(keys); i++ {
-		if keys[i].String() != myGossiper.Name {
-			nodes = append(nodes, keys[i].String())
-		}
-	}
-
-	json.Set("nodes", nodes)
-
-	payload, err := json.MarshalJSON()
-	checkError(err)
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(payload)
-}
-
-func listenToGUI() {
-
-	r := mux.NewRouter()
-	r.HandleFunc("/id", sendID).Methods("GET")
-	r.HandleFunc("/message", msgsPost).Methods("POST")
-	r.HandleFunc("/message", msgsGet).Methods("GET")
-	r.HandleFunc("/node", nodePost).Methods("POST")
-	r.HandleFunc("/node", nodeGet).Methods("GET")
-
-	http.Handle("/", r)
-
-	http.ListenAndServe(":8080", handlers.CORS()(r))
-}
 
 //###############################  Gossiper connexion ##################
 
@@ -698,18 +596,6 @@ func fetchMessages(udpConn *net.UDPConn) (*GossipPacket, *net.UDPAddr) {
 	return &newPacket, addr
 }
 
-func addNeighbor(neighbor string) {
-
-	for _, n := range myGossiper.neighbors {
-		if n == neighbor {
-			return
-		}
-	}
-
-	myGossiper.neighbors = append(myGossiper.neighbors, neighbor)
-
-}
-
 func fireTicker() {
 
 	ticker := time.NewTicker(TICKER_DURATION)
@@ -739,27 +625,6 @@ func fireRumor(rtimer int) {
 
 }
 
-// Pick one neighbor (But not the exception) we don't want to send back a rumor
-// to the one that made us discovered it for exemple
-func pickOneNeighbor(exception string) string {
-
-	var s = rand.NewSource(time.Now().UnixNano())
-	var R = rand.New(s)
-
-	if len(myGossiper.neighbors) == 1 {
-		return myGossiper.neighbors[0]
-	}
-
-	picked := R.Intn(len(myGossiper.neighbors))
-	for myGossiper.neighbors[picked] == exception {
-
-		picked = R.Intn(len(myGossiper.neighbors))
-	}
-
-	return myGossiper.neighbors[picked]
-
-}
-
 // Send a packet to every peers known by the gossiper (except the relayer)
 func sendToAllNeighbors(packet *GossipPacket, relayer string) {
 
@@ -784,15 +649,6 @@ func sendTo(packet *GossipPacket, addr string) {
 	_, err = myGossiper.conn.WriteTo(packetBytes, remoteGossiperAddr)
 	if err != nil {
 		fmt.Printf("Error: UDP write error: %v", err)
-	}
-}
-
-// Code retrieved from https://astaxie.gitbooks.io/build-web-application-with-golang/en/08.1.html
-// Used to ckeck if an error occured
-func checkError(err error) {
-	if err != nil {
-		fmt.Println("Fatal error ", os.Stderr, err.Error())
-		os.Exit(1)
 	}
 }
 
@@ -829,122 +685,4 @@ func NewGossiper(address, name, neighborsInit string) *Gossiper {
 		safeTimersRecord: safetimersRecord,
 		routingTable:     routingTableInit,
 	}
-}
-
-func (myVC *StatusPacket) SortVC() {
-
-	// Since SliceSort use quick sort (best case O(n)) it's better to check if it's already sorted
-	if sort.IsSorted(myVC) {
-		return
-	}
-
-	sort.Sort(myVC)
-
-}
-
-// Function to compare myVC and other VC's (Run in O(n) 2n if the two VC are shifted )
-// Takes to SORTED VC and compare them
-// To make no ambiguity (Both VC have msg that other doesn't have), we try to send the rumor first
-// return : (outcome , identifier, nextID)
-// outcome +1 means we are in advance => todo : send a rumor message that the otherone does not have (using id & nextID)
-// outcome -1 means we are late => todo: send myVC to the neighbors (only if the other VC has every msgs we have)
-// outcome  0 means uptodate
-func (myVC *StatusPacket) CompareStatusPacket(otherVC *StatusPacket) (int, string, uint32) {
-	// If otherVC is emty, just fetch the first elem in myVC
-
-	if len(otherVC.Want) == 0 && len(myVC.Want) != 0 {
-		return 1, myVC.Want[0].Identifier, 1
-	}
-
-	if len(otherVC.Want) == 0 && len(myVC.Want) == 0 {
-		return 0, "", 0
-	}
-
-	if len(otherVC.Want) != 0 && len(myVC.Want) == 0 {
-		return -1, "", 0
-	}
-
-	otherIsInadvance := false
-
-	var maxMe, maxHim int = len(myVC.Want), len(otherVC.Want)
-	i, j, to_with_draw := 0, 0, 0
-
-	for i < maxMe && j < maxHim {
-
-		// If the nextID field of the incomming packet is 1 we ignore it
-		for otherVC.Want[j].NextID == 1 {
-			j = j + 1
-			to_with_draw = to_with_draw + 1
-		}
-
-		if myVC.Want[i].Identifier == otherVC.Want[j].Identifier {
-			if myVC.Want[i].NextID > otherVC.Want[j].NextID {
-				return 1, otherVC.Want[j].Identifier, otherVC.Want[j].NextID
-
-			}
-			if myVC.Want[i].NextID < otherVC.Want[j].NextID {
-				otherIsInadvance = true
-			}
-			i = i + 1
-			j = j + 1
-			continue
-		}
-
-		if myVC.Want[i].Identifier < otherVC.Want[j].Identifier {
-
-			return 1, myVC.Want[i].Identifier, 1
-		}
-
-		if myVC.Want[i].Identifier > otherVC.Want[j].Identifier {
-			j = j + 1
-		}
-	}
-
-	// We couldn't go to the end of myVC, thus otherVC could be scanned entirely
-	// meaning: All the entries in myVC after i are not in otherVC
-	if i < maxMe {
-		return 1, myVC.Want[i].Identifier, 1
-
-	}
-
-	// Seek for the remaining 1 fields in the rest of the other's VC
-	for j < maxHim {
-		if otherVC.Want[j].NextID == 1 {
-			to_with_draw += 1
-		}
-		j = j + 1
-
-	}
-
-	if len(myVC.Want) < (len(otherVC.Want)-to_with_draw) || otherIsInadvance {
-		return -1, "", 0
-	}
-	// The two lists are the same
-	return 0, "", 0
-}
-
-// Making Satus message implementing interface sort
-func (VC StatusPacket) Len() int           { return len(VC.Want) }
-func (VC StatusPacket) Less(i, j int) bool { return VC.Want[i].Identifier < VC.Want[j].Identifier }
-func (VC StatusPacket) Swap(i, j int)      { VC.Want[i], VC.Want[j] = VC.Want[j], VC.Want[i] }
-
-func (VC *StatusPacket) seekInVC(origin string) (bool, int) {
-
-	if len(VC.Want) == 0 {
-		return false, 0
-	}
-
-	i := sort.Search(len(VC.Want), func(arg1 int) bool {
-		return VC.Want[arg1].Identifier >= origin
-	})
-
-	if len(VC.Want) == i {
-		return false, i
-	}
-
-	if VC.Want[i].Identifier == origin {
-		return true, i
-	}
-	return false, i
-
 }
