@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"net"
 	"os"
 	"sort"
+	"strings"
 	"time"
 )
 
@@ -166,4 +168,68 @@ func (myVC *StatusPacket) SortVC() {
 
 	sort.Sort(myVC)
 
+}
+
+func fireTicker() {
+
+	ticker := time.NewTicker(TICKER_DURATION)
+	go func() {
+		for range ticker.C {
+			neighbor := pickOneNeighbor("")
+			sendTo(&GossipPacket{Status: myGossiper.myVC}, neighbor)
+		}
+
+	}()
+}
+
+func fireRumor(rtimer int) {
+
+	ticker := time.NewTicker(time.Duration(rtimer) * time.Second)
+
+	go func() {
+		for range ticker.C {
+			// Same procedure (As if it is genereated by the client but there is no text in the content)
+			routeMsg := SimpleMessage{
+				Contents: "",
+			}
+			initiateRumorFromClient(&GossipPacket{Simple: &routeMsg})
+		}
+
+	}()
+
+}
+
+// Create the Gossiper
+func NewGossiper(address, name, neighborsInit string) *Gossiper {
+	udpAddr, err := net.ResolveUDPAddr("udp4", address)
+	checkError(err)
+	udpConn, err := net.ListenUDP("udp4", udpAddr)
+	checkError(err)
+
+	sp := StatusPacket{}
+	sp.Want = make([]PeerStatus, 0)
+
+	messagesHistoryInit := make(map[string]*SafeMsgsOrginHistory)
+	messagesHistoryInit[name] = &SafeMsgsOrginHistory{}
+
+	timersRecordInit := make(map[string][]*TimerForAck)
+	safetimersRecord := SafeTimerRecord{timersRecord: timersRecordInit}
+
+	routingTableInit := make(map[string]*RoutingTableEntry)
+
+	if neighborsInit == "" {
+		fmt.Println("Fatal error: Please provide at least one neighbor")
+		os.Exit(1)
+	}
+
+	return &Gossiper{
+		address:          udpAddr,
+		conn:             udpConn,
+		Name:             name,
+		neighbors:        strings.Split(neighborsInit, ","),
+		myVC:             &sp,
+		messagesHistory:  messagesHistoryInit,
+		safeTimersRecord: safetimersRecord,
+		routingTable:     routingTableInit,
+	}
 }

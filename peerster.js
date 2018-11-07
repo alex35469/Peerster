@@ -4,6 +4,7 @@ const backendAddr = "http://127.0.0.1:8080";
 const ID_PATH = "/id";
 const MESSAGES_PATH = "/message";
 const NODE_PATH = "/node";
+const FILE_PATH = "/file"
 let select = "All";
 let msgs = [];
 let nodes = new Set(["All"])
@@ -19,6 +20,19 @@ function whenDocumentLoaded(action) {
 	}
 }
 
+
+function getFileName(){
+	let fname =  $("#file-input").val()
+
+	// From https://stackoverflow.com/questions/857618/javascript-how-to-extract-filename-from-a-file-input-control
+	let startIndex = (fname.indexOf('\\') >= 0 ? fname.lastIndexOf('\\') : fname.lastIndexOf('/'));
+    fname = fname.substring(startIndex);
+    if (fname.indexOf('\\') === 0 || fname.indexOf('/') === 0) {
+        fname = fname.substring(1);
+    }
+	return fname
+
+}
 
 
 // Send msg to backend
@@ -37,8 +51,6 @@ function fetchAndSendMessage(){
 
 
 	updateChatBox()
-
-
 }
 
 // inform the backend about the new peer
@@ -208,10 +220,33 @@ whenDocumentLoaded(() => {
 
 
 
-
+	let share = document.getElementById("share-btn");
+	share.addEventListener("click", () => shareFile())
 
 
 });
+
+
+function shareFile(){
+
+	let fname = getFileName()
+	if (fname == ""){
+		return
+	}
+	console.log("Shareing " + fname)
+
+	$.post(
+		backendAddr+FILE_PATH,
+		{name:fname, mode:"share"},
+		'jsonp'
+	)
+
+
+
+
+
+
+}
 
 
 

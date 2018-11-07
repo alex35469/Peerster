@@ -2,6 +2,11 @@ package main
 
 import "testing"
 
+func TestScanFile(t *testing.T) {
+
+	ScanFile("file.txt")
+}
+
 // Test for comparing 2 packet status
 
 func TestCreateGossiper(t *testing.T) {

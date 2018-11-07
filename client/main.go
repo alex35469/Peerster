@@ -51,13 +51,15 @@ type GossipPacket struct {
 }
 
 var UIPort, msg string
-var dest string
+var dest, file string
 
 // Init
 func init() {
 	flag.StringVar(&UIPort, "UIPort", "8080", "port for the UI client")
 	flag.StringVar(&msg, "msg", "", "message to be sent")
 	flag.StringVar(&dest, "dest", "", "destination for the private message")
+	flag.StringVar(&file, "file", "", "file to be indexed by the gossiper")
+
 }
 
 //########################## MAIN ######################
@@ -67,7 +69,11 @@ func main() {
 	packetToSend := GossipPacket{}
 
 	if dest == "" {
-		packetToSend = GossipPacket{Simple: &SimpleMessage{OriginalName: "Client", RelayPeerAddr: "Null", Contents: msg}}
+		sM := &SimpleMessage{OriginalName: "Client", RelayPeerAddr: "Null", Contents: msg}
+		if file != "" {
+
+		}
+		packetToSend = GossipPacket{Simple: sM}
 	} else {
 
 		packetToSend = GossipPacket{Private: &PrivateMessage{

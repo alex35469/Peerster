@@ -94,6 +94,15 @@ func nodeGet(w http.ResponseWriter, r *http.Request) {
 	w.Write(payload)
 }
 
+func shareFile(w http.ResponseWriter, r *http.Request) {
+  fmt.Println("Good path")
+  fname := r.FormValue("name")
+  mode := r.FormValue("mode")
+  fmt.Println(fname)
+  fmt.Println(mode)
+
+}
+
 func listenToGUI() {
 
 	r := mux.NewRouter()
@@ -102,6 +111,7 @@ func listenToGUI() {
 	r.HandleFunc("/message", msgsGet).Methods("GET")
 	r.HandleFunc("/node", nodePost).Methods("POST")
 	r.HandleFunc("/node", nodeGet).Methods("GET")
+  r.HandleFunc("/file", shareFile).Methods("POST")
 
 	http.Handle("/", r)
 

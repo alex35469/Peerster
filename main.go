@@ -13,7 +13,6 @@ import (
 	"fmt"
 	"math/rand"
 	"net"
-	"os"
 	"strings"
 	"sync"
 	"time"
@@ -30,6 +29,7 @@ type SimpleMessage struct {
 	OriginalName  string
 	RelayPeerAddr string
 	Contents      string
+	FileName      string
 }
 
 type RumorMessage struct {
@@ -56,10 +56,12 @@ type PrivateMessage struct {
 }
 
 type GossipPacket struct {
-	Simple  *SimpleMessage
-	Rumor   *RumorMessage
-	Status  *StatusPacket
-	Private *PrivateMessage
+	Simple      *SimpleMessage
+	Rumor       *RumorMessage
+	Status      *StatusPacket
+	Private     *PrivateMessage
+	DataRequest *DataRequest
+	DataReply   *DataReply
 }
 
 // Struct used to fetch a rumor when
@@ -170,7 +172,7 @@ func main() {
 
 //######################################## END MAIN #####################################
 
-//###############################  Webserver connexion ##################
+//###############################  Webserver connexion in wserver.go ##################
 
 //###############################  Gossiper connexion ##################
 
@@ -596,35 +598,6 @@ func fetchMessages(udpConn *net.UDPConn) (*GossipPacket, *net.UDPAddr) {
 	return &newPacket, addr
 }
 
-func fireTicker() {
-
-	ticker := time.NewTicker(TICKER_DURATION)
-	go func() {
-		for range ticker.C {
-			neighbor := pickOneNeighbor("")
-			sendTo(&GossipPacket{Status: myGossiper.myVC}, neighbor)
-		}
-
-	}()
-}
-
-func fireRumor(rtimer int) {
-
-	ticker := time.NewTicker(time.Duration(rtimer) * time.Second)
-
-	go func() {
-		for range ticker.C {
-			// Same procedure (As if it is genereated by the client but there is no text in the content)
-			routeMsg := SimpleMessage{
-				Contents: "",
-			}
-			initiateRumorFromClient(&GossipPacket{Simple: &routeMsg})
-		}
-
-	}()
-
-}
-
 // Send a packet to every peers known by the gossiper (except the relayer)
 func sendToAllNeighbors(packet *GossipPacket, relayer string) {
 
@@ -649,40 +622,5 @@ func sendTo(packet *GossipPacket, addr string) {
 	_, err = myGossiper.conn.WriteTo(packetBytes, remoteGossiperAddr)
 	if err != nil {
 		fmt.Printf("Error: UDP write error: %v", err)
-	}
-}
-
-// Create the Gossiper
-func NewGossiper(address, name, neighborsInit string) *Gossiper {
-	udpAddr, err := net.ResolveUDPAddr("udp4", address)
-	checkError(err)
-	udpConn, err := net.ListenUDP("udp4", udpAddr)
-	checkError(err)
-
-	sp := StatusPacket{}
-	sp.Want = make([]PeerStatus, 0)
-
-	messagesHistoryInit := make(map[string]*SafeMsgsOrginHistory)
-	messagesHistoryInit[name] = &SafeMsgsOrginHistory{}
-
-	timersRecordInit := make(map[string][]*TimerForAck)
-	safetimersRecord := SafeTimerRecord{timersRecord: timersRecordInit}
-
-	routingTableInit := make(map[string]*RoutingTableEntry)
-
-	if neighborsInit == "" {
-		fmt.Println("Fatal error: Please provide at least one neighbor")
-		os.Exit(1)
-	}
-
-	return &Gossiper{
-		address:          udpAddr,
-		conn:             udpConn,
-		Name:             name,
-		neighbors:        strings.Split(neighborsInit, ","),
-		myVC:             &sp,
-		messagesHistory:  messagesHistoryInit,
-		safeTimersRecord: safetimersRecord,
-		routingTable:     routingTableInit,
 	}
 }

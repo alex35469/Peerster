@@ -29,6 +29,10 @@ file and then run ./Client with the approptiate flags.
 
 ### Set up GUI client Interface
 
+The GUI client is inactive by default, to acitvate it, please uncomment the whole
+webserver connexion section (line 139 to 213) and the line `go listenToGUI()` in the main function (line 127),
+please uncomment the importation as well.
+
 After having run the Gossiper programme, please open ./peerster.html
 (better on Google Chrome or Safari). Make sure to press `Send` to broadcast
 a message (not keypress enter). Same thing to add a peer. If the chat box is overloaded,
@@ -40,7 +44,5 @@ The GUI client communicate with the backend using HTTP on port 8080.
 
 ## Discussion about tests
 
-the flipped coin test doesn't pass because we will never send again a rumor to a peer that
+the flipped coin test doesn't always pass because we will never send again a rumor to a peer that
 just confirm he received it (StatusPacket as an Ack). We will instead choose another peer.
-
-test_1_ring.sh doesn't pass when the web server is active... If it is commented (All the section: Webserver connexion plus `go listenToGUI()` in main) test_1_ring.sh passes the test.
