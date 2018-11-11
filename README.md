@@ -37,11 +37,13 @@ After having run the Gossiper programme, please open ./peerster.html
 a message (not keypress enter). Same thing to add a peer and sharing a file. If the chat box is overloaded,
 to see the most recent messages, please scroll down inside the box. Same for the node box and info-box. If the message doesn't show up right away, please, just wait 2 seconds.
 
-Scroll down the main page to see the downloading part 
+Scroll down the main page to see the downloading part
 
 
 
 ## Discussion about tests
+
+While Downloading the same file from 2 different location, if we receive a chunk from B, then we update in C the next chunk requested as well.
 
 the flipped coin test doesn't always pass because we will never send again a rumor to a peer that
 just confirm he received it (StatusPacket as an Ack). We will instead choose another peer.
