@@ -20,21 +20,6 @@ type SimpleMessage struct {
 	Contents      string
 }
 
-type RumorMessage struct {
-	Origin string
-	ID     uint32
-	Text   string
-}
-
-type PeerStatus struct {
-	Identifier string
-	NextID     uint32
-}
-
-type StatusPacket struct {
-	Want []PeerStatus
-}
-
 type PrivateMessage struct {
 	Origin      string
 	ID          uint32
@@ -43,55 +28,80 @@ type PrivateMessage struct {
 	HopLimit    uint32
 }
 
-type GossipPacket struct {
-	Simple  *SimpleMessage
-	Rumor   *RumorMessage
-	Status  *StatusPacket
-	Private *PrivateMessage
+// Special message only intended to the communication :
+//  Client -------> Gossiper
+type ClientMessage struct {
+	File    string
+	Request string
+	Dest    string
+}
+
+type ClientPacket struct {
+	Broadcast *SimpleMessage
+	Private   *PrivateMessage
+	CMessage  *ClientMessage
 }
 
 var UIPort, msg string
-var dest, file string
+var dest, file, request string
 
 // Init
 func init() {
 	flag.StringVar(&UIPort, "UIPort", "8080", "port for the UI client")
 	flag.StringVar(&msg, "msg", "", "message to be sent")
 	flag.StringVar(&dest, "dest", "", "destination for the private message")
-	flag.StringVar(&file, "file", "", "file to be indexed by the gossiper")
-
+	flag.StringVar(&file, "file", "", "file to be indexed by the gossiper, or filename of the requested file")
+	flag.StringVar(&request, "request", "", "request a chunk or metafile of this hash")
 }
 
 //########################## MAIN ######################
 
 func main() {
 	flag.Parse()
-	packetToSend := GossipPacket{}
+	packetToSend := ClientPacket{}
 
-	if dest == "" {
-		sM := &SimpleMessage{OriginalName: "Client", RelayPeerAddr: "Null", Contents: msg}
-		if file != "" {
+	if dest != "" && file != "" && request != "" {
+		// The client is downloading a file
 
-		}
-		packetToSend = GossipPacket{Simple: sM}
-	} else {
-
-		packetToSend = GossipPacket{Private: &PrivateMessage{
-			Text:        msg,
-			Destination: dest,
-		}}
+		// Telling the gossiper we want to download the file -file.
+		packetToSend.CMessage = &ClientMessage{File: file, Request: request, Dest: dest}
+		sendToGossiper(&packetToSend)
+		return
 
 	}
 
-	sendToGossiper(packetToSend)
+	// It's an indexing
+	if file != "" && request == "" {
+		fmt.Println("indexing")
+		packetToSend.CMessage = &ClientMessage{File: file, Request: "", Dest: "Hello"}
+
+	}
+
+	// Broadcast message
+	if dest == "" && msg != "" {
+		sM := &SimpleMessage{OriginalName: "Client", RelayPeerAddr: "Null", Contents: msg}
+		packetToSend.Broadcast = sM
+
+	}
+
+	// Private Message
+	if dest != "" && msg != "" {
+
+		packetToSend.Private = &PrivateMessage{
+			Text:        msg,
+			Destination: dest,
+		}
+	}
+
+	sendToGossiper(&packetToSend)
 }
 
 //########################## END MAIN ######################
 
 // Send a packet to the Gossiper
-func sendToGossiper(packetToSend GossipPacket) {
+func sendToGossiper(packetToSend *ClientPacket) {
 
-	packetBytes, err := protobuf.Encode(&packetToSend)
+	packetBytes, err := protobuf.Encode(packetToSend)
 	checkError(err)
 
 	udpAddr, err := net.ResolveUDPAddr("udp4", "localhost:"+UIPort)

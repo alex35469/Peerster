@@ -12,10 +12,13 @@ import (
 
 // Code retrieved from https://astaxie.gitbooks.io/build-web-application-with-golang/en/08.1.html
 // Used to ckeck if an error occured
-func checkError(err error) {
+func checkError(err error, stop bool) {
 	if err != nil {
 		fmt.Println("Fatal error ", os.Stderr, err.Error())
-		os.Exit(1)
+		if stop {
+			os.Exit(1)
+		}
+
 	}
 }
 
@@ -25,6 +28,10 @@ func pickOneNeighbor(exception string) string {
 
 	var s = rand.NewSource(time.Now().UnixNano())
 	var R = rand.New(s)
+
+	if len(myGossiper.neighbors) == 0 {
+		return ""
+	}
 
 	if len(myGossiper.neighbors) == 1 {
 		return myGossiper.neighbors[0]
@@ -172,11 +179,15 @@ func (myVC *StatusPacket) SortVC() {
 
 func fireTicker() {
 
-	ticker := time.NewTicker(TICKER_DURATION)
+	ticker := time.NewTicker(ANTI_ENTROPY_DURATION)
 	go func() {
 		for range ticker.C {
 			neighbor := pickOneNeighbor("")
-			sendTo(&GossipPacket{Status: myGossiper.myVC}, neighbor)
+
+			if neighbor != "" {
+				sendTo(&GossipPacket{Status: myGossiper.myVC}, neighbor)
+			}
+
 		}
 
 	}()
@@ -202,9 +213,9 @@ func fireRumor(rtimer int) {
 // Create the Gossiper
 func NewGossiper(address, name, neighborsInit string) *Gossiper {
 	udpAddr, err := net.ResolveUDPAddr("udp4", address)
-	checkError(err)
+	checkError(err, true)
 	udpConn, err := net.ListenUDP("udp4", udpAddr)
-	checkError(err)
+	checkError(err, true)
 
 	sp := StatusPacket{}
 	sp.Want = make([]PeerStatus, 0)
@@ -216,20 +227,31 @@ func NewGossiper(address, name, neighborsInit string) *Gossiper {
 	safetimersRecord := SafeTimerRecord{timersRecord: timersRecordInit}
 
 	routingTableInit := make(map[string]*RoutingTableEntry)
+	FileRecordInit := make([]*FileRecord, 0)
 
-	if neighborsInit == "" {
-		fmt.Println("Fatal error: Please provide at least one neighbor")
-		os.Exit(1)
+	nghInit := make([]string, 0)
+	if neighborsInit != "" {
+		nghInit = strings.Split(neighborsInit, ",")
+	}
+
+	sCtd := SafeChunkToDownload{
+		tickers: make([]*time.Ticker, 0),
+		chunks:  make([][]byte, 0),
+		metas:   make([][]byte, 0), // Refer to the parent meta Hash
+		dests:   make([]string, 0),
+		fname:   make([]string, 0),
 	}
 
 	return &Gossiper{
 		address:          udpAddr,
 		conn:             udpConn,
 		Name:             name,
-		neighbors:        strings.Split(neighborsInit, ","),
+		neighbors:        nghInit,
 		myVC:             &sp,
 		messagesHistory:  messagesHistoryInit,
 		safeTimersRecord: safetimersRecord,
 		routingTable:     routingTableInit,
+		safeFiles:        SafeFileRecords{files: FileRecordInit},
+		safeCtd:          sCtd,
 	}
 }

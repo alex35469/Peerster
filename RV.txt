@@ -1,0 +1,1368 @@
+DSDV J 127.0.0.1:5003
+DSDV A 127.0.0.1:5003
+DSDV C 127.0.0.1:5003
+DSDV B 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer F nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 2 peer F nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 2 peer C nextID 2 peer F nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+DSDV D 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 2 peer B nextID 2 peer C nextID 2 peer F nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 2 peer B nextID 2 peer C nextID 2 peer D nextID 2 peer F nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 2 peer B nextID 2 peer C nextID 2 peer D nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 2 peer B nextID 2 peer C nextID 2 peer D nextID 2 peer E nextID 2 peer F nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 2 peer B nextID 2 peer C nextID 2 peer D nextID 2 peer E nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV F 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 2 peer B nextID 2 peer C nextID 2 peer D nextID 2 peer E nextID 2 peer F nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV G 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 2 peer B nextID 2 peer C nextID 2 peer D nextID 2 peer E nextID 2 peer F nextID 2 peer G nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV H 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 2 peer B nextID 2 peer C nextID 2 peer D nextID 2 peer E nextID 2 peer F nextID 2 peer G nextID 2 peer H nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV I 127.0.0.1:5003
+DSDV A 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 3 peer B nextID 2 peer C nextID 2 peer D nextID 2 peer E nextID 2 peer F nextID 2 peer G nextID 2 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV B 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 3 peer B nextID 3 peer C nextID 2 peer D nextID 2 peer E nextID 2 peer F nextID 2 peer G nextID 2 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 2 peer E nextID 2 peer F nextID 2 peer G nextID 2 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 2 peer F nextID 2 peer G nextID 2 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 2 peer E nextID 3 peer F nextID 2 peer G nextID 2 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 3 peer F nextID 2 peer G nextID 2 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 2 peer F nextID 2 peer G nextID 2 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 3 peer F nextID 2 peer G nextID 2 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 3 peer F nextID 3 peer G nextID 2 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 3 peer F nextID 3 peer G nextID 2 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 3 peer F nextID 3 peer G nextID 3 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 3 peer F nextID 3 peer G nextID 3 peer H nextID 3 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 3 peer F nextID 3 peer G nextID 3 peer H nextID 3 peer I nextID 3 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5005 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 3 peer F nextID 3 peer G nextID 3 peer H nextID 3 peer I nextID 3 peer J nextID 3
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+CLIENT MESSAGE Weather_is_clear DEST A
+DSDV A 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 4 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 3 peer F nextID 3 peer G nextID 3 peer H nextID 3 peer I nextID 3 peer J nextID 3
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV B 127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 4 peer B nextID 4 peer C nextID 4 peer D nextID 4 peer E nextID 3 peer F nextID 3 peer G nextID 3 peer H nextID 3 peer I nextID 3 peer J nextID 3
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 4 peer B nextID 4 peer C nextID 4 peer D nextID 4 peer E nextID 3 peer F nextID 3 peer G nextID 3 peer H nextID 3 peer I nextID 3 peer J nextID 3
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5005 peer A nextID 4 peer B nextID 4 peer C nextID 4 peer D nextID 4 peer E nextID 3 peer F nextID 3 peer G nextID 3 peer H nextID 3 peer I nextID 3 peer J nextID 3
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 4 peer B nextID 4 peer C nextID 4 peer D nextID 4 peer E nextID 4 peer F nextID 4 peer G nextID 3 peer H nextID 3 peer I nextID 3 peer J nextID 3
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 4 peer B nextID 4 peer C nextID 4 peer D nextID 4 peer E nextID 3 peer F nextID 4 peer G nextID 3 peer H nextID 3 peer I nextID 3 peer J nextID 3
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 4 peer B nextID 4 peer C nextID 4 peer D nextID 4 peer E nextID 4 peer F nextID 4 peer G nextID 4 peer H nextID 3 peer I nextID 3 peer J nextID 3
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV H 127.0.0.1:5003
+DSDV I 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 4 peer B nextID 4 peer C nextID 4 peer D nextID 4 peer E nextID 4 peer F nextID 4 peer G nextID 4 peer H nextID 4 peer I nextID 4 peer J nextID 3
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 4 peer B nextID 4 peer C nextID 4 peer D nextID 4 peer E nextID 4 peer F nextID 4 peer G nextID 4 peer H nextID 4 peer I nextID 4 peer J nextID 4
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5005 peer A nextID 4 peer B nextID 5 peer C nextID 4 peer D nextID 4 peer E nextID 4 peer F nextID 4 peer G nextID 4 peer H nextID 4 peer I nextID 4 peer J nextID 4
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 5 peer B nextID 5 peer C nextID 4 peer D nextID 4 peer E nextID 4 peer F nextID 4 peer G nextID 4 peer H nextID 4 peer I nextID 4 peer J nextID 4
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV C 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 5 peer B nextID 5 peer C nextID 5 peer D nextID 4 peer E nextID 4 peer F nextID 4 peer G nextID 4 peer H nextID 4 peer I nextID 4 peer J nextID 4
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 5 peer B nextID 5 peer C nextID 5 peer D nextID 5 peer E nextID 5 peer F nextID 4 peer G nextID 4 peer H nextID 4 peer I nextID 4 peer J nextID 4
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 5 peer B nextID 5 peer C nextID 5 peer D nextID 5 peer E nextID 4 peer F nextID 4 peer G nextID 4 peer H nextID 4 peer I nextID 4 peer J nextID 4
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 5 peer B nextID 5 peer C nextID 5 peer D nextID 5 peer E nextID 5 peer F nextID 4 peer G nextID 4 peer H nextID 4 peer I nextID 4 peer J nextID 4
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV F 127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 5 peer B nextID 5 peer C nextID 5 peer D nextID 5 peer E nextID 5 peer F nextID 5 peer G nextID 5 peer H nextID 4 peer I nextID 4 peer J nextID 4
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV H 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 5 peer B nextID 5 peer C nextID 5 peer D nextID 5 peer E nextID 5 peer F nextID 5 peer G nextID 5 peer H nextID 5 peer I nextID 4 peer J nextID 4
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV I 127.0.0.1:5003
+DSDV J 127.0.0.1:5005
+CLIENT MESSAGE No_clouds_really DEST A
+STATUS from 127.0.0.1:5005 peer A nextID 6 peer B nextID 5 peer C nextID 5 peer D nextID 5 peer E nextID 5 peer F nextID 5 peer G nextID 5 peer H nextID 5 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV B 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 6 peer B nextID 6 peer C nextID 5 peer D nextID 5 peer E nextID 5 peer F nextID 5 peer G nextID 5 peer H nextID 5 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 5 peer E nextID 5 peer F nextID 5 peer G nextID 5 peer H nextID 5 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 5 peer F nextID 5 peer G nextID 5 peer H nextID 5 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 5 peer F nextID 5 peer G nextID 5 peer H nextID 5 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 5 peer F nextID 5 peer G nextID 5 peer H nextID 5 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 6 peer F nextID 5 peer G nextID 5 peer H nextID 5 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV F 127.0.0.1:5005
+STATUS from 127.0.0.1:5005 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 6 peer F nextID 6 peer G nextID 5 peer H nextID 5 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 6 peer F nextID 6 peer G nextID 5 peer H nextID 5 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 6 peer F nextID 6 peer G nextID 6 peer H nextID 5 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV H 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 6 peer F nextID 6 peer G nextID 6 peer H nextID 6 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV I 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 6 peer F nextID 6 peer G nextID 6 peer H nextID 6 peer I nextID 6 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV J 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 6 peer F nextID 6 peer G nextID 6 peer H nextID 6 peer I nextID 6 peer J nextID 6
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5005 peer A nextID 7 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 6 peer F nextID 6 peer G nextID 6 peer H nextID 6 peer I nextID 6 peer J nextID 6
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV B 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 7 peer B nextID 7 peer C nextID 6 peer D nextID 6 peer E nextID 6 peer F nextID 6 peer G nextID 6 peer H nextID 6 peer I nextID 6 peer J nextID 6
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV C 127.0.0.1:5003
+DSDV D 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 7 peer B nextID 7 peer C nextID 7 peer D nextID 7 peer E nextID 7 peer F nextID 6 peer G nextID 6 peer H nextID 6 peer I nextID 6 peer J nextID 6
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 7 peer B nextID 7 peer C nextID 7 peer D nextID 7 peer E nextID 7 peer F nextID 7 peer G nextID 6 peer H nextID 6 peer I nextID 6 peer J nextID 6
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 7 peer B nextID 7 peer C nextID 7 peer D nextID 7 peer E nextID 7 peer F nextID 7 peer G nextID 7 peer H nextID 6 peer I nextID 6 peer J nextID 6
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV H 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 7 peer B nextID 7 peer C nextID 7 peer D nextID 7 peer E nextID 7 peer F nextID 7 peer G nextID 7 peer H nextID 7 peer I nextID 6 peer J nextID 6
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV I 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 7 peer B nextID 7 peer C nextID 7 peer D nextID 7 peer E nextID 7 peer F nextID 7 peer G nextID 7 peer H nextID 7 peer I nextID 7 peer J nextID 6
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5005 peer A nextID 7 peer B nextID 7 peer C nextID 7 peer D nextID 7 peer E nextID 7 peer F nextID 7 peer G nextID 7 peer H nextID 7 peer I nextID 7 peer J nextID 7
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV A 127.0.0.1:5005
+STATUS from 127.0.0.1:5005 peer A nextID 8 peer B nextID 8 peer C nextID 8 peer D nextID 7 peer E nextID 7 peer F nextID 7 peer G nextID 7 peer H nextID 7 peer I nextID 7 peer J nextID 7
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5005 peer A nextID 8 peer B nextID 8 peer C nextID 8 peer D nextID 8 peer E nextID 8 peer F nextID 7 peer G nextID 7 peer H nextID 7 peer I nextID 7 peer J nextID 7
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 8 peer B nextID 8 peer C nextID 8 peer D nextID 8 peer E nextID 8 peer F nextID 8 peer G nextID 7 peer H nextID 7 peer I nextID 7 peer J nextID 7
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV G 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 8 peer B nextID 8 peer C nextID 8 peer D nextID 8 peer E nextID 8 peer F nextID 8 peer G nextID 8 peer H nextID 7 peer I nextID 7 peer J nextID 7
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 8 peer B nextID 8 peer C nextID 8 peer D nextID 8 peer E nextID 8 peer F nextID 8 peer G nextID 8 peer H nextID 8 peer I nextID 7 peer J nextID 7
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV I 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 8 peer B nextID 8 peer C nextID 8 peer D nextID 8 peer E nextID 8 peer F nextID 8 peer G nextID 8 peer H nextID 8 peer I nextID 8 peer J nextID 7
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 8 peer B nextID 8 peer C nextID 8 peer D nextID 8 peer E nextID 8 peer F nextID 8 peer G nextID 8 peer H nextID 8 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 9 peer B nextID 8 peer C nextID 8 peer D nextID 8 peer E nextID 8 peer F nextID 8 peer G nextID 8 peer H nextID 8 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 9 peer B nextID 9 peer C nextID 8 peer D nextID 8 peer E nextID 8 peer F nextID 8 peer G nextID 8 peer H nextID 8 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV C 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 9 peer B nextID 9 peer C nextID 9 peer D nextID 8 peer E nextID 8 peer F nextID 8 peer G nextID 8 peer H nextID 8 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 9 peer B nextID 9 peer C nextID 9 peer D nextID 9 peer E nextID 9 peer F nextID 8 peer G nextID 8 peer H nextID 8 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 9 peer B nextID 9 peer C nextID 9 peer D nextID 9 peer E nextID 8 peer F nextID 8 peer G nextID 8 peer H nextID 8 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 9 peer B nextID 9 peer C nextID 9 peer D nextID 9 peer E nextID 9 peer F nextID 8 peer G nextID 8 peer H nextID 8 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5005 peer A nextID 9 peer B nextID 9 peer C nextID 9 peer D nextID 9 peer E nextID 9 peer F nextID 9 peer G nextID 8 peer H nextID 8 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 9 peer B nextID 9 peer C nextID 9 peer D nextID 9 peer E nextID 9 peer F nextID 9 peer G nextID 8 peer H nextID 8 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV G 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 9 peer B nextID 9 peer C nextID 9 peer D nextID 9 peer E nextID 9 peer F nextID 9 peer G nextID 9 peer H nextID 8 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 9 peer B nextID 9 peer C nextID 9 peer D nextID 9 peer E nextID 9 peer F nextID 9 peer G nextID 9 peer H nextID 9 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV I 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 9 peer B nextID 9 peer C nextID 9 peer D nextID 9 peer E nextID 9 peer F nextID 9 peer G nextID 9 peer H nextID 9 peer I nextID 9 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5005 peer A nextID 9 peer B nextID 9 peer C nextID 9 peer D nextID 9 peer E nextID 9 peer F nextID 9 peer G nextID 9 peer H nextID 9 peer I nextID 9 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 10 peer B nextID 9 peer C nextID 9 peer D nextID 9 peer E nextID 9 peer F nextID 9 peer G nextID 9 peer H nextID 9 peer I nextID 9 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV B 127.0.0.1:5005
+DSDV C 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 10 peer B nextID 10 peer C nextID 10 peer D nextID 9 peer E nextID 9 peer F nextID 9 peer G nextID 9 peer H nextID 9 peer I nextID 9 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV D 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 10 peer B nextID 10 peer C nextID 10 peer D nextID 10 peer E nextID 9 peer F nextID 9 peer G nextID 9 peer H nextID 9 peer I nextID 9 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 10 peer B nextID 10 peer C nextID 10 peer D nextID 10 peer E nextID 9 peer F nextID 9 peer G nextID 9 peer H nextID 9 peer I nextID 9 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 10 peer B nextID 10 peer C nextID 10 peer D nextID 10 peer E nextID 10 peer F nextID 9 peer G nextID 9 peer H nextID 9 peer I nextID 9 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 10 peer B nextID 10 peer C nextID 10 peer D nextID 10 peer E nextID 10 peer F nextID 9 peer G nextID 9 peer H nextID 9 peer I nextID 9 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 10 peer B nextID 10 peer C nextID 10 peer D nextID 10 peer E nextID 10 peer F nextID 10 peer G nextID 9 peer H nextID 9 peer I nextID 9 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV G 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 10 peer B nextID 10 peer C nextID 10 peer D nextID 10 peer E nextID 10 peer F nextID 10 peer G nextID 10 peer H nextID 9 peer I nextID 9 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 10 peer B nextID 10 peer C nextID 10 peer D nextID 10 peer E nextID 10 peer F nextID 10 peer G nextID 10 peer H nextID 10 peer I nextID 9 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 10 peer B nextID 10 peer C nextID 10 peer D nextID 10 peer E nextID 10 peer F nextID 10 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV J 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 10 peer B nextID 10 peer C nextID 10 peer D nextID 10 peer E nextID 10 peer F nextID 10 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV A 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 11 peer B nextID 10 peer C nextID 10 peer D nextID 10 peer E nextID 10 peer F nextID 10 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV B 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 11 peer B nextID 11 peer C nextID 10 peer D nextID 10 peer E nextID 10 peer F nextID 10 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV C 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 10 peer E nextID 10 peer F nextID 10 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 11 peer E nextID 10 peer F nextID 10 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 10 peer E nextID 11 peer F nextID 10 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 11 peer E nextID 11 peer F nextID 10 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 11 peer E nextID 11 peer F nextID 10 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5005 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 11 peer E nextID 11 peer F nextID 11 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 11 peer E nextID 11 peer F nextID 11 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV G 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 11 peer E nextID 11 peer F nextID 11 peer G nextID 11 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV H 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 11 peer E nextID 11 peer F nextID 11 peer G nextID 11 peer H nextID 11 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 11 peer E nextID 11 peer F nextID 11 peer G nextID 11 peer H nextID 11 peer I nextID 11 peer J nextID 11
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 11 peer E nextID 11 peer F nextID 11 peer G nextID 11 peer H nextID 11 peer I nextID 11 peer J nextID 11
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV J 127.0.0.1:5003
+DSDV A 127.0.0.1:5003
+DSDV C 127.0.0.1:5003
+DSDV B 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer F nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 2 peer F nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 2 peer C nextID 2 peer F nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+DSDV D 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 2 peer B nextID 2 peer C nextID 2 peer F nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 2 peer B nextID 2 peer C nextID 2 peer D nextID 2 peer F nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 2 peer B nextID 2 peer C nextID 2 peer D nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 2 peer B nextID 2 peer C nextID 2 peer D nextID 2 peer E nextID 2 peer F nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 2 peer B nextID 2 peer C nextID 2 peer D nextID 2 peer E nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV F 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 2 peer B nextID 2 peer C nextID 2 peer D nextID 2 peer E nextID 2 peer F nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV G 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 2 peer B nextID 2 peer C nextID 2 peer D nextID 2 peer E nextID 2 peer F nextID 2 peer G nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV H 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 2 peer B nextID 2 peer C nextID 2 peer D nextID 2 peer E nextID 2 peer F nextID 2 peer G nextID 2 peer H nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV I 127.0.0.1:5003
+DSDV A 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 3 peer B nextID 2 peer C nextID 2 peer D nextID 2 peer E nextID 2 peer F nextID 2 peer G nextID 2 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV B 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 3 peer B nextID 3 peer C nextID 2 peer D nextID 2 peer E nextID 2 peer F nextID 2 peer G nextID 2 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 2 peer E nextID 2 peer F nextID 2 peer G nextID 2 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 2 peer F nextID 2 peer G nextID 2 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 2 peer E nextID 3 peer F nextID 2 peer G nextID 2 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 3 peer F nextID 2 peer G nextID 2 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 2 peer F nextID 2 peer G nextID 2 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 3 peer F nextID 2 peer G nextID 2 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 3 peer F nextID 3 peer G nextID 2 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 3 peer F nextID 3 peer G nextID 2 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 3 peer F nextID 3 peer G nextID 3 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 3 peer F nextID 3 peer G nextID 3 peer H nextID 3 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 3 peer F nextID 3 peer G nextID 3 peer H nextID 3 peer I nextID 3 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5005 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 3 peer F nextID 3 peer G nextID 3 peer H nextID 3 peer I nextID 3 peer J nextID 3
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+CLIENT MESSAGE Weather_is_clear DEST A
+DSDV A 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 4 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 3 peer F nextID 3 peer G nextID 3 peer H nextID 3 peer I nextID 3 peer J nextID 3
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV B 127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 4 peer B nextID 4 peer C nextID 4 peer D nextID 4 peer E nextID 3 peer F nextID 3 peer G nextID 3 peer H nextID 3 peer I nextID 3 peer J nextID 3
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 4 peer B nextID 4 peer C nextID 4 peer D nextID 4 peer E nextID 3 peer F nextID 3 peer G nextID 3 peer H nextID 3 peer I nextID 3 peer J nextID 3
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5005 peer A nextID 4 peer B nextID 4 peer C nextID 4 peer D nextID 4 peer E nextID 3 peer F nextID 3 peer G nextID 3 peer H nextID 3 peer I nextID 3 peer J nextID 3
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 4 peer B nextID 4 peer C nextID 4 peer D nextID 4 peer E nextID 4 peer F nextID 4 peer G nextID 3 peer H nextID 3 peer I nextID 3 peer J nextID 3
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 4 peer B nextID 4 peer C nextID 4 peer D nextID 4 peer E nextID 3 peer F nextID 4 peer G nextID 3 peer H nextID 3 peer I nextID 3 peer J nextID 3
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 4 peer B nextID 4 peer C nextID 4 peer D nextID 4 peer E nextID 4 peer F nextID 4 peer G nextID 4 peer H nextID 3 peer I nextID 3 peer J nextID 3
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV H 127.0.0.1:5003
+DSDV I 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 4 peer B nextID 4 peer C nextID 4 peer D nextID 4 peer E nextID 4 peer F nextID 4 peer G nextID 4 peer H nextID 4 peer I nextID 4 peer J nextID 3
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 4 peer B nextID 4 peer C nextID 4 peer D nextID 4 peer E nextID 4 peer F nextID 4 peer G nextID 4 peer H nextID 4 peer I nextID 4 peer J nextID 4
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5005 peer A nextID 4 peer B nextID 5 peer C nextID 4 peer D nextID 4 peer E nextID 4 peer F nextID 4 peer G nextID 4 peer H nextID 4 peer I nextID 4 peer J nextID 4
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 5 peer B nextID 5 peer C nextID 4 peer D nextID 4 peer E nextID 4 peer F nextID 4 peer G nextID 4 peer H nextID 4 peer I nextID 4 peer J nextID 4
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV C 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 5 peer B nextID 5 peer C nextID 5 peer D nextID 4 peer E nextID 4 peer F nextID 4 peer G nextID 4 peer H nextID 4 peer I nextID 4 peer J nextID 4
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 5 peer B nextID 5 peer C nextID 5 peer D nextID 5 peer E nextID 5 peer F nextID 4 peer G nextID 4 peer H nextID 4 peer I nextID 4 peer J nextID 4
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 5 peer B nextID 5 peer C nextID 5 peer D nextID 5 peer E nextID 4 peer F nextID 4 peer G nextID 4 peer H nextID 4 peer I nextID 4 peer J nextID 4
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 5 peer B nextID 5 peer C nextID 5 peer D nextID 5 peer E nextID 5 peer F nextID 4 peer G nextID 4 peer H nextID 4 peer I nextID 4 peer J nextID 4
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV F 127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 5 peer B nextID 5 peer C nextID 5 peer D nextID 5 peer E nextID 5 peer F nextID 5 peer G nextID 5 peer H nextID 4 peer I nextID 4 peer J nextID 4
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV H 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 5 peer B nextID 5 peer C nextID 5 peer D nextID 5 peer E nextID 5 peer F nextID 5 peer G nextID 5 peer H nextID 5 peer I nextID 4 peer J nextID 4
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV I 127.0.0.1:5003
+DSDV J 127.0.0.1:5005
+CLIENT MESSAGE No_clouds_really DEST A
+STATUS from 127.0.0.1:5005 peer A nextID 6 peer B nextID 5 peer C nextID 5 peer D nextID 5 peer E nextID 5 peer F nextID 5 peer G nextID 5 peer H nextID 5 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV B 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 6 peer B nextID 6 peer C nextID 5 peer D nextID 5 peer E nextID 5 peer F nextID 5 peer G nextID 5 peer H nextID 5 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 5 peer E nextID 5 peer F nextID 5 peer G nextID 5 peer H nextID 5 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 5 peer F nextID 5 peer G nextID 5 peer H nextID 5 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 5 peer F nextID 5 peer G nextID 5 peer H nextID 5 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 5 peer F nextID 5 peer G nextID 5 peer H nextID 5 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 6 peer F nextID 5 peer G nextID 5 peer H nextID 5 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV F 127.0.0.1:5005
+STATUS from 127.0.0.1:5005 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 6 peer F nextID 6 peer G nextID 5 peer H nextID 5 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 6 peer F nextID 6 peer G nextID 5 peer H nextID 5 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 6 peer F nextID 6 peer G nextID 6 peer H nextID 5 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV H 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 6 peer F nextID 6 peer G nextID 6 peer H nextID 6 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV I 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 6 peer F nextID 6 peer G nextID 6 peer H nextID 6 peer I nextID 6 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV J 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 6 peer F nextID 6 peer G nextID 6 peer H nextID 6 peer I nextID 6 peer J nextID 6
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5005 peer A nextID 7 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 6 peer F nextID 6 peer G nextID 6 peer H nextID 6 peer I nextID 6 peer J nextID 6
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV B 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 7 peer B nextID 7 peer C nextID 6 peer D nextID 6 peer E nextID 6 peer F nextID 6 peer G nextID 6 peer H nextID 6 peer I nextID 6 peer J nextID 6
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV C 127.0.0.1:5003
+DSDV D 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 7 peer B nextID 7 peer C nextID 7 peer D nextID 7 peer E nextID 7 peer F nextID 6 peer G nextID 6 peer H nextID 6 peer I nextID 6 peer J nextID 6
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 7 peer B nextID 7 peer C nextID 7 peer D nextID 7 peer E nextID 7 peer F nextID 7 peer G nextID 6 peer H nextID 6 peer I nextID 6 peer J nextID 6
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 7 peer B nextID 7 peer C nextID 7 peer D nextID 7 peer E nextID 7 peer F nextID 7 peer G nextID 7 peer H nextID 6 peer I nextID 6 peer J nextID 6
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV H 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 7 peer B nextID 7 peer C nextID 7 peer D nextID 7 peer E nextID 7 peer F nextID 7 peer G nextID 7 peer H nextID 7 peer I nextID 6 peer J nextID 6
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV I 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 7 peer B nextID 7 peer C nextID 7 peer D nextID 7 peer E nextID 7 peer F nextID 7 peer G nextID 7 peer H nextID 7 peer I nextID 7 peer J nextID 6
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5005 peer A nextID 7 peer B nextID 7 peer C nextID 7 peer D nextID 7 peer E nextID 7 peer F nextID 7 peer G nextID 7 peer H nextID 7 peer I nextID 7 peer J nextID 7
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV A 127.0.0.1:5005
+STATUS from 127.0.0.1:5005 peer A nextID 8 peer B nextID 8 peer C nextID 8 peer D nextID 7 peer E nextID 7 peer F nextID 7 peer G nextID 7 peer H nextID 7 peer I nextID 7 peer J nextID 7
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5005 peer A nextID 8 peer B nextID 8 peer C nextID 8 peer D nextID 8 peer E nextID 8 peer F nextID 7 peer G nextID 7 peer H nextID 7 peer I nextID 7 peer J nextID 7
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 8 peer B nextID 8 peer C nextID 8 peer D nextID 8 peer E nextID 8 peer F nextID 8 peer G nextID 7 peer H nextID 7 peer I nextID 7 peer J nextID 7
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV G 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 8 peer B nextID 8 peer C nextID 8 peer D nextID 8 peer E nextID 8 peer F nextID 8 peer G nextID 8 peer H nextID 7 peer I nextID 7 peer J nextID 7
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 8 peer B nextID 8 peer C nextID 8 peer D nextID 8 peer E nextID 8 peer F nextID 8 peer G nextID 8 peer H nextID 8 peer I nextID 7 peer J nextID 7
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV I 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 8 peer B nextID 8 peer C nextID 8 peer D nextID 8 peer E nextID 8 peer F nextID 8 peer G nextID 8 peer H nextID 8 peer I nextID 8 peer J nextID 7
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 8 peer B nextID 8 peer C nextID 8 peer D nextID 8 peer E nextID 8 peer F nextID 8 peer G nextID 8 peer H nextID 8 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 9 peer B nextID 8 peer C nextID 8 peer D nextID 8 peer E nextID 8 peer F nextID 8 peer G nextID 8 peer H nextID 8 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 9 peer B nextID 9 peer C nextID 8 peer D nextID 8 peer E nextID 8 peer F nextID 8 peer G nextID 8 peer H nextID 8 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV C 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 9 peer B nextID 9 peer C nextID 9 peer D nextID 8 peer E nextID 8 peer F nextID 8 peer G nextID 8 peer H nextID 8 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 9 peer B nextID 9 peer C nextID 9 peer D nextID 9 peer E nextID 9 peer F nextID 8 peer G nextID 8 peer H nextID 8 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 9 peer B nextID 9 peer C nextID 9 peer D nextID 9 peer E nextID 8 peer F nextID 8 peer G nextID 8 peer H nextID 8 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 9 peer B nextID 9 peer C nextID 9 peer D nextID 9 peer E nextID 9 peer F nextID 8 peer G nextID 8 peer H nextID 8 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5005 peer A nextID 9 peer B nextID 9 peer C nextID 9 peer D nextID 9 peer E nextID 9 peer F nextID 9 peer G nextID 8 peer H nextID 8 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 9 peer B nextID 9 peer C nextID 9 peer D nextID 9 peer E nextID 9 peer F nextID 9 peer G nextID 8 peer H nextID 8 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV G 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 9 peer B nextID 9 peer C nextID 9 peer D nextID 9 peer E nextID 9 peer F nextID 9 peer G nextID 9 peer H nextID 8 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 9 peer B nextID 9 peer C nextID 9 peer D nextID 9 peer E nextID 9 peer F nextID 9 peer G nextID 9 peer H nextID 9 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV I 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 9 peer B nextID 9 peer C nextID 9 peer D nextID 9 peer E nextID 9 peer F nextID 9 peer G nextID 9 peer H nextID 9 peer I nextID 9 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5005 peer A nextID 9 peer B nextID 9 peer C nextID 9 peer D nextID 9 peer E nextID 9 peer F nextID 9 peer G nextID 9 peer H nextID 9 peer I nextID 9 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 10 peer B nextID 9 peer C nextID 9 peer D nextID 9 peer E nextID 9 peer F nextID 9 peer G nextID 9 peer H nextID 9 peer I nextID 9 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV B 127.0.0.1:5005
+DSDV C 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 10 peer B nextID 10 peer C nextID 10 peer D nextID 9 peer E nextID 9 peer F nextID 9 peer G nextID 9 peer H nextID 9 peer I nextID 9 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV D 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 10 peer B nextID 10 peer C nextID 10 peer D nextID 10 peer E nextID 9 peer F nextID 9 peer G nextID 9 peer H nextID 9 peer I nextID 9 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 10 peer B nextID 10 peer C nextID 10 peer D nextID 10 peer E nextID 9 peer F nextID 9 peer G nextID 9 peer H nextID 9 peer I nextID 9 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 10 peer B nextID 10 peer C nextID 10 peer D nextID 10 peer E nextID 10 peer F nextID 9 peer G nextID 9 peer H nextID 9 peer I nextID 9 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 10 peer B nextID 10 peer C nextID 10 peer D nextID 10 peer E nextID 10 peer F nextID 9 peer G nextID 9 peer H nextID 9 peer I nextID 9 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 10 peer B nextID 10 peer C nextID 10 peer D nextID 10 peer E nextID 10 peer F nextID 10 peer G nextID 9 peer H nextID 9 peer I nextID 9 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV G 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 10 peer B nextID 10 peer C nextID 10 peer D nextID 10 peer E nextID 10 peer F nextID 10 peer G nextID 10 peer H nextID 9 peer I nextID 9 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 10 peer B nextID 10 peer C nextID 10 peer D nextID 10 peer E nextID 10 peer F nextID 10 peer G nextID 10 peer H nextID 10 peer I nextID 9 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 10 peer B nextID 10 peer C nextID 10 peer D nextID 10 peer E nextID 10 peer F nextID 10 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV J 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 10 peer B nextID 10 peer C nextID 10 peer D nextID 10 peer E nextID 10 peer F nextID 10 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV A 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 11 peer B nextID 10 peer C nextID 10 peer D nextID 10 peer E nextID 10 peer F nextID 10 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV B 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 11 peer B nextID 11 peer C nextID 10 peer D nextID 10 peer E nextID 10 peer F nextID 10 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV C 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 10 peer E nextID 10 peer F nextID 10 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 11 peer E nextID 10 peer F nextID 10 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 10 peer E nextID 11 peer F nextID 10 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 11 peer E nextID 11 peer F nextID 10 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 11 peer E nextID 11 peer F nextID 10 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5005 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 11 peer E nextID 11 peer F nextID 11 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 11 peer E nextID 11 peer F nextID 11 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV G 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 11 peer E nextID 11 peer F nextID 11 peer G nextID 11 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV H 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 11 peer E nextID 11 peer F nextID 11 peer G nextID 11 peer H nextID 11 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 11 peer E nextID 11 peer F nextID 11 peer G nextID 11 peer H nextID 11 peer I nextID 11 peer J nextID 11
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 11 peer E nextID 11 peer F nextID 11 peer G nextID 11 peer H nextID 11 peer I nextID 11 peer J nextID 11
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV J 127.0.0.1:5003
+DSDV A 127.0.0.1:5003
+DSDV C 127.0.0.1:5003
+DSDV B 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer F nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 2 peer F nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 2 peer C nextID 2 peer F nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+DSDV D 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 2 peer B nextID 2 peer C nextID 2 peer F nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 2 peer B nextID 2 peer C nextID 2 peer D nextID 2 peer F nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 2 peer B nextID 2 peer C nextID 2 peer D nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 2 peer B nextID 2 peer C nextID 2 peer D nextID 2 peer E nextID 2 peer F nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 2 peer B nextID 2 peer C nextID 2 peer D nextID 2 peer E nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV F 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 2 peer B nextID 2 peer C nextID 2 peer D nextID 2 peer E nextID 2 peer F nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV G 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 2 peer B nextID 2 peer C nextID 2 peer D nextID 2 peer E nextID 2 peer F nextID 2 peer G nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV H 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 2 peer B nextID 2 peer C nextID 2 peer D nextID 2 peer E nextID 2 peer F nextID 2 peer G nextID 2 peer H nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV I 127.0.0.1:5003
+DSDV A 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 3 peer B nextID 2 peer C nextID 2 peer D nextID 2 peer E nextID 2 peer F nextID 2 peer G nextID 2 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV B 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 3 peer B nextID 3 peer C nextID 2 peer D nextID 2 peer E nextID 2 peer F nextID 2 peer G nextID 2 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 2 peer E nextID 2 peer F nextID 2 peer G nextID 2 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 2 peer F nextID 2 peer G nextID 2 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 2 peer E nextID 3 peer F nextID 2 peer G nextID 2 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 3 peer F nextID 2 peer G nextID 2 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 2 peer F nextID 2 peer G nextID 2 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 3 peer F nextID 2 peer G nextID 2 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 3 peer F nextID 3 peer G nextID 2 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 3 peer F nextID 3 peer G nextID 2 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 3 peer F nextID 3 peer G nextID 3 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 3 peer F nextID 3 peer G nextID 3 peer H nextID 3 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 3 peer F nextID 3 peer G nextID 3 peer H nextID 3 peer I nextID 3 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5005 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 3 peer F nextID 3 peer G nextID 3 peer H nextID 3 peer I nextID 3 peer J nextID 3
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+CLIENT MESSAGE Weather_is_clear DEST A
+DSDV A 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 4 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 3 peer F nextID 3 peer G nextID 3 peer H nextID 3 peer I nextID 3 peer J nextID 3
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV B 127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 4 peer B nextID 4 peer C nextID 4 peer D nextID 4 peer E nextID 3 peer F nextID 3 peer G nextID 3 peer H nextID 3 peer I nextID 3 peer J nextID 3
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 4 peer B nextID 4 peer C nextID 4 peer D nextID 4 peer E nextID 3 peer F nextID 3 peer G nextID 3 peer H nextID 3 peer I nextID 3 peer J nextID 3
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5005 peer A nextID 4 peer B nextID 4 peer C nextID 4 peer D nextID 4 peer E nextID 3 peer F nextID 3 peer G nextID 3 peer H nextID 3 peer I nextID 3 peer J nextID 3
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 4 peer B nextID 4 peer C nextID 4 peer D nextID 4 peer E nextID 4 peer F nextID 4 peer G nextID 3 peer H nextID 3 peer I nextID 3 peer J nextID 3
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 4 peer B nextID 4 peer C nextID 4 peer D nextID 4 peer E nextID 3 peer F nextID 4 peer G nextID 3 peer H nextID 3 peer I nextID 3 peer J nextID 3
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 4 peer B nextID 4 peer C nextID 4 peer D nextID 4 peer E nextID 4 peer F nextID 4 peer G nextID 4 peer H nextID 3 peer I nextID 3 peer J nextID 3
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV H 127.0.0.1:5003
+DSDV I 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 4 peer B nextID 4 peer C nextID 4 peer D nextID 4 peer E nextID 4 peer F nextID 4 peer G nextID 4 peer H nextID 4 peer I nextID 4 peer J nextID 3
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 4 peer B nextID 4 peer C nextID 4 peer D nextID 4 peer E nextID 4 peer F nextID 4 peer G nextID 4 peer H nextID 4 peer I nextID 4 peer J nextID 4
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5005 peer A nextID 4 peer B nextID 5 peer C nextID 4 peer D nextID 4 peer E nextID 4 peer F nextID 4 peer G nextID 4 peer H nextID 4 peer I nextID 4 peer J nextID 4
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 5 peer B nextID 5 peer C nextID 4 peer D nextID 4 peer E nextID 4 peer F nextID 4 peer G nextID 4 peer H nextID 4 peer I nextID 4 peer J nextID 4
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV C 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 5 peer B nextID 5 peer C nextID 5 peer D nextID 4 peer E nextID 4 peer F nextID 4 peer G nextID 4 peer H nextID 4 peer I nextID 4 peer J nextID 4
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 5 peer B nextID 5 peer C nextID 5 peer D nextID 5 peer E nextID 5 peer F nextID 4 peer G nextID 4 peer H nextID 4 peer I nextID 4 peer J nextID 4
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 5 peer B nextID 5 peer C nextID 5 peer D nextID 5 peer E nextID 4 peer F nextID 4 peer G nextID 4 peer H nextID 4 peer I nextID 4 peer J nextID 4
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 5 peer B nextID 5 peer C nextID 5 peer D nextID 5 peer E nextID 5 peer F nextID 4 peer G nextID 4 peer H nextID 4 peer I nextID 4 peer J nextID 4
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV F 127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 5 peer B nextID 5 peer C nextID 5 peer D nextID 5 peer E nextID 5 peer F nextID 5 peer G nextID 5 peer H nextID 4 peer I nextID 4 peer J nextID 4
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV H 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 5 peer B nextID 5 peer C nextID 5 peer D nextID 5 peer E nextID 5 peer F nextID 5 peer G nextID 5 peer H nextID 5 peer I nextID 4 peer J nextID 4
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV I 127.0.0.1:5003
+DSDV J 127.0.0.1:5005
+CLIENT MESSAGE No_clouds_really DEST A
+STATUS from 127.0.0.1:5005 peer A nextID 6 peer B nextID 5 peer C nextID 5 peer D nextID 5 peer E nextID 5 peer F nextID 5 peer G nextID 5 peer H nextID 5 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV B 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 6 peer B nextID 6 peer C nextID 5 peer D nextID 5 peer E nextID 5 peer F nextID 5 peer G nextID 5 peer H nextID 5 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 5 peer E nextID 5 peer F nextID 5 peer G nextID 5 peer H nextID 5 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 5 peer F nextID 5 peer G nextID 5 peer H nextID 5 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 5 peer F nextID 5 peer G nextID 5 peer H nextID 5 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 5 peer F nextID 5 peer G nextID 5 peer H nextID 5 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 6 peer F nextID 5 peer G nextID 5 peer H nextID 5 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV F 127.0.0.1:5005
+STATUS from 127.0.0.1:5005 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 6 peer F nextID 6 peer G nextID 5 peer H nextID 5 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 6 peer F nextID 6 peer G nextID 5 peer H nextID 5 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 6 peer F nextID 6 peer G nextID 6 peer H nextID 5 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV H 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 6 peer F nextID 6 peer G nextID 6 peer H nextID 6 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV I 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 6 peer F nextID 6 peer G nextID 6 peer H nextID 6 peer I nextID 6 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV J 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 6 peer F nextID 6 peer G nextID 6 peer H nextID 6 peer I nextID 6 peer J nextID 6
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5005 peer A nextID 7 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 6 peer F nextID 6 peer G nextID 6 peer H nextID 6 peer I nextID 6 peer J nextID 6
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV B 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 7 peer B nextID 7 peer C nextID 6 peer D nextID 6 peer E nextID 6 peer F nextID 6 peer G nextID 6 peer H nextID 6 peer I nextID 6 peer J nextID 6
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV C 127.0.0.1:5003
+DSDV D 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 7 peer B nextID 7 peer C nextID 7 peer D nextID 7 peer E nextID 7 peer F nextID 6 peer G nextID 6 peer H nextID 6 peer I nextID 6 peer J nextID 6
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 7 peer B nextID 7 peer C nextID 7 peer D nextID 7 peer E nextID 7 peer F nextID 7 peer G nextID 6 peer H nextID 6 peer I nextID 6 peer J nextID 6
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 7 peer B nextID 7 peer C nextID 7 peer D nextID 7 peer E nextID 7 peer F nextID 7 peer G nextID 7 peer H nextID 6 peer I nextID 6 peer J nextID 6
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV H 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 7 peer B nextID 7 peer C nextID 7 peer D nextID 7 peer E nextID 7 peer F nextID 7 peer G nextID 7 peer H nextID 7 peer I nextID 6 peer J nextID 6
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV I 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 7 peer B nextID 7 peer C nextID 7 peer D nextID 7 peer E nextID 7 peer F nextID 7 peer G nextID 7 peer H nextID 7 peer I nextID 7 peer J nextID 6
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5005 peer A nextID 7 peer B nextID 7 peer C nextID 7 peer D nextID 7 peer E nextID 7 peer F nextID 7 peer G nextID 7 peer H nextID 7 peer I nextID 7 peer J nextID 7
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV A 127.0.0.1:5005
+STATUS from 127.0.0.1:5005 peer A nextID 8 peer B nextID 8 peer C nextID 8 peer D nextID 7 peer E nextID 7 peer F nextID 7 peer G nextID 7 peer H nextID 7 peer I nextID 7 peer J nextID 7
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5005 peer A nextID 8 peer B nextID 8 peer C nextID 8 peer D nextID 8 peer E nextID 8 peer F nextID 7 peer G nextID 7 peer H nextID 7 peer I nextID 7 peer J nextID 7
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 8 peer B nextID 8 peer C nextID 8 peer D nextID 8 peer E nextID 8 peer F nextID 8 peer G nextID 7 peer H nextID 7 peer I nextID 7 peer J nextID 7
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV G 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 8 peer B nextID 8 peer C nextID 8 peer D nextID 8 peer E nextID 8 peer F nextID 8 peer G nextID 8 peer H nextID 7 peer I nextID 7 peer J nextID 7
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 8 peer B nextID 8 peer C nextID 8 peer D nextID 8 peer E nextID 8 peer F nextID 8 peer G nextID 8 peer H nextID 8 peer I nextID 7 peer J nextID 7
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV I 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 8 peer B nextID 8 peer C nextID 8 peer D nextID 8 peer E nextID 8 peer F nextID 8 peer G nextID 8 peer H nextID 8 peer I nextID 8 peer J nextID 7
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 8 peer B nextID 8 peer C nextID 8 peer D nextID 8 peer E nextID 8 peer F nextID 8 peer G nextID 8 peer H nextID 8 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 9 peer B nextID 8 peer C nextID 8 peer D nextID 8 peer E nextID 8 peer F nextID 8 peer G nextID 8 peer H nextID 8 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 9 peer B nextID 9 peer C nextID 8 peer D nextID 8 peer E nextID 8 peer F nextID 8 peer G nextID 8 peer H nextID 8 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV C 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 9 peer B nextID 9 peer C nextID 9 peer D nextID 8 peer E nextID 8 peer F nextID 8 peer G nextID 8 peer H nextID 8 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 9 peer B nextID 9 peer C nextID 9 peer D nextID 9 peer E nextID 9 peer F nextID 8 peer G nextID 8 peer H nextID 8 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 9 peer B nextID 9 peer C nextID 9 peer D nextID 9 peer E nextID 8 peer F nextID 8 peer G nextID 8 peer H nextID 8 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 9 peer B nextID 9 peer C nextID 9 peer D nextID 9 peer E nextID 9 peer F nextID 8 peer G nextID 8 peer H nextID 8 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5005 peer A nextID 9 peer B nextID 9 peer C nextID 9 peer D nextID 9 peer E nextID 9 peer F nextID 9 peer G nextID 8 peer H nextID 8 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 9 peer B nextID 9 peer C nextID 9 peer D nextID 9 peer E nextID 9 peer F nextID 9 peer G nextID 8 peer H nextID 8 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV G 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 9 peer B nextID 9 peer C nextID 9 peer D nextID 9 peer E nextID 9 peer F nextID 9 peer G nextID 9 peer H nextID 8 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 9 peer B nextID 9 peer C nextID 9 peer D nextID 9 peer E nextID 9 peer F nextID 9 peer G nextID 9 peer H nextID 9 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV I 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 9 peer B nextID 9 peer C nextID 9 peer D nextID 9 peer E nextID 9 peer F nextID 9 peer G nextID 9 peer H nextID 9 peer I nextID 9 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5005 peer A nextID 9 peer B nextID 9 peer C nextID 9 peer D nextID 9 peer E nextID 9 peer F nextID 9 peer G nextID 9 peer H nextID 9 peer I nextID 9 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 10 peer B nextID 9 peer C nextID 9 peer D nextID 9 peer E nextID 9 peer F nextID 9 peer G nextID 9 peer H nextID 9 peer I nextID 9 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV B 127.0.0.1:5005
+DSDV C 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 10 peer B nextID 10 peer C nextID 10 peer D nextID 9 peer E nextID 9 peer F nextID 9 peer G nextID 9 peer H nextID 9 peer I nextID 9 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV D 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 10 peer B nextID 10 peer C nextID 10 peer D nextID 10 peer E nextID 9 peer F nextID 9 peer G nextID 9 peer H nextID 9 peer I nextID 9 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 10 peer B nextID 10 peer C nextID 10 peer D nextID 10 peer E nextID 9 peer F nextID 9 peer G nextID 9 peer H nextID 9 peer I nextID 9 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 10 peer B nextID 10 peer C nextID 10 peer D nextID 10 peer E nextID 10 peer F nextID 9 peer G nextID 9 peer H nextID 9 peer I nextID 9 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 10 peer B nextID 10 peer C nextID 10 peer D nextID 10 peer E nextID 10 peer F nextID 9 peer G nextID 9 peer H nextID 9 peer I nextID 9 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 10 peer B nextID 10 peer C nextID 10 peer D nextID 10 peer E nextID 10 peer F nextID 10 peer G nextID 9 peer H nextID 9 peer I nextID 9 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV G 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 10 peer B nextID 10 peer C nextID 10 peer D nextID 10 peer E nextID 10 peer F nextID 10 peer G nextID 10 peer H nextID 9 peer I nextID 9 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 10 peer B nextID 10 peer C nextID 10 peer D nextID 10 peer E nextID 10 peer F nextID 10 peer G nextID 10 peer H nextID 10 peer I nextID 9 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 10 peer B nextID 10 peer C nextID 10 peer D nextID 10 peer E nextID 10 peer F nextID 10 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV J 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 10 peer B nextID 10 peer C nextID 10 peer D nextID 10 peer E nextID 10 peer F nextID 10 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV A 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 11 peer B nextID 10 peer C nextID 10 peer D nextID 10 peer E nextID 10 peer F nextID 10 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV B 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 11 peer B nextID 11 peer C nextID 10 peer D nextID 10 peer E nextID 10 peer F nextID 10 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV C 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 10 peer E nextID 10 peer F nextID 10 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 11 peer E nextID 10 peer F nextID 10 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 10 peer E nextID 11 peer F nextID 10 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 11 peer E nextID 11 peer F nextID 10 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 11 peer E nextID 11 peer F nextID 10 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5005 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 11 peer E nextID 11 peer F nextID 11 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 11 peer E nextID 11 peer F nextID 11 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV G 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 11 peer E nextID 11 peer F nextID 11 peer G nextID 11 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV H 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 11 peer E nextID 11 peer F nextID 11 peer G nextID 11 peer H nextID 11 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 11 peer E nextID 11 peer F nextID 11 peer G nextID 11 peer H nextID 11 peer I nextID 11 peer J nextID 11
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 11 peer E nextID 11 peer F nextID 11 peer G nextID 11 peer H nextID 11 peer I nextID 11 peer J nextID 11
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV J 127.0.0.1:5003
+DSDV A 127.0.0.1:5003
+DSDV C 127.0.0.1:5003
+DSDV B 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer F nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 2 peer F nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 2 peer C nextID 2 peer F nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+DSDV D 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 2 peer B nextID 2 peer C nextID 2 peer F nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 2 peer B nextID 2 peer C nextID 2 peer D nextID 2 peer F nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 2 peer B nextID 2 peer C nextID 2 peer D nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 2 peer B nextID 2 peer C nextID 2 peer D nextID 2 peer E nextID 2 peer F nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 2 peer B nextID 2 peer C nextID 2 peer D nextID 2 peer E nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV F 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 2 peer B nextID 2 peer C nextID 2 peer D nextID 2 peer E nextID 2 peer F nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV G 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 2 peer B nextID 2 peer C nextID 2 peer D nextID 2 peer E nextID 2 peer F nextID 2 peer G nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV H 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 2 peer B nextID 2 peer C nextID 2 peer D nextID 2 peer E nextID 2 peer F nextID 2 peer G nextID 2 peer H nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV I 127.0.0.1:5003
+DSDV A 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 3 peer B nextID 2 peer C nextID 2 peer D nextID 2 peer E nextID 2 peer F nextID 2 peer G nextID 2 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV B 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 3 peer B nextID 3 peer C nextID 2 peer D nextID 2 peer E nextID 2 peer F nextID 2 peer G nextID 2 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 2 peer E nextID 2 peer F nextID 2 peer G nextID 2 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 2 peer F nextID 2 peer G nextID 2 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 2 peer E nextID 3 peer F nextID 2 peer G nextID 2 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 3 peer F nextID 2 peer G nextID 2 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 2 peer F nextID 2 peer G nextID 2 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 3 peer F nextID 2 peer G nextID 2 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 3 peer F nextID 3 peer G nextID 2 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 3 peer F nextID 3 peer G nextID 2 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 3 peer F nextID 3 peer G nextID 3 peer H nextID 2 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 3 peer F nextID 3 peer G nextID 3 peer H nextID 3 peer I nextID 2 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 3 peer F nextID 3 peer G nextID 3 peer H nextID 3 peer I nextID 3 peer J nextID 2
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5005 peer A nextID 3 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 3 peer F nextID 3 peer G nextID 3 peer H nextID 3 peer I nextID 3 peer J nextID 3
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+CLIENT MESSAGE Weather_is_clear DEST A
+DSDV A 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 4 peer B nextID 3 peer C nextID 3 peer D nextID 3 peer E nextID 3 peer F nextID 3 peer G nextID 3 peer H nextID 3 peer I nextID 3 peer J nextID 3
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV B 127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 4 peer B nextID 4 peer C nextID 4 peer D nextID 4 peer E nextID 3 peer F nextID 3 peer G nextID 3 peer H nextID 3 peer I nextID 3 peer J nextID 3
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 4 peer B nextID 4 peer C nextID 4 peer D nextID 4 peer E nextID 3 peer F nextID 3 peer G nextID 3 peer H nextID 3 peer I nextID 3 peer J nextID 3
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5005 peer A nextID 4 peer B nextID 4 peer C nextID 4 peer D nextID 4 peer E nextID 3 peer F nextID 3 peer G nextID 3 peer H nextID 3 peer I nextID 3 peer J nextID 3
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 4 peer B nextID 4 peer C nextID 4 peer D nextID 4 peer E nextID 4 peer F nextID 4 peer G nextID 3 peer H nextID 3 peer I nextID 3 peer J nextID 3
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 4 peer B nextID 4 peer C nextID 4 peer D nextID 4 peer E nextID 3 peer F nextID 4 peer G nextID 3 peer H nextID 3 peer I nextID 3 peer J nextID 3
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 4 peer B nextID 4 peer C nextID 4 peer D nextID 4 peer E nextID 4 peer F nextID 4 peer G nextID 4 peer H nextID 3 peer I nextID 3 peer J nextID 3
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV H 127.0.0.1:5003
+DSDV I 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 4 peer B nextID 4 peer C nextID 4 peer D nextID 4 peer E nextID 4 peer F nextID 4 peer G nextID 4 peer H nextID 4 peer I nextID 4 peer J nextID 3
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 4 peer B nextID 4 peer C nextID 4 peer D nextID 4 peer E nextID 4 peer F nextID 4 peer G nextID 4 peer H nextID 4 peer I nextID 4 peer J nextID 4
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5005 peer A nextID 4 peer B nextID 5 peer C nextID 4 peer D nextID 4 peer E nextID 4 peer F nextID 4 peer G nextID 4 peer H nextID 4 peer I nextID 4 peer J nextID 4
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 5 peer B nextID 5 peer C nextID 4 peer D nextID 4 peer E nextID 4 peer F nextID 4 peer G nextID 4 peer H nextID 4 peer I nextID 4 peer J nextID 4
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV C 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 5 peer B nextID 5 peer C nextID 5 peer D nextID 4 peer E nextID 4 peer F nextID 4 peer G nextID 4 peer H nextID 4 peer I nextID 4 peer J nextID 4
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 5 peer B nextID 5 peer C nextID 5 peer D nextID 5 peer E nextID 5 peer F nextID 4 peer G nextID 4 peer H nextID 4 peer I nextID 4 peer J nextID 4
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 5 peer B nextID 5 peer C nextID 5 peer D nextID 5 peer E nextID 4 peer F nextID 4 peer G nextID 4 peer H nextID 4 peer I nextID 4 peer J nextID 4
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 5 peer B nextID 5 peer C nextID 5 peer D nextID 5 peer E nextID 5 peer F nextID 4 peer G nextID 4 peer H nextID 4 peer I nextID 4 peer J nextID 4
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV F 127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 5 peer B nextID 5 peer C nextID 5 peer D nextID 5 peer E nextID 5 peer F nextID 5 peer G nextID 5 peer H nextID 4 peer I nextID 4 peer J nextID 4
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV H 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 5 peer B nextID 5 peer C nextID 5 peer D nextID 5 peer E nextID 5 peer F nextID 5 peer G nextID 5 peer H nextID 5 peer I nextID 4 peer J nextID 4
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV I 127.0.0.1:5003
+DSDV J 127.0.0.1:5005
+CLIENT MESSAGE No_clouds_really DEST A
+STATUS from 127.0.0.1:5005 peer A nextID 6 peer B nextID 5 peer C nextID 5 peer D nextID 5 peer E nextID 5 peer F nextID 5 peer G nextID 5 peer H nextID 5 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV B 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 6 peer B nextID 6 peer C nextID 5 peer D nextID 5 peer E nextID 5 peer F nextID 5 peer G nextID 5 peer H nextID 5 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 5 peer E nextID 5 peer F nextID 5 peer G nextID 5 peer H nextID 5 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 5 peer F nextID 5 peer G nextID 5 peer H nextID 5 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 5 peer F nextID 5 peer G nextID 5 peer H nextID 5 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 5 peer F nextID 5 peer G nextID 5 peer H nextID 5 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 6 peer F nextID 5 peer G nextID 5 peer H nextID 5 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV F 127.0.0.1:5005
+STATUS from 127.0.0.1:5005 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 6 peer F nextID 6 peer G nextID 5 peer H nextID 5 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 6 peer F nextID 6 peer G nextID 5 peer H nextID 5 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 6 peer F nextID 6 peer G nextID 6 peer H nextID 5 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV H 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 6 peer F nextID 6 peer G nextID 6 peer H nextID 6 peer I nextID 5 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV I 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 6 peer F nextID 6 peer G nextID 6 peer H nextID 6 peer I nextID 6 peer J nextID 5
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV J 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 6 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 6 peer F nextID 6 peer G nextID 6 peer H nextID 6 peer I nextID 6 peer J nextID 6
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5005 peer A nextID 7 peer B nextID 6 peer C nextID 6 peer D nextID 6 peer E nextID 6 peer F nextID 6 peer G nextID 6 peer H nextID 6 peer I nextID 6 peer J nextID 6
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV B 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 7 peer B nextID 7 peer C nextID 6 peer D nextID 6 peer E nextID 6 peer F nextID 6 peer G nextID 6 peer H nextID 6 peer I nextID 6 peer J nextID 6
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV C 127.0.0.1:5003
+DSDV D 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 7 peer B nextID 7 peer C nextID 7 peer D nextID 7 peer E nextID 7 peer F nextID 6 peer G nextID 6 peer H nextID 6 peer I nextID 6 peer J nextID 6
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 7 peer B nextID 7 peer C nextID 7 peer D nextID 7 peer E nextID 7 peer F nextID 7 peer G nextID 6 peer H nextID 6 peer I nextID 6 peer J nextID 6
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 7 peer B nextID 7 peer C nextID 7 peer D nextID 7 peer E nextID 7 peer F nextID 7 peer G nextID 7 peer H nextID 6 peer I nextID 6 peer J nextID 6
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV H 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 7 peer B nextID 7 peer C nextID 7 peer D nextID 7 peer E nextID 7 peer F nextID 7 peer G nextID 7 peer H nextID 7 peer I nextID 6 peer J nextID 6
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV I 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 7 peer B nextID 7 peer C nextID 7 peer D nextID 7 peer E nextID 7 peer F nextID 7 peer G nextID 7 peer H nextID 7 peer I nextID 7 peer J nextID 6
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5005 peer A nextID 7 peer B nextID 7 peer C nextID 7 peer D nextID 7 peer E nextID 7 peer F nextID 7 peer G nextID 7 peer H nextID 7 peer I nextID 7 peer J nextID 7
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV A 127.0.0.1:5005
+STATUS from 127.0.0.1:5005 peer A nextID 8 peer B nextID 8 peer C nextID 8 peer D nextID 7 peer E nextID 7 peer F nextID 7 peer G nextID 7 peer H nextID 7 peer I nextID 7 peer J nextID 7
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5005 peer A nextID 8 peer B nextID 8 peer C nextID 8 peer D nextID 8 peer E nextID 8 peer F nextID 7 peer G nextID 7 peer H nextID 7 peer I nextID 7 peer J nextID 7
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 8 peer B nextID 8 peer C nextID 8 peer D nextID 8 peer E nextID 8 peer F nextID 8 peer G nextID 7 peer H nextID 7 peer I nextID 7 peer J nextID 7
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV G 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 8 peer B nextID 8 peer C nextID 8 peer D nextID 8 peer E nextID 8 peer F nextID 8 peer G nextID 8 peer H nextID 7 peer I nextID 7 peer J nextID 7
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 8 peer B nextID 8 peer C nextID 8 peer D nextID 8 peer E nextID 8 peer F nextID 8 peer G nextID 8 peer H nextID 8 peer I nextID 7 peer J nextID 7
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV I 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 8 peer B nextID 8 peer C nextID 8 peer D nextID 8 peer E nextID 8 peer F nextID 8 peer G nextID 8 peer H nextID 8 peer I nextID 8 peer J nextID 7
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 8 peer B nextID 8 peer C nextID 8 peer D nextID 8 peer E nextID 8 peer F nextID 8 peer G nextID 8 peer H nextID 8 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 9 peer B nextID 8 peer C nextID 8 peer D nextID 8 peer E nextID 8 peer F nextID 8 peer G nextID 8 peer H nextID 8 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 9 peer B nextID 9 peer C nextID 8 peer D nextID 8 peer E nextID 8 peer F nextID 8 peer G nextID 8 peer H nextID 8 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV C 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 9 peer B nextID 9 peer C nextID 9 peer D nextID 8 peer E nextID 8 peer F nextID 8 peer G nextID 8 peer H nextID 8 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 9 peer B nextID 9 peer C nextID 9 peer D nextID 9 peer E nextID 9 peer F nextID 8 peer G nextID 8 peer H nextID 8 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 9 peer B nextID 9 peer C nextID 9 peer D nextID 9 peer E nextID 8 peer F nextID 8 peer G nextID 8 peer H nextID 8 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 9 peer B nextID 9 peer C nextID 9 peer D nextID 9 peer E nextID 9 peer F nextID 8 peer G nextID 8 peer H nextID 8 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5005 peer A nextID 9 peer B nextID 9 peer C nextID 9 peer D nextID 9 peer E nextID 9 peer F nextID 9 peer G nextID 8 peer H nextID 8 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 9 peer B nextID 9 peer C nextID 9 peer D nextID 9 peer E nextID 9 peer F nextID 9 peer G nextID 8 peer H nextID 8 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV G 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 9 peer B nextID 9 peer C nextID 9 peer D nextID 9 peer E nextID 9 peer F nextID 9 peer G nextID 9 peer H nextID 8 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 9 peer B nextID 9 peer C nextID 9 peer D nextID 9 peer E nextID 9 peer F nextID 9 peer G nextID 9 peer H nextID 9 peer I nextID 8 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV I 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 9 peer B nextID 9 peer C nextID 9 peer D nextID 9 peer E nextID 9 peer F nextID 9 peer G nextID 9 peer H nextID 9 peer I nextID 9 peer J nextID 8
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5005 peer A nextID 9 peer B nextID 9 peer C nextID 9 peer D nextID 9 peer E nextID 9 peer F nextID 9 peer G nextID 9 peer H nextID 9 peer I nextID 9 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 10 peer B nextID 9 peer C nextID 9 peer D nextID 9 peer E nextID 9 peer F nextID 9 peer G nextID 9 peer H nextID 9 peer I nextID 9 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV B 127.0.0.1:5005
+DSDV C 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 10 peer B nextID 10 peer C nextID 10 peer D nextID 9 peer E nextID 9 peer F nextID 9 peer G nextID 9 peer H nextID 9 peer I nextID 9 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV D 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 10 peer B nextID 10 peer C nextID 10 peer D nextID 10 peer E nextID 9 peer F nextID 9 peer G nextID 9 peer H nextID 9 peer I nextID 9 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 10 peer B nextID 10 peer C nextID 10 peer D nextID 10 peer E nextID 9 peer F nextID 9 peer G nextID 9 peer H nextID 9 peer I nextID 9 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 10 peer B nextID 10 peer C nextID 10 peer D nextID 10 peer E nextID 10 peer F nextID 9 peer G nextID 9 peer H nextID 9 peer I nextID 9 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 10 peer B nextID 10 peer C nextID 10 peer D nextID 10 peer E nextID 10 peer F nextID 9 peer G nextID 9 peer H nextID 9 peer I nextID 9 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 10 peer B nextID 10 peer C nextID 10 peer D nextID 10 peer E nextID 10 peer F nextID 10 peer G nextID 9 peer H nextID 9 peer I nextID 9 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV G 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 10 peer B nextID 10 peer C nextID 10 peer D nextID 10 peer E nextID 10 peer F nextID 10 peer G nextID 10 peer H nextID 9 peer I nextID 9 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 10 peer B nextID 10 peer C nextID 10 peer D nextID 10 peer E nextID 10 peer F nextID 10 peer G nextID 10 peer H nextID 10 peer I nextID 9 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 10 peer B nextID 10 peer C nextID 10 peer D nextID 10 peer E nextID 10 peer F nextID 10 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 9
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV J 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 10 peer B nextID 10 peer C nextID 10 peer D nextID 10 peer E nextID 10 peer F nextID 10 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV A 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 11 peer B nextID 10 peer C nextID 10 peer D nextID 10 peer E nextID 10 peer F nextID 10 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV B 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 11 peer B nextID 11 peer C nextID 10 peer D nextID 10 peer E nextID 10 peer F nextID 10 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+DSDV C 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 10 peer E nextID 10 peer F nextID 10 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5003 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 11 peer E nextID 10 peer F nextID 10 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 10 peer E nextID 11 peer F nextID 10 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 11 peer E nextID 11 peer F nextID 10 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 11 peer E nextID 11 peer F nextID 10 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5005 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 11 peer E nextID 11 peer F nextID 11 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+STATUS from 127.0.0.1:5003 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 11 peer E nextID 11 peer F nextID 11 peer G nextID 10 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV G 127.0.0.1:5005
+STATUS from 127.0.0.1:5003 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 11 peer E nextID 11 peer F nextID 11 peer G nextID 11 peer H nextID 10 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+DSDV H 127.0.0.1:5003
+STATUS from 127.0.0.1:5005 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 11 peer E nextID 11 peer F nextID 11 peer G nextID 11 peer H nextID 11 peer I nextID 10 peer J nextID 10
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​
+STATUS from 127.0.0.1:5003 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 11 peer E nextID 11 peer F nextID 11 peer G nextID 11 peer H nextID 11 peer I nextID 11 peer J nextID 11
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5003​
+STATUS from 127.0.0.1:5005 peer A nextID 11 peer B nextID 11 peer C nextID 11 peer D nextID 11 peer E nextID 11 peer F nextID 11 peer G nextID 11 peer H nextID 11 peer I nextID 11 peer J nextID 11
+PEERS 127.0.0.1:5005,127.0.0.1:5003
+IN SYNC WITH 127.0.0.1:5005​

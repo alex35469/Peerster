@@ -1,10 +1,107 @@
 package main
 
-import "testing"
+import (
+	"crypto/sha256"
+	"encoding/hex"
+	"fmt"
+	"testing"
+)
 
-func TestScanFile(t *testing.T) {
+func TestScanFileAndCheckSum(t *testing.T) {
 
-	ScanFile("file.txt")
+	myGossiper := NewGossiper("127.0.0.1:6000", "nodeTest", "127.0.0.1:6002,127.0.0.1:6003,127.0.0.1:6004")
+	rf1, _ := ScanFile("file.txt")
+	fmt.Println(rf1)
+
+	rf2, _ := ScanFile("carlton.txt")
+	fmt.Println(rf2)
+
+	rf3, _ := ScanFile("E.out")
+	fmt.Println(rf3)
+
+	myGossiper.safeFiles.files = append(myGossiper.safeFiles.files, rf1)
+	myGossiper.safeFiles.files = append(myGossiper.safeFiles.files, rf2)
+	myGossiper.safeFiles.files = append(myGossiper.safeFiles.files, rf3)
+	b1, _ := hex.DecodeString("45e9baede15bc785096188994799ed7bee54c56e1709a1398c2d9c65bedfd0a0")
+
+	i, j := chunkSeek(b1, myGossiper)
+	if i != 2 && j != 1 {
+		t.Errorf("Expected i = 2 and j = 1 but got i = %d and j=%d ", i, j)
+	}
+
+	b2, _ := hex.DecodeString("45e9baede15bc78a096188994799ed7bee54c56e1709a1398c2d9c65bedfd0a0")
+	i, j = chunkSeek(b2, myGossiper)
+	if i != -1 {
+		t.Errorf("Expected i = -1 but got i = %d", i)
+	}
+
+	b3, _ := hex.DecodeString("dc179d1243faa12394d81ce16168fb9b8eb6e123bec0afa139e3f10464b07554")
+
+	i, j = chunkSeek(b3, myGossiper)
+	if i != 0 || j != 1 {
+		t.Errorf("Expected i = 0 and j = 1 but got i = %d and j = %d", i, j)
+	}
+
+	b4, _ := hex.DecodeString("ba9517a21079d0b341eca215bdf220a5ec6d3271c8b820670a00c795131f4a7a")
+
+	i, j = chunkSeek(b4, myGossiper)
+	if i != 0 || j != -1 {
+		t.Errorf("Expected i = 1 and j = 1 but got i = %d and j = %d", i, j)
+	}
+	/*
+		data, h := getDataAndHash(i, j, myGossiper)
+		if !bytes.Equal(b4, h) {
+			t.Errorf("Expected h = %x but got h = %x", b4, h)
+		}
+		s := hex.EncodeToString(data)
+		if s != "5b8f8878a3f398fa93f591f2f0ae69321b88897ea096d8c6720f827df81810a1dc179d1243faa12394d81ce16168fb9b8eb6e123bec0afa139e3f10464b07554" {
+			t.Errorf("Expected s = ea0187742b9be0a5b717b118ec7c2b36c3e91d789bad272cca817348416c377c but got s = %s", s)
+		}
+
+		d := "492540a77c76bb091370aee42cd2c0b5f5ba4c4520e7e3492c46a852f690831645e9baede15bc785096188994799ed7bee54c56e1709a1398c2d9c65bedfd0a0e8bf62332041cca560c69ca7257aabe8cd530e19f2e342f6de5f1c0fb1086166066268c93bca6630ce1e08d3077bae5c693b9144cd037858cff8d00e3d8fa4ed"
+		r := "c8c557298b82082e5ef660d470aa897bcce552ba81658070f687bb264376c8b8"
+		rByte, _ := hex.DecodeString(r)
+
+		i, j = chunkSeek(rByte, myGossiper)
+		data, h = getDataAndHash(i, 10, myGossiper)
+
+		dreturn := hex.EncodeToString(data)
+		if d != dreturn {
+			t.Errorf("Expected dreturn = %s but got %s ", dreturn, d)
+		}
+
+		// CHECK TO REQUEST A CHUNK
+		rf4, _ := ScanFile("Germany.txt")
+		addFileRecord(rf4, myGossiper)
+		if len(myGossiper.safeFiles.files) != 3 {
+			t.Error("Expected len(myGossiper.files) = 3 but got ", len(myGossiper.safeFiles.files))
+		}
+
+	*/
+
+}
+
+func TestEqualityCheckRecievedData(t *testing.T) {
+	b1 := make([]byte, 3)
+	b1[0] = 1
+	b1[1] = 2
+	b1[2] = 3
+	sha := sha256.New()
+	sha.Write(b1)
+	h := sha.Sum(nil)
+
+	if !EqualityCheckRecievedData(h, b1) {
+		t.Error("Expected true but got false")
+	}
+
+	b3 := make([]byte, 3)
+	b3[0] = 1
+	b3[1] = 4
+	b3[2] = 3
+	if EqualityCheckRecievedData(h, b3) {
+		t.Error("Expected false but got true")
+	}
+
 }
 
 // Test for comparing 2 packet status

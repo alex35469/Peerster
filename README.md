@@ -5,7 +5,10 @@ author: Alexandre Dumur
 
 
 ## Files description
-- ./main.go : the Gossiper programme (backend)
+- ./main.go : the Gossiper programme main (backend)
+- ./webserver.go : the webserver part
+- ./fshare.go : the file sharing part
+- ./utils.go : utils functions
 - ./client/main.go : the CLI client programme (frontend)
 - ./peerster.html ./peerster.js ./style css : the GUI client interface (frontend)
 - ./main_test.go use to test that some of the functions in main.go work as expected
@@ -17,7 +20,6 @@ author: Alexandre Dumur
 Please, run `go build` to create the executable
 file and then run ./Peerster with the approptiate flags.
 
-Noticed that the programme needs to have at least one peer at bootstrap.
 
 
 
@@ -29,16 +31,13 @@ file and then run ./Client with the approptiate flags.
 
 ### Set up GUI client Interface
 
-The GUI client is inactive by default, to acitvate it, please uncomment the whole
-webserver connexion section (line 139 to 213) and the line `go listenToGUI()` in the main function (line 127),
-please uncomment the importation as well.
 
 After having run the Gossiper programme, please open ./peerster.html
 (better on Google Chrome or Safari). Make sure to press `Send` to broadcast
-a message (not keypress enter). Same thing to add a peer. If the chat box is overloaded,
-to see the most recent messages, please scroll down inside the box. Same for the node box. If the message doesn't show up right away, please, just wait 2 seconds.
+a message (not keypress enter). Same thing to add a peer and sharing a file. If the chat box is overloaded,
+to see the most recent messages, please scroll down inside the box. Same for the node box and info-box. If the message doesn't show up right away, please, just wait 2 seconds.
 
-The GUI client communicate with the backend using HTTP on port 8080.
+Scroll down the main page to see the downloading part 
 
 
 

@@ -147,6 +147,12 @@ button {
 	margin: auto;
 }
 
+#info-box{
+	min-height: 200px;
+	max-height: 200px;
+
+}
+
 h6 {
 
 	margin-top: 5px;

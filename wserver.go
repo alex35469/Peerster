@@ -1,10 +1,11 @@
 package main
 
 import (
+	"fmt"
+	"net/http"
+	"os"
+	"reflect"
 
-  "reflect"
-  "fmt"
-  "net/http"
 	"github.com/bitly/go-simplejson"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -19,7 +20,7 @@ func sendID(w http.ResponseWriter, r *http.Request) {
 
 	payload, err := json.MarshalJSON()
 
-	checkError(err)
+	checkError(err, false)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(payload)
 
@@ -27,25 +28,24 @@ func sendID(w http.ResponseWriter, r *http.Request) {
 
 func msgsPost(w http.ResponseWriter, r *http.Request) {
 	// from https://stackoverflow.com/questions/15672556/handling-json-post-request-in-go
+	r.ParseForm()
 	content := r.FormValue("Msg")
 	dest := r.FormValue("Dest")
 
 	fmt.Println(dest)
 	fmt.Println(content)
 	if dest == "All" {
-		packet := &GossipPacket{Simple: &SimpleMessage{OriginalName: "Client", RelayPeerAddr: "Null", Contents: content}}
+		packet := &ClientPacket{Broadcast: &SimpleMessage{OriginalName: "Client", RelayPeerAddr: "Null", Contents: content}}
 		processMsgFromClient(packet)
 	} else {
 		packet := PrivateMessage{Text: content, Destination: dest}
-		processMsgFromClient(&GossipPacket{Private: &packet})
+		processMsgFromClient(&ClientPacket{Private: &packet})
 
 	}
 
 	//msgsGet(w, r)
 
 }
-
-
 
 func msgsGet(w http.ResponseWriter, r *http.Request) {
 
@@ -56,7 +56,7 @@ func msgsGet(w http.ResponseWriter, r *http.Request) {
 	stack = make([]StackElem, 0)
 
 	payload, err := json.MarshalJSON()
-	checkError(err)
+	checkError(err, false)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(payload)
 }
@@ -89,17 +89,89 @@ func nodeGet(w http.ResponseWriter, r *http.Request) {
 	json.Set("nodes", nodes)
 
 	payload, err := json.MarshalJSON()
-	checkError(err)
+	checkError(err, false)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(payload)
 }
 
 func shareFile(w http.ResponseWriter, r *http.Request) {
-  fmt.Println("Good path")
-  fname := r.FormValue("name")
-  mode := r.FormValue("mode")
-  fmt.Println(fname)
-  fmt.Println(mode)
+
+	fname := r.FormValue("name")
+	hash := r.FormValue("metaHash")
+	mode := r.FormValue("mode")
+	dest := r.FormValue("dest")
+
+	if mode == "share" {
+
+		if _, err := os.Stat("./_SharedFiles/" + fname); os.IsNotExist(err) {
+			fmt.Println("The file doesn't exist in the shared folder")
+		} else {
+			rf, err := ScanFile(fname)
+
+			if err != nil {
+				fmt.Println(err.Error())
+				infos = append(infos, InfoElem{Fname: fname, Event: "error", Desc: err.Error(), Hash: ""})
+				return
+			}
+
+			infos = append(infos, InfoElem{Fname: fname, Event: "indexed", Desc: "MetaHash = ", Hash: rf.MetaHash})
+
+			err = addFileRecord(rf, myGossiper)
+
+			if err != nil {
+				infos = append(infos, InfoElem{Fname: fname, Event: "duplicate", Desc: err.Error(), Hash: ""})
+			}
+		}
+	}
+
+	if mode == "download" {
+		cm := ClientMessage{
+			File:    fname,
+			Request: hash,
+			Dest:    dest,
+		}
+		processMsgFromClient(&ClientPacket{CMessage: &cm})
+
+	}
+
+	// In case we want to upload the file
+	/*
+		  r.ParseForm()
+			fmt.Println(r.MultipartForm)
+			fname := r.FormValue("name")
+			mode := r.FormValue("mode")
+			fmt.Println(fname)
+			fmt.Println(mode)
+
+		  fmt.Println("Good path")
+		  fmt.Println(r.ContentLength)
+		  fmt.Println(r.Header["Content-Type"]["boundary"])
+
+			buf := new(bytes.Buffer)
+			buf.ReadFrom(r.Body)
+
+		  mp := r.MultipartReader()
+
+		  p, err := mp.NextPart()
+			b := buf.Bytes()
+			s := *(*string)(unsafe.Pointer(&b))
+			fmt.Println(s)
+	*/
+
+}
+
+// Provide a feedback
+func fileInfo(w http.ResponseWriter, r *http.Request) {
+	json := simplejson.New()
+	json.Set("infos", infos)
+
+	// flush infos
+	infos = make([]InfoElem, 0)
+
+	payload, err := json.MarshalJSON()
+	checkError(err, false)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(payload)
 
 }
 
@@ -111,7 +183,8 @@ func listenToGUI() {
 	r.HandleFunc("/message", msgsGet).Methods("GET")
 	r.HandleFunc("/node", nodePost).Methods("POST")
 	r.HandleFunc("/node", nodeGet).Methods("GET")
-  r.HandleFunc("/file", shareFile).Methods("POST")
+	r.HandleFunc("/file", shareFile).Methods("POST")
+	r.HandleFunc("/file", fileInfo).Methods("Get")
 
 	http.Handle("/", r)
 

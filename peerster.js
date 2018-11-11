@@ -9,6 +9,7 @@ let select = "All";
 let msgs = [];
 let nodes = new Set(["All"])
 let myId = ""
+let stats = new Set()
 /*
 	Run the action when we are sure the DOM has been loaded (FROM dataviz course)
 */
@@ -124,6 +125,15 @@ function updateNodeBox(newElem, nodes){
 
 function openChat(id){
 	$("#selection").html(id)
+
+	if (id == "All"){
+		$("#selection2").html("None")
+	}
+
+	else{
+		$("#selection2").html(id)
+	}
+
 	$("#"+id).html(id)
 	select = id
 	updateChatBox()
@@ -205,6 +215,7 @@ whenDocumentLoaded(() => {
 	setInterval(getNewNode, 2*1000);
 	setInterval(getNewMsg, 2*1000);
 	setInterval(updateChatBox, 1*1000);
+	setInterval(getInfos, 2*1000);
 
 
 
@@ -219,12 +230,101 @@ whenDocumentLoaded(() => {
 	send.addEventListener("click", () => fetchAndSendMessage())
 
 
+	// In case we want to post the entire file to the gossiper
+	/*
+	let form = document.getElementById('file-form');
+	let fileSelect = document.getElementById('file-select');
+	let uploadButton = document.getElementById('upload-button');
+
+
+
+	form.onsubmit = function(event) {
+		// Create a new FormData object.
+		let formData = new FormData();
+		event.preventDefault();
+		uploadButton.innerHTML = 'sharing...';
+		let file = fileSelect.files[0];
+		console.log("file name  = " + file.name);
+		console.log("file type  = " + file.type);
+
+		formData.append("name", file, file.name); //, file.name)
+
+		for (var [key, value] of formData.entries()) {
+  		console.log("Key = ",  key, "Value = ", value);
+		}
+		console.log(formData)
+
+
+		// Set up the request.
+		let xhr = new XMLHttpRequest();
+
+		// Open the connection.
+		xhr.open('POST', backendAddr+FILE_PATH, true);
+
+		// Set up a handler for when the request finishes.
+		xhr.onload = function () {
+  		if (xhr.status === 200) {
+    		// File(s) uploaded.
+    		uploadButton.innerHTML = 'Upload';
+  		} else {
+    		alert('An error occurred!');
+  		}
+		};
+
+		// Send the Data.
+		xhr.send(formData);
+
+
+
+	}
+	*/
 
 	let share = document.getElementById("share-btn");
 	share.addEventListener("click", () => shareFile())
 
 
+	let download = document.getElementById("download-btn");
+	download.addEventListener("click", () => downloadFile())
+
+
 });
+
+function downloadFile(){
+	let fname = document.getElementsByName("fname-input")[0].value;
+	let hash = document.getElementsByName("hash-input")[0].value;
+
+
+
+	if (select == "All" ){
+		$("#info-box").append("Please select a valide node <br />")
+		return
+		}
+	if(fname == "" ){
+		$("#info-box").append("Please enter the file name <br />")
+		return
+	}
+
+	if(fname.indexOf(' ') >= 0){
+    $("#info-box").append("No white space allowed<br />");
+		return
+	}
+
+	let re = /[0-9a-f]{64}/
+	if  (!re.test(hash)){
+		$("#info-box").append("Not conform to sha256 hexaHash format <br />");
+		return
+
+	}
+
+	$.post(
+		backendAddr+FILE_PATH,
+		{name:fname, metaHash:hash, dest:select , mode:"download"},
+		'jsonp'
+	)
+	$("#info-box").append("Downloading "+fname +" from "+select + "...<br />");
+
+}
+
 
 
 function shareFile(){
@@ -240,14 +340,43 @@ function shareFile(){
 		{name:fname, mode:"share"},
 		'jsonp'
 	)
+	$("#info-box").append("Sharing "+fname +"...<br />");
+}
+
+function getInfos(){
+	// Fetch the Peer ID
+	$.get(
+		"http://localhost:8080/file",
+		function(json) {
+			json.infos.forEach(info => {
+
+				//console.log(info["Event"])
 
 
 
+				if (info["Event"] == "error") {
+					$("#info-box").append("Error "+info["Fname"]+ " "+ info["Desc"]+"<br />");
+					return
+				}
 
+				if (info["Event"] == "download") {
+					$("#info-box").append(info["Fname"] + " "+  info["Desc"]+"<br />");
+					return
+
+				}
+
+				if (info["Event"] == "indexed"){
+
+					$("#info-box").append(info["Fname"] + " "+  info["Desc"]+ " " + "<span style='color: #ff0000;text-align=right'>"+info["Hash"]+ "</span><br />");
+					return
+				}
+
+			})
+		}
+	)
 
 
 }
-
 
 
 // Helpers functions

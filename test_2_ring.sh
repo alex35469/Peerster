@@ -8,7 +8,7 @@ cd ..
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m'
-DEBUG="true"
+DEBUG="false"
 
 outputFiles=()
 message_c1_1=Weather_is_clear
@@ -16,7 +16,12 @@ message_c2_1=Winter_is_coming
 message_c1_2=No_clouds_really
 message_c2_2=Let\'s_go_skiing
 message_c3=Is_anybody_here?
-
+message_c4=Blablabla
+message_c5=Yo!
+message_c6=Hello
+message_c7=Salut
+message_c8=Hey
+message_c9=Bien?
 
 UIPort=12345
 gossipPort=5000
@@ -31,7 +36,7 @@ do
 	peerPort=$((($gossipPort+1)%10+5000))
 	peer="127.0.0.1:$peerPort"
 	gossipAddr="127.0.0.1:$gossipPort"
-	./Peerster -UIPort=$UIPort -gossipAddr=$gossipAddr -name=$name -peers=$peer > $outFileName &
+	./Peerster -UIPort=$UIPort -gossipAddr=$gossipAddr -name=$name -peers=$peer -rtimer=1 > $outFileName &
 	outputFiles+=("$outFileName")
 	if [[ "$DEBUG" == "true" ]] ; then
 		echo "$name running at UIPort $UIPort and gossipPort $gossipPort"
@@ -41,16 +46,24 @@ do
 	name=$(echo "$name" | tr "A-Y" "B-Z")
 done
 
-./client/client -UIPort=12349 -msg=$message_c1_1
-./client/client -UIPort=12346 -msg=$message_c2_1
+./client/client -UIPort=12349 -msg=$message_c1_1 -dest=A
+./client/client -UIPort=12346 -msg=$message_c2_1 -dest=A
+./client/client -UIPort=12348 -msg=$message_c6 -dest=A
+./client/client -UIPort=12352 -msg=$message_c7 -dest=A
+./client/client -UIPort=12353 -msg=$message_c8 -dest=A
 sleep 2
-./client/client -UIPort=12349 -msg=$message_c1_2
+./client/client -UIPort=12349 -msg=$message_c1_2 -dest=A
+./client/client -UIPort=12347 -msg=$message_c5 -dest=A
+./client/client -UIPort=12354 -msg=$message_c9 -dest=A
 sleep 1
-./client/client -UIPort=12346 -msg=$message_c2_2
-./client/client -UIPort=12351 -msg=$message_c3
-
+./client/client -UIPort=12346 -msg=$message_c2_2 -dest=A
+./client/client -UIPort=12351 -msg=$message_c3 -dest=A
+./client/client -UIPort=12350 -msg=$message_c4 -dest=A
 sleep 5
 pkill -f Peerster
+
+
+
 
 
 #testing
@@ -104,34 +117,24 @@ do
 	if [[ "$gossipPort" != 5004 ]] ; then
 		if !(grep -Eq "$msgLine1" "${outputFiles[$i]}") ; then
         	failed="T"
-					echo $i
-					echo $msgLine1
     	fi
 		if !(grep -Eq "$msgLine2" "${outputFiles[$i]}") ; then
         	failed="T"
-					echo $i
-					echo $msgLine2
     	fi
 	fi
 
 	if [[ "$gossipPort" != 5001 ]] ; then
 		if !(grep -Eq "$msgLine3" "${outputFiles[$i]}") ; then
         	failed="T"
-					echo $i
-					echo msgLine3
     	fi
 		if !(grep -Eq "$msgLine4" "${outputFiles[$i]}") ; then
         	failed="T"
-					echo $i
-					echo $msgLine4
     	fi
 	fi
 
 	if [[ "$gossipPort" != 5006 ]] ; then
 		if !(grep -Eq "$msgLine5" "${outputFiles[$i]}") ; then
         	failed="T"
-					echo $i
-					echo msgLine5
     	fi
 	fi
 	gossipPort=$(($gossipPort+1))
@@ -188,18 +191,28 @@ do
 	msgLine5="peer G nextID 2"
 
 	if !(grep -q "$msgLine1" "${outputFiles[$i]}") ; then
+				echo "$i"
+				echo $msgLine1
         failed="T"
     fi
     if !(grep -q "$msgLine2" "${outputFiles[$i]}") ; then
+				echo "$i"
+				echo $msgLine2
         failed="T"
     fi
     if !(grep -q "$msgLine3" "${outputFiles[$i]}") ; then
+				echo $i
+				echo $msgLine3
         failed="T"
     fi
     if !(grep -q "$msgLine4" "${outputFiles[$i]}") ; then
+				echo $i
+				echo $msgLine4
         failed="T"
     fi
     if !(grep -q "$msgLine5" "${outputFiles[$i]}") ; then
+				echo $i
+				echo $msgLine5
         failed="T"
     fi
 	gossipPort=$(($gossipPort+1))
