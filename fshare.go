@@ -79,7 +79,6 @@ func ScanFile(fname string) (*FileRecord, error) {
 		} else {
 			h.Write(buf[0:n])
 			b := h.Sum(nil)
-			fmt.Println("n = ", n, " sha = ", b)
 
 			// If we need bytes uncomment this
 			concats = append(concats, b...)
@@ -224,19 +223,15 @@ func WriteChunk(fname string, data []byte) {
 	f, err := os.OpenFile(SPATH+fname, os.O_APPEND|os.O_WRONLY, 0600)
 	if err != nil {
 		fmt.Println("HEY")
-		panic(err)
 	}
 
 	defer f.Close()
 
-	n, err := f.Write(data)
+	_, err = f.Write(data)
 
 	if err != nil {
 		fmt.Println("HEY")
-		panic(err)
 	}
-
-	fmt.Println("N = ", n)
 
 }
 
