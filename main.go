@@ -9,7 +9,6 @@
 package main
 
 import (
-	"bytes"
 	"encoding/hex"
 	"flag"
 	"fmt"
@@ -125,8 +124,8 @@ type SafeMsgsOrginHistory struct {
 
 type SafeChunkToDownload struct {
 	tickers []*time.Ticker
-	chunks  [][]byte
-	metas   [][]byte // Refer to the parent meta Hash
+	chunks  []string
+	metas   []string // Refer to the parent meta Hash
 	dests   []string
 	fname   []string
 	mux     sync.Mutex
@@ -292,11 +291,17 @@ func proccessPacketAndSend(newPacket *GossipPacket, receivedFrom string) {
 
 func processDataReply(packet *DataReply) {
 
+	hashValue := hex.EncodeToString(packet.HashValue)
+	data := hex.EncodeToString(packet.Data)
+
+	fmt.Printf(" With Hash Value : %s\n", hashValue)
+
 	// Check if the packet is not intended to us
 	if packet.Destination != myGossiper.Name {
 
 		// We don't know where to forward the PrivateMessage
 		if myGossiper.routingTable[packet.Destination] == nil {
+			fmt.Println("Not in routing table")
 			return
 		}
 
@@ -308,22 +313,25 @@ func processDataReply(packet *DataReply) {
 		return
 	}
 
+	fmt.Printf("THE DATA : %x\n", packet.Data)
+	fmt.Printf("THE HASH : %x\n", packet.HashValue)
+	fmt.Println("MY RECORD TO DOWNLOAD: ", myGossiper.safeCtd.chunks)
+
 	// The hash doesn't match
-	if !EqualityCheckRecievedData(packet.HashValue, packet.Data) {
+	if !EqualityCheckRecievedData(hashValue, data) {
+		fmt.Println("Not correct Hash value")
 		return
 	}
 
 	// Now look if the hash is a requested
 	//myGossiper.safeCtd.mux.Lock()
 
-	// Be careful of the ticker
-	//defer myGossiper.safeCtd.mux.Unlock()
+	myGossiper.safeCtd.mux.Lock()
+	myGossiper.safeFiles.mux.Lock()
 
 	for i, c := range myGossiper.safeCtd.chunks {
 
-		myGossiper.safeCtd.mux.Lock()
-
-		if bytes.Equal(c, packet.HashValue) && myGossiper.safeCtd.dests[i] == packet.Origin {
+		if c == hashValue && myGossiper.safeCtd.dests[i] == packet.Origin {
 			//We needed to :
 			// 1) Stop the ticker for the corresponding  (and the others timers)
 			// 2) update the file record
@@ -335,32 +343,28 @@ func processDataReply(packet *DataReply) {
 
 			fname := myGossiper.safeCtd.fname[i]
 			// If it is the Meta file
-			if bytes.Equal(myGossiper.safeCtd.metas[i], c) {
+			if myGossiper.safeCtd.metas[i] == c {
 
 				if (len(packet.Data) % 32) != 0 {
 					fmt.Println("Wrong data size skipping this data")
-					//myGossiper.safeCtd.mux.Unlock()
+					myGossiper.safeCtd.mux.Unlock()
 					return
 				}
 
-				metaHash := hex.EncodeToString(c)
-				mf := hex.EncodeToString(packet.Data)
 				re := regexp.MustCompile(`[a-f0-9]{64}`)
-				mf2 := re.FindAllString(mf, -1) // Separate string in 64 letters (32bytes)
-				fr := &FileRecord{Name: fname, MetaHash: metaHash, MetaFile: mf2, NbChunk: 0}
+				mf := re.FindAllString(data, -1) // Separate string in 64 letters (32bytes)
+				fr := &FileRecord{Name: fname, MetaHash: c, MetaFile: mf, NbChunk: 0}
 
 				// Add the file record to the files
 				myGossiper.safeFiles.files = append(myGossiper.safeFiles.files, fr)
 
-				hashChunck, err := hex.DecodeString(mf2[0])
-				checkError(err, true)
-
+				fmt.Println("METAFILE: ", mf)
 				// Setup the ticker for next chunk and send the packet
 				fmt.Printf("DOWNLOADING %s chunk 1 from %s\n", fname, packet.Origin)
 
-				requestNextChunk(fname, hashChunck, myGossiper.safeCtd.metas[i], packet.Origin, i)
+				requestNextChunk(fname, mf[0], c, packet.Origin, i)
 				// We clean the old hashes: and update them to the current hash that we want
-				cleaningCtd(c, hashChunck)
+				//cleaningCtd(c, mf[0])
 
 				// Maybe put an unlock herer
 
@@ -369,7 +373,7 @@ func processDataReply(packet *DataReply) {
 				k, l := chunkSeek(c, myGossiper)
 
 				if l == -1 {
-					fmt.Printf("Meta File already received but inconcitency when matching in the File Record with k = %d and hash = %s\n", k, hex.EncodeToString(c))
+					fmt.Printf("Meta File already received but inconcitency when matching in the File Record with k = %d and hash = %s\n", k, c)
 					//os.Exit(1)
 
 				}
@@ -382,10 +386,10 @@ func processDataReply(packet *DataReply) {
 				// We finished to download the whole file
 				if myGossiper.safeFiles.files[k].NbChunk == len(myGossiper.safeFiles.files[k].MetaFile) {
 					// Remove the hashes
-					cleaningCtd(c, nil)
+					//cleaningCtd(c, "")
 
 					fmt.Printf("RECONSTRUCTED file %s\n", fname)
-					storeFile(fname, nil, myGossiper, k)
+					storeFile(fname, "", myGossiper, k)
 					infos = append(infos, InfoElem{Fname: fname, Event: "download", Desc: "downloaded", Hash: ""})
 					// Delete the entry
 
@@ -393,21 +397,24 @@ func processDataReply(packet *DataReply) {
 
 					// Setup the ticker for next chunk and send the packet
 					hexaChunk := myGossiper.safeFiles.files[k].MetaFile[myGossiper.safeFiles.files[k].NbChunk]
-					hashChunck, _ := hex.DecodeString(hexaChunk)
 
 					fmt.Printf("DOWNLOADING %s chunk %d from %s\n", fname, myGossiper.safeFiles.files[k].NbChunk+1, packet.Origin)
-					requestNextChunk(fname, hashChunck, myGossiper.safeCtd.metas[i], packet.Origin, i)
-					cleaningCtd(c, hashChunck)
+					requestNextChunk(fname, hexaChunk, myGossiper.safeCtd.metas[i], packet.Origin, i)
+					//cleaningCtd(c, hexaChunk)
 
 				}
 			}
+
 		}
-		myGossiper.safeCtd.mux.Unlock()
+
 	}
+	myGossiper.safeCtd.mux.Unlock()
+	myGossiper.safeFiles.mux.Unlock()
+	fmt.Println("Exited")
 }
 
 // Upgrade the chunk request that we want to send
-func cleaningCtd(oldHash []byte, newHash []byte) {
+func cleaningCtd(oldHash string, newHash string) {
 
 	supressed := 0
 
@@ -421,8 +428,8 @@ func cleaningCtd(oldHash []byte, newHash []byte) {
 
 	for i := 0; i < len(myGossiper.safeCtd.chunks); i++ {
 
-		if newHash != nil {
-			if bytes.Equal(myGossiper.safeCtd.chunks[i], oldHash) {
+		if newHash != "" {
+			if myGossiper.safeCtd.chunks[i] == oldHash {
 				// Waiting for a new chunk (Already downloaded because of other peers)
 				myGossiper.safeCtd.chunks[i] = newHash
 				myGossiper.safeCtd.tickers[i].Stop()
@@ -433,7 +440,7 @@ func cleaningCtd(oldHash []byte, newHash []byte) {
 
 			j := i - supressed
 
-			if bytes.Equal(myGossiper.safeCtd.chunks[j], oldHash) {
+			if myGossiper.safeCtd.chunks[j] == oldHash {
 
 				// Deleteing elements
 
@@ -453,7 +460,7 @@ func cleaningCtd(oldHash []byte, newHash []byte) {
 }
 
 // Set the timer and request next chunk
-func requestNextChunk(fname string, hashChunck []byte, meta []byte, dest string, i int) {
+func requestNextChunk(fname string, hashChunck string, meta string, dest string, i int) {
 
 	ticker := time.NewTicker(FILE_DURATION)
 	if len(myGossiper.safeCtd.tickers) == i {
@@ -471,11 +478,16 @@ func requestNextChunk(fname string, hashChunck []byte, meta []byte, dest string,
 	}
 
 	go func() {
-		dr := &DataRequest{HopLimit: HOP_LIMIT, HashValue: hashChunck, Origin: myGossiper.Name, Destination: dest}
+		hash_bytes, err := hex.DecodeString(hashChunck)
+		if err != nil {
+			fmt.Println("ERROR: ", err.Error())
+		}
+
+		dr := &DataRequest{HopLimit: HOP_LIMIT, HashValue: hash_bytes, Origin: myGossiper.Name, Destination: dest}
 		// Send before waiting the ticker for the first time
 		neighbor := myGossiper.routingTable[dest]
 		if neighbor != nil {
-			fmt.Printf("SENDING DATA REQUEST TO %s for Chunk %s\n", dest, hashChunck)
+			fmt.Printf("SENDING DATA REQUEST TO %s for Chunk %x\n", dest, hash_bytes)
 			sendTo(&GossipPacket{DataRequest: dr}, neighbor.link)
 		}
 
@@ -483,7 +495,7 @@ func requestNextChunk(fname string, hashChunck []byte, meta []byte, dest string,
 
 			neighbor = myGossiper.routingTable[dest]
 			if neighbor != nil {
-				fmt.Printf("SENDING DATA REQUEST TO %s for Chunk %s\n", dest, hashChunck)
+				fmt.Printf("SENDING DATA REQUEST TO %s for Chunk %x\n", dest, hash_bytes)
 				sendTo(&GossipPacket{DataRequest: dr}, neighbor.link)
 			}
 		}
@@ -496,6 +508,8 @@ func processDataRequest(packet *DataRequest) {
 
 	myGossiper.safeFiles.mux.Lock()
 	defer myGossiper.safeFiles.mux.Unlock()
+
+	hashValue := hex.EncodeToString(packet.HashValue)
 
 	// Check if the packet is not intended to us
 	if packet.Destination != myGossiper.Name {
@@ -513,7 +527,7 @@ func processDataRequest(packet *DataRequest) {
 		return
 	}
 
-	i, j := chunkSeek(packet.HashValue, myGossiper)
+	i, j := chunkSeek(hashValue, myGossiper)
 
 	// We don't have the chunk
 	if i == -1 || j >= myGossiper.safeFiles.files[i].NbChunk {
@@ -521,10 +535,18 @@ func processDataRequest(packet *DataRequest) {
 	}
 
 	// We have the metaFile bur not the chunk yet
-	data, hashValue := getDataAndHash(i, j, myGossiper)
+	data, hashValue2 := getDataAndHash(i, j, myGossiper)
 
-	// Create the reply
-	dReply := &DataReply{Data: data, HashValue: hashValue, Origin: myGossiper.Name, Destination: packet.Origin, HopLimit: HOP_LIMIT}
+	if hashValue != hashValue2 {
+		fmt.Printf("ERROR while processing a data request: Hash Get and Hash Given not the same\n hash From packet: %s\n and hash retrieved from the data: %s\n", hashValue, hashValue2)
+	}
+
+	data_bytes, err := hex.DecodeString(data)
+	checkError(err, true)
+	hash_bytes, err := hex.DecodeString(hashValue)
+	checkError(err, true)
+
+	dReply := &DataReply{Data: data_bytes, HashValue: hash_bytes, Origin: myGossiper.Name, Destination: packet.Origin, HopLimit: HOP_LIMIT}
 
 	if myGossiper.routingTable[packet.Origin] == nil {
 		return
@@ -913,14 +935,14 @@ func processMsgFromClient(newPacket *ClientPacket) {
 				return
 			}
 
-			i, _ := chunkSeek(request, myGossiper)
+			i, _ := chunkSeek(packet.Request, myGossiper)
 
 			// If we found the corresponding metafile record and the downoad is complete
 			// we can already send back what the client ask
 			if i != -1 && myGossiper.safeFiles.files[i].NbChunk == len(myGossiper.safeFiles.files[i].MetaFile) {
 
 				fmt.Println("FILE FOUND IN THE INDEX")
-				storeFile(packet.File, request, myGossiper, -1)
+				storeFile(packet.File, packet.Request, myGossiper, -1)
 				return
 			}
 
@@ -940,7 +962,7 @@ func processMsgFromClient(newPacket *ClientPacket) {
 			// Sending it
 			//sendTo(&GossipPacket{DataRequest: &DataRequest{Origin: myGossiper.Name, Destination: packet.Dest, HashValue: request, HopLimit: HOP_LIMIT}}, link)
 			fmt.Printf("DOWNLOADING metafile of %s from %s\n", packet.File, packet.Dest)
-			requestNextChunk(packet.File, request, request, packet.Dest, len(myGossiper.safeCtd.tickers))
+			requestNextChunk(packet.File, packet.Request, packet.Request, packet.Dest, len(myGossiper.safeCtd.tickers))
 
 		}
 

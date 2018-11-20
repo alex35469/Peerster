@@ -94,18 +94,16 @@ func ScanFile(fname string) (*FileRecord, error) {
 // (-1, -1) if no chunck corresponds
 // (x, -1) if the metahash match the request of entry x in myGossiper.file
 // (x , y) if the entry y of the Metafile x match
-func chunkSeek(hash []byte, myGossiper *Gossiper) (int, int) {
-
-	request := hex.EncodeToString(hash)
+func chunkSeek(hash string, myGossiper *Gossiper) (int, int) {
 
 	for i, f := range myGossiper.safeFiles.files {
 
-		if f.MetaHash == request {
+		if f.MetaHash == hash {
 			return i, -1
 		}
 
 		for j, chunk := range f.MetaFile {
-			if chunk == request {
+			if chunk == hash {
 				return i, j
 			}
 		}
@@ -115,19 +113,17 @@ func chunkSeek(hash []byte, myGossiper *Gossiper) (int, int) {
 
 }
 
-func getDataAndHash(i int, j int, myGossiper *Gossiper) ([]byte, []byte) {
+func getDataAndHash(i int, j int, myGossiper *Gossiper) (string, string) {
 
-	var data []byte
-	var hash []byte
+	var data string
+	var hash string
 
 	// If the meta file is requested
 	if j == -1 {
 		// Meta file is the deta
-		fmt.Println(i)
-		data, err := hex.DecodeString(strings.Join(myGossiper.safeFiles.files[i].MetaFile, ""))
-		checkError(err, true)
+		data = strings.Join(myGossiper.safeFiles.files[i].MetaFile, "")
 
-		hash, err = hex.DecodeString(myGossiper.safeFiles.files[i].MetaHash)
+		hash = myGossiper.safeFiles.files[i].MetaHash
 
 		return data, hash
 
@@ -158,22 +154,29 @@ func getDataAndHash(i int, j int, myGossiper *Gossiper) ([]byte, []byte) {
 	// Sanitary CcheckError
 	h := sha256.New()
 	h.Write(buf[0:n])
-	hash = h.Sum(nil)
+	hash_byte := h.Sum(nil)
 	sanitaryCheck, _ := hex.DecodeString(myGossiper.safeFiles.files[i].MetaFile[j])
-	if !bytes.Equal(hash, sanitaryCheck) {
+	if !bytes.Equal(hash_byte, sanitaryCheck) {
 		fmt.Println("Sanitary Check failed! (l.137 in fshare.go)")
 		//os.Exit(1)
 	}
-	data = buf[0:n]
+	data_bytes := buf[0:n]
+	data = hex.EncodeToString(data_bytes)
+	hash = hex.EncodeToString(hash_byte)
 
 	return data, hash
 }
 
-func EqualityCheckRecievedData(HashValue []byte, data []byte) bool {
+func EqualityCheckRecievedData(HashValue string, data string) bool {
 	h := sha256.New()
-	h.Write(data)
+	data_bytes, err := hex.DecodeString(data)
+	checkError(err, true)
+	h.Write(data_bytes)
 
-	return bytes.Equal(HashValue, h.Sum(nil))
+	HashValue_bytes, err := hex.DecodeString(HashValue)
+	checkError(err, true)
+
+	return bytes.Equal(HashValue_bytes, h.Sum(nil))
 
 }
 
@@ -190,11 +193,11 @@ func addFileRecord(fr *FileRecord, myGossiper *Gossiper) error {
 	return nil
 }
 
-func storeFile(fname string, request []byte, myGossiper *Gossiper, i int) {
+func storeFile(fname string, request string, myGossiper *Gossiper, i int) {
 
 	// If we know already where to seek, we don't need seek where to seek
 	j := -1
-	if request != nil {
+	if request != "" {
 		i, j = chunkSeek(request, myGossiper)
 	}
 

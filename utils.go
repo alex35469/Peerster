@@ -236,8 +236,8 @@ func NewGossiper(address, name, neighborsInit string) *Gossiper {
 
 	sCtd := SafeChunkToDownload{
 		tickers: make([]*time.Ticker, 0),
-		chunks:  make([][]byte, 0),
-		metas:   make([][]byte, 0), // Refer to the parent meta Hash
+		chunks:  make([]string, 0),
+		metas:   make([]string, 0), // Refer to the parent meta Hash
 		dests:   make([]string, 0),
 		fname:   make([]string, 0),
 	}
