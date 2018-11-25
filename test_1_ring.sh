@@ -7,7 +7,7 @@ cd ..
 
 RED='\033[0;31m'
 NC='\033[0m'
-DEBUG="true"
+DEBUG="false"
 
 outputFiles=()
 message=Weather_is_clear
@@ -48,12 +48,10 @@ failed="F"
 
 if !(grep -q "CLIENT MESSAGE $message" "E.out") ; then
 	failed="T"
-	echo -e "${RED}1${NC}"
 fi
 
 if !(grep -q "CLIENT MESSAGE $message2" "B.out") ; then
   failed="T"
-		echo -e "${RED}2${NC}"
 fi
 
 if [[ "$failed" == "T" ]] ; then
@@ -81,15 +79,12 @@ do
 	gossipPort=$(($gossipPort+1))
 	if !(grep -q "$msgLine" "${outputFiles[$i]}") ; then
    		failed="T"
-			echo -e "${RED}$msgLine $i ${NC}"
 	fi
 	if !(grep -q "$peersLine" "${outputFiles[$i]}") ; then
         failed="T"
-					echo -e "${RED}4 $i ${NC}"
     fi
 	if !(grep -q "$msgLine2" "${outputFiles[$i]}") ; then
         failed="T"
-					echo -e "${RED}5 $i ${NC}"
     fi
 done
 

@@ -286,6 +286,8 @@ whenDocumentLoaded(() => {
 	let download = document.getElementById("download-btn");
 	download.addEventListener("click", () => downloadFile())
 
+	let search = document.getElementById("search-btn");
+	search.addEventListener("click", () => searchFile())
 
 });
 
@@ -371,9 +373,32 @@ function getInfos(){
 					return
 				}
 
+				if (info["Event"] == "search"){
+					$("#search-box").append(info["Desc"] +"...<br />");
+
+				}
+
 			})
 		}
 	)
+
+
+}
+
+function searchFile(){
+	let keywords = document.getElementsByName("keywords-input")[0].value;
+	let budget = document.getElementsByName("budget-input")[0].value;
+
+	if (keywords == ""){
+		return
+	}
+
+	$.post(
+		backendAddr+FILE_PATH,
+		{mode:"search", keywords: keywords, budget:budget},
+		'jsonp'
+	)
+
 
 
 }

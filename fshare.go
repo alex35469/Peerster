@@ -79,7 +79,7 @@ func ScanFile(fname string) (*FileRecord, error) {
 		} else {
 			h.Write(buf[0:n])
 			b := h.Sum(nil)
-			fmt.Println("n = ", n, " sha = ", b)
+			fmt.Printf("n = %d, sha = %x\n", n, b)
 
 			// If we need bytes uncomment this
 			concats = append(concats, b...)
@@ -88,6 +88,20 @@ func ScanFile(fname string) (*FileRecord, error) {
 		}
 	}
 }
+
+/*
+func checkDuplicateFname(name string) bool {
+
+	for _, file := range myGossiper.safeFiles.files {
+
+		if name == file.Name {
+			return true
+		}
+
+	}
+	return false
+}
+*/
 
 // When requesting a chunk, this method check if it is in its possession
 // return  the index where it found it on the files record and which chunck
@@ -112,6 +126,12 @@ func chunkSeek(hash []byte, myGossiper *Gossiper) (int, int) {
 	}
 
 	return -1, -1
+
+}
+
+// Custom Function to determin if a file have a hit w.r.t keyword
+func matchName(fname, key string) bool {
+	return strings.Contains(fname, key)
 
 }
 
@@ -191,6 +211,7 @@ func addFileRecord(fr *FileRecord, myGossiper *Gossiper) error {
 }
 
 func storeFile(fname string, request []byte, myGossiper *Gossiper, i int) {
+	// Storing a file in _Download folder
 
 	// If we know already where to seek, we don't need seek where to seek
 	j := -1
@@ -203,15 +224,15 @@ func storeFile(fname string, request []byte, myGossiper *Gossiper, i int) {
 		sfname := myGossiper.safeFiles.files[i].Name
 
 		src, err := os.Open(SPATH + sfname)
-		checkError(err, true)
+		checkError(err, false)
 		defer src.Close()
 
 		dst, err := os.Create(DPATH + fname)
-		checkError(err, true)
+		checkError(err, false)
 		defer dst.Close()
 
 		_, err = io.Copy(dst, src)
-		checkError(err, true)
+		checkError(err, false)
 	}
 
 }

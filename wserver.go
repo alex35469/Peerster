@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"os"
 	"reflect"
+	"strconv"
+	"strings"
 
 	"github.com/bitly/go-simplejson"
 	"github.com/gorilla/handlers"
@@ -94,12 +96,14 @@ func nodeGet(w http.ResponseWriter, r *http.Request) {
 	w.Write(payload)
 }
 
-func shareFile(w http.ResponseWriter, r *http.Request) {
+func fileRequest(w http.ResponseWriter, r *http.Request) {
 
 	fname := r.FormValue("name")
 	hash := r.FormValue("metaHash")
 	mode := r.FormValue("mode")
 	dest := r.FormValue("dest")
+	keywords := r.FormValue("keywords")
+	budget := r.FormValue("budget")
 
 	if mode == "share" {
 
@@ -131,6 +135,26 @@ func shareFile(w http.ResponseWriter, r *http.Request) {
 			Dest:    dest,
 		}
 		processMsgFromClient(&ClientPacket{CMessage: &cm})
+	}
+
+	if mode == "search" {
+		budgetUint, err := strconv.ParseUint(budget, 10, 64)
+
+		if err != nil {
+			checkError(err, false)
+			return
+		}
+
+		smartSplit := func(s rune) bool {
+			return s == ','
+		}
+
+		cm := ClientSearch{
+			Keywords: strings.FieldsFunc(keywords, smartSplit),
+			Budget:   uint64(budgetUint),
+		}
+		processMsgFromClient(&ClientPacket{CSearch: &cm})
+		//infos = append(infos, InfoElem{Event: "search", Desc: "Searching " + keywords + " with budget " + budget})
 
 	}
 
@@ -183,7 +207,7 @@ func listenToGUI() {
 	r.HandleFunc("/message", msgsGet).Methods("GET")
 	r.HandleFunc("/node", nodePost).Methods("POST")
 	r.HandleFunc("/node", nodeGet).Methods("GET")
-	r.HandleFunc("/file", shareFile).Methods("POST")
+	r.HandleFunc("/file", fileRequest).Methods("POST")
 	r.HandleFunc("/file", fileInfo).Methods("Get")
 
 	http.Handle("/", r)

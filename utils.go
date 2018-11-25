@@ -255,3 +255,12 @@ func NewGossiper(address, name, neighborsInit string) *Gossiper {
 		safeCtd:          sCtd,
 	}
 }
+
+// From https://stackoverflow.com/questions/39868029/how-to-generate-a-sequence-of-numbers-in-golang?rq=1
+func makeRange(min, max int) []uint64 {
+	r := make([]uint64, max-min+1)
+	for i := range r {
+		r[i] = uint64(min + i)
+	}
+	return r
+}

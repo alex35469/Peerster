@@ -9,169 +9,16 @@
 package main
 
 import (
-	"bytes"
 	"encoding/hex"
 	"flag"
 	"fmt"
 	"math/rand"
 	"net"
-	"regexp"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/dedis/protobuf"
 )
-
-// Set the time out to 1 second
-const TIME_OUT time.Duration = time.Second
-const ANTI_ENTROPY_DURATION time.Duration = time.Second
-const FILE_DURATION time.Duration = 5 * time.Second
-
-//###### PEERSTER MESSAGES TYPES   #######
-type SimpleMessage struct {
-	OriginalName  string
-	RelayPeerAddr string
-	Contents      string
-	FileName      string
-}
-
-type RumorMessage struct {
-	Origin string
-	ID     uint32
-	Text   string
-}
-
-type PeerStatus struct {
-	Identifier string
-	NextID     uint32
-}
-
-type StatusPacket struct {
-	Want []PeerStatus
-}
-
-type PrivateMessage struct {
-	Origin      string
-	ID          uint32
-	Text        string
-	Destination string
-	HopLimit    uint32
-}
-
-type DataRequest struct {
-	Origin      string
-	Destination string
-	HopLimit    uint32
-	HashValue   []byte
-}
-
-type DataReply struct {
-	Origin      string
-	Destination string
-	HopLimit    uint32
-	HashValue   []byte
-	Data        []byte
-}
-
-type GossipPacket struct {
-	Simple      *SimpleMessage
-	Rumor       *RumorMessage
-	Status      *StatusPacket
-	Private     *PrivateMessage
-	DataRequest *DataRequest
-	DataReply   *DataReply
-}
-
-// COMUNICATION WITH CLIENT
-type ClientMessage struct {
-	File    string
-	Request string
-	Dest    string
-}
-
-type ClientPacket struct {
-	Broadcast *SimpleMessage
-	Private   *PrivateMessage
-	CMessage  *ClientMessage
-}
-
-// Struct used to fetch a rumor when
-// Stopping
-type TimerForAck struct {
-	rumor RumorMessage
-	timer *time.Timer
-}
-
-type SafeTimerRecord struct {
-	timersRecord map[string][]*TimerForAck
-	mux          sync.Mutex
-}
-
-// The list
-type SafeMsgsOrginHistory struct {
-	history []*RumorMessage
-	mux     sync.Mutex
-}
-
-// The Gossiper struct.
-// address : address of the Gossiper
-// connexion : connexion through which the gossiper speaks and listen
-// Name used to identify his own messages
-// neighbors : Peers that are "Onlink" i.e. We know their IP address
-// messagesHistory : Will eventually countain all the messages from all peers in the net.
-//									All the records from different origin can be locked independently due to SafeMsgsOrginHistory
-// safeTimersRecord : Records of the timers regarding a particular rumor packet Can be locked
-
-type SafeChunkToDownload struct {
-	tickers []*time.Ticker
-	chunks  [][]byte
-	metas   [][]byte // Refer to the parent meta Hash
-	dests   []string
-	fname   []string
-	mux     sync.Mutex
-}
-
-type SafeFileRecords struct {
-	files []*FileRecord
-	mux   sync.Mutex
-}
-
-type Gossiper struct {
-	address          *net.UDPAddr
-	conn             *net.UDPConn
-	Name             string
-	neighbors        []string
-	myVC             *StatusPacket
-	safeTimersRecord SafeTimerRecord
-	messagesHistory  map[string]*SafeMsgsOrginHistory
-	routingTable     map[string]*RoutingTableEntry
-	mux              sync.Mutex
-	safeFiles        SafeFileRecords
-	safeCtd          SafeChunkToDownload
-}
-
-type RoutingTableEntry struct {
-	link     string
-	freshest uint32
-}
-
-type StackElem struct {
-	Msg    string
-	Origin string
-	Dest   string
-	Mode   string
-}
-
-type InfoElem struct {
-	Fname string
-	Hash  string
-	Event string
-	Desc  string
-}
-
-const UDP_PACKET_SIZE = 10000
-const HOP_LIMIT = 10
 
 var myGossiper *Gossiper
 
@@ -247,28 +94,35 @@ func proccessPacketAndSend(newPacket *GossipPacket, receivedFrom string) {
 
 	addNeighbor(receivedFrom)
 
-	// ############################## NEW DATA REQUEST
+	// ############################## NEW SIMPLE MSG ###################
+
+	if packet := newPacket.Simple; packet != nil && simple {
+		processSimpleMsgGossiper(newPacket)
+	}
+
+	// ############################## NEW SEARCH MSG #################
+	if packet := newPacket.SearchReply; packet != nil {
+		processSearchReply(packet)
+	}
+
+	if packet := newPacket.SearchRequest; packet != nil {
+		processSearchRequest(packet, receivedFrom)
+	}
+
+	// ############################## NEW DATA MSG #################
 
 	if packet := newPacket.DataReply; packet != nil {
-
-		fmt.Println("RECEIVING DATA REPLY")
+		fmt.Println("$RECEIVING DATA REPLY")
 		processDataReply(packet)
-
 	}
 
 	if packet := newPacket.DataRequest; packet != nil {
 		processDataRequest(packet)
 	}
 
-	if packet := newPacket.Simple; packet != nil && simple {
-		processSimpleMsgGossiper(newPacket)
-	}
-
 	// ################################ NEW PRIVATE ####################
 
 	if packet := newPacket.Private; packet != nil {
-
-		// We received a private Message
 		processPrivateMsgGossiper(packet)
 
 	}
@@ -276,9 +130,7 @@ func proccessPacketAndSend(newPacket *GossipPacket, receivedFrom string) {
 	// ################################ NEW RUMOR ####################
 
 	if packet := newPacket.Rumor; packet != nil {
-
 		processRumorMsgGossiper(packet, receivedFrom)
-
 	}
 
 	// ############################# NEW STATUS ##############
@@ -288,251 +140,165 @@ func proccessPacketAndSend(newPacket *GossipPacket, receivedFrom string) {
 
 }
 
-// ##### PROCESSING DATA REPLY
+// ##### PROCESSING SEARCH REPLY
 
-func processDataReply(packet *DataReply) {
+func processSearchReply(packet *SearchReply) {
+	fmt.Println("RECEIVING SEARCH REPLY ", packet)
+}
 
-	// Check if the packet is not intended to us
-	if packet.Destination != myGossiper.Name {
+func processSearchRequest(packet *SearchRequest, link string) {
 
-		// We don't know where to forward the PrivateMessage
-		if myGossiper.routingTable[packet.Destination] == nil {
+	fmt.Printf("$SEARCH REQUEST from %s keywords %s budget %d link %s\n", packet.Origin, strings.Join(packet.Keywords, ","), packet.Budget, link)
+
+	// If the search come back to us simply ignore it.ANTI_ENTROPY_DURATION
+	if packet.Origin == myGossiper.Name {
+		fmt.Println("$Ignoring")
+		return
+	}
+
+	myGossiper.safeSearchesSeen.mux.Lock()
+
+	// Firstly see if it's a duplicated searchRequests
+	keywords := strings.Join(packet.Keywords, "")
+	for _, sR := range myGossiper.safeSearchesSeen.searchesSeen {
+		if keywords == strings.Join(sR.Keywords, "") && packet.Origin == sR.Origin {
+			// Duplicate Search request
+			fmt.Println("$YESSSS! FOUND DUPLICATES!")
+			myGossiper.safeSearchesSeen.mux.Unlock()
 			return
 		}
-
-		//Can we send it?
-		if hl := packet.HopLimit - 1; hl > 0 {
-			packet.HopLimit = hl
-			sendTo(&GossipPacket{DataReply: packet}, myGossiper.routingTable[packet.Destination].link)
-		}
-		return
 	}
 
-	// The hash doesn't match
-	if !EqualityCheckRecievedData(packet.HashValue, packet.Data) {
-		return
-	}
+	// TODO:
+	// Maybe put the
 
-	// Now look if the hash is a requested
-	//myGossiper.safeCtd.mux.Lock()
+	results := make([]*SearchResult, 0)
 
-	// Be careful of the ticker
-	//defer myGossiper.safeCtd.mux.Unlock()
+	for _, f := range myGossiper.safeFiles.files {
+		for _, key := range packet.Keywords {
 
-	for i, c := range myGossiper.safeCtd.chunks {
+			if matchName(f.Name, key) {
 
-		myGossiper.safeCtd.mux.Lock()
-
-		if bytes.Equal(c, packet.HashValue) && myGossiper.safeCtd.dests[i] == packet.Origin {
-			//We needed to :
-			// 1) Stop the ticker for the corresponding  (and the others timers)
-			// 2) update the file record
-			// 3) write to file the chunk
-			// 4) ask for the next chunk
-			// 5) if no chunk is needed any more, download it to _Downloads
-			fmt.Printf("We Found a match at %d for %s and we have %d\n", i, myGossiper.safeCtd.dests, len(myGossiper.safeCtd.tickers))
-			myGossiper.safeCtd.tickers[i].Stop()
-
-			fname := myGossiper.safeCtd.fname[i]
-			// If it is the Meta file
-			if bytes.Equal(myGossiper.safeCtd.metas[i], c) {
-
-				if (len(packet.Data) % 32) != 0 {
-					fmt.Println("Wrong data size skipping this data")
-					//myGossiper.safeCtd.mux.Unlock()
-					return
-				}
-
-				metaHash := hex.EncodeToString(c)
-				mf := hex.EncodeToString(packet.Data)
-				re := regexp.MustCompile(`[a-f0-9]{64}`)
-				mf2 := re.FindAllString(mf, -1) // Separate string in 64 letters (32bytes)
-				fr := &FileRecord{Name: fname, MetaHash: metaHash, MetaFile: mf2, NbChunk: 0}
-
-				// Add the file record to the files
-				myGossiper.safeFiles.files = append(myGossiper.safeFiles.files, fr)
-
-				hashChunck, err := hex.DecodeString(mf2[0])
+				// ChunkMap is simply the list from 0 to
+				metaHashByte, err := hex.DecodeString(f.MetaHash)
 				checkError(err, true)
 
-				// Setup the ticker for next chunk and send the packet
-				fmt.Printf("DOWNLOADING %s chunk 1 from %s\n", fname, packet.Origin)
-
-				requestNextChunk(fname, hashChunck, myGossiper.safeCtd.metas[i], packet.Origin, i)
-				// We clean the old hashes: and update them to the current hash that we want
-				cleaningCtd(c, hashChunck)
-
-				// Maybe put an unlock herer
-
-			} else {
-				// The metafile is already here
-				k, l := chunkSeek(c, myGossiper)
-
-				if l == -1 {
-					fmt.Printf("Meta File already received but inconcitency when matching in the File Record with k = %d and hash = %s\n", k, hex.EncodeToString(c))
-					//os.Exit(1)
-
+				r := &SearchResult{
+					FileName:     f.Name,
+					ChunkMap:     makeRange(1, f.NbChunk),
+					MetafileHash: metaHashByte,
 				}
-				fmt.Println("Writing to file")
-				WriteChunk(fname, packet.Data)
-				myGossiper.safeFiles.files[k].NbChunk += 1
 
-				// Add the new chunk in the to dwonload list
+				results = append(results, r)
 
-				// We finished to download the whole file
-				if myGossiper.safeFiles.files[k].NbChunk == len(myGossiper.safeFiles.files[k].MetaFile) {
-					// Remove the hashes
-					cleaningCtd(c, nil)
-
-					fmt.Printf("RECONSTRUCTED file %s\n", fname)
-					storeFile(fname, nil, myGossiper, k)
-					infos = append(infos, InfoElem{Fname: fname, Event: "download", Desc: "downloaded", Hash: ""})
-					// Delete the entry
-
-				} else {
-
-					// Setup the ticker for next chunk and send the packet
-					hexaChunk := myGossiper.safeFiles.files[k].MetaFile[myGossiper.safeFiles.files[k].NbChunk]
-					hashChunck, _ := hex.DecodeString(hexaChunk)
-
-					fmt.Printf("DOWNLOADING %s chunk %d from %s\n", fname, myGossiper.safeFiles.files[k].NbChunk+1, packet.Origin)
-					requestNextChunk(fname, hashChunck, myGossiper.safeCtd.metas[i], packet.Origin, i)
-					cleaningCtd(c, hashChunck)
-
-				}
-			}
-		}
-		myGossiper.safeCtd.mux.Unlock()
-	}
-}
-
-// Upgrade the chunk request that we want to send
-func cleaningCtd(oldHash []byte, newHash []byte) {
-
-	supressed := 0
-
-	/*
-		newTickers :=  []*time.Ticker
-		newChunks := [][]byte
-		newMetas :=   [][]byte // Refer to the parent meta Hash
-			newDests :=   []string
-		newFname :=   []string
-	*/
-
-	for i := 0; i < len(myGossiper.safeCtd.chunks); i++ {
-
-		if newHash != nil {
-			if bytes.Equal(myGossiper.safeCtd.chunks[i], oldHash) {
-				// Waiting for a new chunk (Already downloaded because of other peers)
-				myGossiper.safeCtd.chunks[i] = newHash
-				myGossiper.safeCtd.tickers[i].Stop()
-				requestNextChunk(myGossiper.safeCtd.fname[i], newHash, myGossiper.safeCtd.metas[i], myGossiper.safeCtd.dests[i], i)
-
-			}
-		} else {
-
-			j := i - supressed
-
-			if bytes.Equal(myGossiper.safeCtd.chunks[j], oldHash) {
-
-				// Deleteing elements
-
-				myGossiper.safeCtd.chunks = append(myGossiper.safeCtd.chunks[:j], myGossiper.safeCtd.chunks[j+1:]...)
-				myGossiper.safeCtd.dests = append(myGossiper.safeCtd.dests[:j], myGossiper.safeCtd.dests[j+1:]...)
-				myGossiper.safeCtd.fname = append(myGossiper.safeCtd.fname[:j], myGossiper.safeCtd.fname[j+1:]...)
-				myGossiper.safeCtd.metas = append(myGossiper.safeCtd.metas[:j], myGossiper.safeCtd.metas[j+1:]...)
-
-				myGossiper.safeCtd.tickers[j].Stop()
-				myGossiper.safeCtd.tickers = append(myGossiper.safeCtd.tickers[:j], myGossiper.safeCtd.tickers[j+1:]...)
-
-				supressed++
+				// We found a match we proceed directly the next file
+				break
 			}
 		}
 	}
 
+	fmt.Println("$Results: ", results)
+
+	markSearchRequest(packet)
+
+	packet.Budget = packet.Budget - 1
+
+	myGossiper.safeSearchesSeen.mux.Unlock()
+	distributeSearchRequest(*packet)
+	craftAndSendSearchReply(results, packet)
+
 }
 
-// Set the timer and request next chunk
-func requestNextChunk(fname string, hashChunck []byte, meta []byte, dest string, i int) {
-
-	ticker := time.NewTicker(FILE_DURATION)
-	if len(myGossiper.safeCtd.tickers) == i {
-		myGossiper.safeCtd.chunks = append(myGossiper.safeCtd.chunks, hashChunck)
-		myGossiper.safeCtd.dests = append(myGossiper.safeCtd.dests, dest)
-		myGossiper.safeCtd.fname = append(myGossiper.safeCtd.fname, fname)
-		myGossiper.safeCtd.metas = append(myGossiper.safeCtd.metas, meta)
-		myGossiper.safeCtd.tickers = append(myGossiper.safeCtd.tickers, ticker)
-	} else {
-		myGossiper.safeCtd.tickers[i] = ticker
-		myGossiper.safeCtd.chunks[i] = hashChunck
-		myGossiper.safeCtd.dests[i] = dest
-		myGossiper.safeCtd.fname[i] = fname
-		myGossiper.safeCtd.metas[i] = meta
+func autodestruct(packet *SearchRequest) {
+	fmt.Println("$Before Deleting : Searches seen: ", myGossiper.safeSearchesSeen.searchesSeen)
+	myGossiper.safeSearchesSeen.mux.Lock()
+	for i, sseen := range myGossiper.safeSearchesSeen.searchesSeen {
+		if sseen == packet {
+			copy(myGossiper.safeSearchesSeen.searchesSeen[i:], myGossiper.safeSearchesSeen.searchesSeen[i+1:])
+			myGossiper.safeSearchesSeen.searchesSeen[len(myGossiper.safeSearchesSeen.searchesSeen)-1] = nil // or the zero value of T
+			myGossiper.safeSearchesSeen.searchesSeen = myGossiper.safeSearchesSeen.searchesSeen[:len(myGossiper.safeSearchesSeen.searchesSeen)-1]
+		}
 	}
+	fmt.Println("$After Deleting : Searches seen: ", myGossiper.safeSearchesSeen.searchesSeen)
 
+	myGossiper.safeSearchesSeen.mux.Unlock()
+
+}
+
+func markSearchRequest(packet *SearchRequest) {
+
+	// Mark the searchRequest
+	myGossiper.safeSearchesSeen.searchesSeen = append(myGossiper.safeSearchesSeen.searchesSeen, packet)
+
+	// Set up the autoDestructor timer
+	t := time.NewTimer(SEEN_SEARCH_REQUEST_TIMEOUT)
 	go func() {
-		dr := &DataRequest{HopLimit: HOP_LIMIT, HashValue: hashChunck, Origin: myGossiper.Name, Destination: dest}
-		// Send before waiting the ticker for the first time
-		neighbor := myGossiper.routingTable[dest]
-		if neighbor != nil {
-			fmt.Printf("SENDING DATA REQUEST TO %s for Chunk %s\n", dest, hashChunck)
-			sendTo(&GossipPacket{DataRequest: dr}, neighbor.link)
-		}
-
-		for range ticker.C {
-
-			neighbor = myGossiper.routingTable[dest]
-			if neighbor != nil {
-				fmt.Printf("SENDING DATA REQUEST TO %s for Chunk %s\n", dest, hashChunck)
-				sendTo(&GossipPacket{DataRequest: dr}, neighbor.link)
-			}
-		}
+		<-t.C
+		// notSupposeToSendTo field = "" Because if there is a time out occure
+		// for a peer, we might want to retry to send the message back to him
+		autodestruct(packet)
 	}()
-	fmt.Println("Finished")
 }
 
-// ########## DATA REQUEST
-func processDataRequest(packet *DataRequest) {
+func distributeSearchRequest(packet SearchRequest) {
+	b := int(packet.Budget)
+	n := len(myGossiper.neighbors)
 
-	myGossiper.safeFiles.mux.Lock()
-	defer myGossiper.safeFiles.mux.Unlock()
+	if b < 1 {
+		//No budget anymore
+		return
+	}
 
-	// Check if the packet is not intended to us
-	if packet.Destination != myGossiper.Name {
+	// budget == nb neighboors
+	if b == n {
+		packet.Budget = 1
+		// For now on we don't consider the node how
+		sendToAllNeighbors(&GossipPacket{SearchRequest: &packet}, "")
+	}
 
-		// We don't know where to forward the Packet
-		if myGossiper.routingTable[packet.Destination] == nil {
-			return
+	perm := rand.Perm(n)
+	// budget < nb neihboors
+	if b < n {
+		packet.Budget = 1
+		for i := 0; i < b; i++ {
+			sendTo(&GossipPacket{SearchRequest: &packet}, myGossiper.neighbors[perm[i]])
+		}
+	}
+
+	if b > n {
+		packet.Budget = uint64(b / n)
+		for k, i := range perm {
+			sendTo(&GossipPacket{SearchRequest: &packet}, myGossiper.neighbors[i])
+
+			if k == (n - b%n - 1) {
+				packet.Budget += 1
+			}
+
 		}
 
-		//Can we send it?
-		if hl := packet.HopLimit - 1; hl > 0 {
-			packet.HopLimit = hl
-			sendTo(&GossipPacket{DataRequest: packet}, myGossiper.routingTable[packet.Destination].link)
-		}
+	}
+
+}
+
+func craftAndSendSearchReply(results []*SearchResult, packet *SearchRequest) {
+
+	record := myGossiper.routingTable[packet.Origin]
+
+	// no need to create a search reply if we have no result
+	// Or we don't know where to send the result
+	if len(results) != 0 || record == nil {
 		return
 	}
 
-	i, j := chunkSeek(packet.HashValue, myGossiper)
-
-	// We don't have the chunk
-	if i == -1 || j >= myGossiper.safeFiles.files[i].NbChunk {
-		return
+	link := record.link
+	sr := &SearchReply{
+		Origin:      myGossiper.Name,
+		Destination: packet.Origin,
+		HopLimit:    HOP_LIMIT,
+		Results:     results,
 	}
 
-	// We have the metaFile bur not the chunk yet
-	data, hashValue := getDataAndHash(i, j, myGossiper)
-
-	// Create the reply
-	dReply := &DataReply{Data: data, HashValue: hashValue, Origin: myGossiper.Name, Destination: packet.Origin, HopLimit: HOP_LIMIT}
-
-	if myGossiper.routingTable[packet.Origin] == nil {
-		return
-	}
-
-	link := myGossiper.routingTable[packet.Origin].link
-	fmt.Println("Sending DataReply ")
-	sendTo(&GossipPacket{DataReply: dReply}, link)
+	sendTo(&GossipPacket{SearchReply: sr}, link)
 
 }
 
@@ -888,7 +654,7 @@ func processMsgFromClient(newPacket *ClientPacket) {
 
 	}
 
-	// PROCESSING FILE INDEXING
+	// PROCESSING FILE INDEXING AND FILE DOWNLOAD
 	if packet := newPacket.CMessage; packet != nil {
 		if packet.Request == "" {
 			fr, err := ScanFile(packet.File)
@@ -909,7 +675,7 @@ func processMsgFromClient(newPacket *ClientPacket) {
 			request, err := hex.DecodeString(packet.Request)
 
 			if err != nil || len(request) != 32 {
-				fmt.Println("CLIENT: Bad Request")
+				fmt.Println("CLIENT BAD FILE REQUEST hash doesn't match sha256 hash")
 				return
 			}
 
@@ -946,8 +712,85 @@ func processMsgFromClient(newPacket *ClientPacket) {
 
 	}
 
-	// PROCESSING FILE REQUEST
+	// PROCESSING FILE SEARCH
+	if packet := newPacket.CSearch; packet != nil {
+		fmt.Printf("We received a file Search request with : kw= %s en len(kw) = %d , and bdgt = %d\n", packet.Keywords, len(packet.Keywords), packet.Budget)
+		processSearchMsgFromClient(packet)
+	}
 
+}
+
+func processSearchMsgFromClient(packet *ClientSearch) {
+	// 1 Need to setup ticker that whill increase the budget
+	//
+	// craft Searchpacket
+
+	sr := &SearchRequest{
+		Origin:   myGossiper.Name,
+		Budget:   packet.Budget,
+		Keywords: packet.Keywords,
+	}
+
+	myGossiper.safeOngoingSearch.mux.Lock()
+
+	if duplicateClientSearch(sr) {
+		infos = append(infos, InfoElem{Desc: "Duplicate Search", Event: "search"})
+		fmt.Println("CLIENT DUPLICATE SEARCH")
+		myGossiper.safeOngoingSearch.mux.Unlock()
+		return
+	}
+
+	stringKw := strings.Join(packet.Keywords, ",")
+	fmt.Printf("CLIENT SEARCH REQUEST keywords %s budget %d link\n", stringKw, packet.Budget)
+
+	infos = append(infos, InfoElem{Event: "search", Desc: "Searching " + stringKw + " with budget " + string(packet.Budget)})
+
+	ticker := time.NewTicker(SEARCH_CLIENT_TIMEOUT)
+	myGossiper.safeOngoingSearch.tickers = append(myGossiper.safeOngoingSearch.tickers, ticker)
+	myGossiper.safeOngoingSearch.searches = append(myGossiper.safeOngoingSearch.searches, sr)
+
+	// Mark the Search even if it comes from client
+	myGossiper.safeSearchesSeen.mux.Lock()
+	markSearchRequest(sr)
+	myGossiper.safeSearchesSeen.mux.Unlock()
+
+	if packet.Budget == 0 {
+		// Performing the increasing search request
+		go func() {
+			sr.Budget = 2
+			for range ticker.C {
+
+				// we can delete the Search
+				if sr.Budget > MAX_BUDGET {
+					ticker.Stop()
+					//Not even delete here but put it in the
+
+					return
+				}
+				fmt.Println("Sending search. Budget = ", sr.Budget)
+				distributeSearchRequest(*sr)
+				sr.Budget = sr.Budget * 2
+			}
+		}()
+	} else {
+		// Perfoming the simple seach request (No need for ticker but we keep it in the list)
+		ticker.Stop()
+		distributeSearchRequest(*sr)
+	}
+
+	myGossiper.safeOngoingSearch.mux.Unlock()
+}
+
+func duplicateClientSearch(packet *SearchRequest) bool {
+
+	keywords := strings.Join(packet.Keywords, "")
+
+	for _, sr := range myGossiper.safeOngoingSearch.searches {
+		if strings.Join(sr.Keywords, "") == keywords {
+			return true
+		}
+	}
+	return false
 }
 
 func processPrivateMsgFromClient(packetToSend *PrivateMessage) {

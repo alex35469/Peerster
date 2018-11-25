@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"strings"
 
 	"github.com/dedis/protobuf"
 )
@@ -36,14 +37,22 @@ type ClientMessage struct {
 	Dest    string
 }
 
+type ClientSearch struct {
+	Keywords []string
+	Budget   uint64
+}
+
 type ClientPacket struct {
 	Broadcast *SimpleMessage
 	Private   *PrivateMessage
 	CMessage  *ClientMessage
+	CSearch   *ClientSearch
 }
 
 var UIPort, msg string
 var dest, file, request string
+var keywords string
+var budget uint64
 
 // Init
 func init() {
@@ -52,6 +61,8 @@ func init() {
 	flag.StringVar(&dest, "dest", "", "destination for the private message")
 	flag.StringVar(&file, "file", "", "file to be indexed by the gossiper, or filename of the requested file")
 	flag.StringVar(&request, "request", "", "request a chunk or metafile of this hash")
+	flag.StringVar(&keywords, "keywords", "", "comma separated keywords to search")
+	flag.Uint64Var(&budget, "budget", 0, "budget assiociated with the underlying search (if not specified (or 0) dubbling process starting with 2 applies)")
 }
 
 //########################## MAIN ######################
@@ -68,6 +79,19 @@ func main() {
 		sendToGossiper(&packetToSend)
 		return
 
+	}
+
+	// Processing SearchRequest
+	if keywords != "" {
+		// Removing false and first not correct carracters
+		smartSplit := func(s rune) bool {
+			return s == ','
+		}
+
+		packetToSend.CSearch = &ClientSearch{
+			Keywords: strings.FieldsFunc(keywords, smartSplit),
+			Budget:   budget,
+		}
 	}
 
 	// It's an indexing

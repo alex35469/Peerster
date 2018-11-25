@@ -16,38 +16,41 @@ func TestScanFileAndCheckSum(t *testing.T) {
 	rf2, _ := ScanFile("carlton.txt")
 	fmt.Println(rf2)
 
-	rf3, _ := ScanFile("E.out")
+	rf3, _ := ScanFile("im1.jpg")
 	fmt.Println(rf3)
 
 	myGossiper.safeFiles.files = append(myGossiper.safeFiles.files, rf1)
 	myGossiper.safeFiles.files = append(myGossiper.safeFiles.files, rf2)
 	myGossiper.safeFiles.files = append(myGossiper.safeFiles.files, rf3)
-	b1, _ := hex.DecodeString("45e9baede15bc785096188994799ed7bee54c56e1709a1398c2d9c65bedfd0a0")
+	b1, _ := hex.DecodeString("129fe7a41d63d5d2dbc89816ee86298a04dd47654dbe210a09073bd24ae40729")
 
 	i, j := chunkSeek(b1, myGossiper)
-	if i != 2 && j != 1 {
-		t.Errorf("Expected i = 2 and j = 1 but got i = %d and j=%d ", i, j)
+
+	if i != 2 || j != -1 {
+		t.Errorf("Expected i = 2 and j = -1 but got i = %d and j=%d ", i, j)
 	}
 
-	b2, _ := hex.DecodeString("45e9baede15bc78a096188994799ed7bee54c56e1709a1398c2d9c65bedfd0a0")
+	b2, _ := hex.DecodeString("8eca4615e2c45366a822f1e732ae1bea9f7aecaf5dcc58c3dae6da2b6ed1dbb5")
 	i, j = chunkSeek(b2, myGossiper)
+
+	if i != 2 || j != 7 {
+		t.Errorf("Expected i = 2 and j = 7 but got i = %d and j=%d ", i, j)
+	}
+
+	b3, _ := hex.DecodeString("dc179d1241faa12394d81ce16168fb9b8eb6e123bec0afa139e3f10464b07554")
+
+	i, j = chunkSeek(b3, myGossiper)
 	if i != -1 {
 		t.Errorf("Expected i = -1 but got i = %d", i)
 	}
 
-	b3, _ := hex.DecodeString("dc179d1243faa12394d81ce16168fb9b8eb6e123bec0afa139e3f10464b07554")
+	b4, _ := hex.DecodeString("dc179d1243faa12394d81ce16168fb9b8eb6e123bec0afa139e3f10464b07554")
 
-	i, j = chunkSeek(b3, myGossiper)
+	i, j = chunkSeek(b4, myGossiper)
 	if i != 0 || j != 1 {
 		t.Errorf("Expected i = 0 and j = 1 but got i = %d and j = %d", i, j)
 	}
 
-	b4, _ := hex.DecodeString("ba9517a21079d0b341eca215bdf220a5ec6d3271c8b820670a00c795131f4a7a")
-
-	i, j = chunkSeek(b4, myGossiper)
-	if i != 0 || j != -1 {
-		t.Errorf("Expected i = 1 and j = 1 but got i = %d and j = %d", i, j)
-	}
 	/*
 		data, h := getDataAndHash(i, j, myGossiper)
 		if !bytes.Equal(b4, h) {
