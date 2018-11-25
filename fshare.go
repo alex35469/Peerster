@@ -245,19 +245,15 @@ func WriteChunk(fname string, data []byte) {
 	f, err := os.OpenFile(SPATH+fname, os.O_APPEND|os.O_WRONLY, 0600)
 	if err != nil {
 		fmt.Println("HEY")
-		panic(err)
 	}
 
 	defer f.Close()
 
-	n, err := f.Write(data)
+	_, err = f.Write(data)
 
 	if err != nil {
 		fmt.Println("HEY")
-		panic(err)
 	}
-
-	fmt.Println("N = ", n)
 
 }
 

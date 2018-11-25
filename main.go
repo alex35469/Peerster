@@ -476,9 +476,7 @@ func sendRumor(packet *RumorMessage, addr string) {
 		return
 	}
 
-	if packet.Text != "" {
-		fmt.Println("MONGERING with", addrNeighbor)
-	}
+	fmt.Println("MONGERING with", addrNeighbor)
 
 	sendTo(&GossipPacket{Rumor: packet}, addrNeighbor)
 
@@ -590,9 +588,9 @@ func flipACoinAndSend(packet *RumorMessage, notSupposeToSendTo string) {
 
 	if R.Int()%2 == 0 {
 		addrNeighbor := pickOneNeighbor(notSupposeToSendTo)
-		if packet.Text != "" {
-			fmt.Println("FLIPPED COIN sending rumor to", addrNeighbor)
-		}
+
+		fmt.Println("FLIPPED COIN sending rumor to", addrNeighbor)
+
 		if addrNeighbor == "" {
 			return
 		}
@@ -696,9 +694,6 @@ func processMsgFromClient(newPacket *ClientPacket) {
 			}
 
 			// We Craft the dataRequest and send it
-
-			link := myGossiper.routingTable[packet.Dest].link
-			fmt.Println("Sending to link : ", link)
 
 			// Filling the SafeChunkToDownload
 			//myGossiper.safeCtd.mux.Lock()
