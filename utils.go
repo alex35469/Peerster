@@ -8,6 +8,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/dedis/protobuf"
 )
 
 // Code retrieved from https://astaxie.gitbooks.io/build-web-application-with-golang/en/08.1.html
@@ -19,6 +21,57 @@ func checkError(err error, stop bool) {
 			os.Exit(1)
 		}
 
+	}
+}
+
+// Fetch a message that has been sent through a particular connection
+func fetchMessagesGossiper(udpConn *net.UDPConn) (*GossipPacket, *net.UDPAddr) {
+	var newPacket GossipPacket
+	buffer := make([]byte, UDP_PACKET_SIZE)
+
+	n, addr, err := udpConn.ReadFromUDP(buffer)
+	checkError(err, true)
+	err = protobuf.Decode(buffer[0:n], &newPacket)
+	checkError(err, true)
+
+	return &newPacket, addr
+}
+
+// Fetch a message that has been sent through a particular connection
+func fetchMessagesClient(udpConn *net.UDPConn) (*ClientPacket, *net.UDPAddr) {
+	var newPacket ClientPacket
+	buffer := make([]byte, UDP_PACKET_SIZE)
+
+	n, addr, err := udpConn.ReadFromUDP(buffer)
+	checkError(err, true)
+	err = protobuf.Decode(buffer[0:n], &newPacket)
+	checkError(err, true)
+
+	return &newPacket, addr
+}
+
+// Send a packet to every peers known by the gossiper (except the relayer)
+func sendToAllNeighbors(packet *GossipPacket, relayer string) {
+
+	// Extracting the peers
+
+	for _, neighbor := range myGossiper.neighbors {
+		if neighbor != relayer {
+			sendTo(packet, neighbor)
+		}
+	}
+}
+
+func sendTo(packet *GossipPacket, addr string) {
+	packetBytes, err := protobuf.Encode(packet)
+	checkError(err, true)
+
+	remoteGossiperAddr, err := net.ResolveUDPAddr("udp4", addr)
+	checkError(err, true)
+
+	_, err = myGossiper.conn.WriteTo(packetBytes, remoteGossiperAddr)
+	if err != nil {
+		fmt.Printf("Error: UDP write error: %v", err)
 	}
 }
 
@@ -59,7 +112,7 @@ func addNeighbor(neighbor string) {
 
 }
 
-// Function to compare myVC and other VC's (Run in O(n) 2n if the two VC are shifted )
+// CompareStatusPacket compare myVC and other VC's (Run in O(n) 2n if the two VC are shifted )
 // Takes to SORTED VC and compare them
 // To make no ambiguity (Both VC have msg that other doesn't have), we try to send the rumor first
 // return : (outcome , identifier, nextID)
@@ -84,14 +137,14 @@ func (myVC *StatusPacket) CompareStatusPacket(otherVC *StatusPacket) (int, strin
 	otherIsInadvance := false
 
 	var maxMe, maxHim int = len(myVC.Want), len(otherVC.Want)
-	i, j, to_with_draw := 0, 0, 0
+	i, j, toWithdraw := 0, 0, 0
 
 	for i < maxMe && j < maxHim {
 
 		// If the nextID field of the incomming packet is 1 we ignore it
 		for otherVC.Want[j].NextID == 1 {
 			j = j + 1
-			to_with_draw = to_with_draw + 1
+			toWithdraw++
 		}
 
 		if myVC.Want[i].Identifier == otherVC.Want[j].Identifier {
@@ -127,13 +180,13 @@ func (myVC *StatusPacket) CompareStatusPacket(otherVC *StatusPacket) (int, strin
 	// Seek for the remaining 1 fields in the rest of the other's VC
 	for j < maxHim {
 		if otherVC.Want[j].NextID == 1 {
-			to_with_draw += 1
+			toWithdraw++
 		}
 		j = j + 1
 
 	}
 
-	if len(myVC.Want) < (len(otherVC.Want)-to_with_draw) || otherIsInadvance {
+	if len(myVC.Want) < (len(otherVC.Want)-toWithdraw) || otherIsInadvance {
 		return -1, "", 0
 	}
 	// The two lists are the same
@@ -210,7 +263,7 @@ func fireRumor(rtimer int) {
 
 }
 
-// Create the Gossiper
+// NewGossiper Create the Gossiper
 func NewGossiper(address, name, neighborsInit string) *Gossiper {
 	udpAddr, err := net.ResolveUDPAddr("udp4", address)
 	checkError(err, true)
@@ -257,10 +310,37 @@ func NewGossiper(address, name, neighborsInit string) *Gossiper {
 }
 
 // From https://stackoverflow.com/questions/39868029/how-to-generate-a-sequence-of-numbers-in-golang?rq=1
-func makeRange(min, max int) []uint64 {
+func makeRange(min, max uint64) []uint64 {
 	r := make([]uint64, max-min+1)
 	for i := range r {
-		r[i] = uint64(min + i)
+		r[i] = uint64(min + uint64(i))
 	}
 	return r
+}
+
+// https://stackoverflow.com/questions/36000487/check-for-equality-on-slices-without-order
+func sameStringSlice(x, y []string) bool {
+	if len(x) != len(y) {
+		return false
+	}
+	// create a map of string -> int
+	diff := make(map[string]int, len(x))
+	for _, _x := range x {
+		// 0 value for int is 0, so just increment a counter for the string
+		diff[_x]++
+	}
+	for _, _y := range y {
+		// If the string _y is not in diff bail out early
+		if _, ok := diff[_y]; !ok {
+			return false
+		}
+		diff[_y]--
+		if diff[_y] == 0 {
+			delete(diff, _y)
+		}
+	}
+	if len(diff) == 0 {
+		return true
+	}
+	return false
 }

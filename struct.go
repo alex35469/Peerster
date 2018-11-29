@@ -18,6 +18,7 @@ const SEARCH_CLIENT_TIMEOUT time.Duration = time.Second
 const UDP_PACKET_SIZE = 10000
 const HOP_LIMIT = 10
 const MAX_BUDGET = 32
+const REQUIRED_MATCH = 2
 
 type SimpleMessage struct {
 	OriginalName  string
@@ -80,6 +81,7 @@ type SearchResult struct {
 	FileName     string
 	MetafileHash []byte
 	ChunkMap     []uint64
+	ChunkCount   uint64
 }
 
 type GossipPacket struct {
@@ -148,6 +150,13 @@ type SafeChunkToDownload struct {
 	mux     sync.Mutex
 }
 
+type FileRecord struct {
+	Name     string
+	NbChunk  uint64
+	MetaFile []string
+	MetaHash string
+}
+
 type SafeFileRecords struct {
 	files []*FileRecord
 	mux   sync.Mutex
@@ -159,25 +168,45 @@ type safeSearchesSeen struct {
 }
 
 type Gossiper struct {
-	address           *net.UDPAddr
-	conn              *net.UDPConn
-	Name              string
-	neighbors         []string
-	myVC              *StatusPacket
-	safeTimersRecord  SafeTimerRecord
-	messagesHistory   map[string]*SafeMsgsOrginHistory
-	routingTable      map[string]*RoutingTableEntry
-	mux               sync.Mutex
-	safeFiles         SafeFileRecords
-	safeCtd           SafeChunkToDownload
-	safeSearchesSeen  safeSearchesSeen
-	safeOngoingSearch OngoingSearch
+	address             *net.UDPAddr
+	conn                *net.UDPConn
+	Name                string
+	neighbors           []string
+	myVC                *StatusPacket
+	safeTimersRecord    SafeTimerRecord
+	messagesHistory     map[string]*SafeMsgsOrginHistory
+	routingTable        map[string]*RoutingTableEntry
+	mux                 sync.Mutex
+	safeFiles           SafeFileRecords
+	safeCtd             SafeChunkToDownload
+	safeSearchesSeen    safeSearchesSeen
+	safeOngoingSearch   OngoingSearch
+	safeDownloadingFile DownloadingFile
+	safeReadyToDownload ReadyToDownload
+}
+
+type DownloadingFile struct {
+	fname      []string
+	chunkMap   []map[uint64]string
+	chunkCount []uint64
+	metaHash   []string
+	mux        sync.Mutex
+}
+
+type ReadyToDownload struct {
+	fname      []string
+	chunkMap   []map[uint64]string
+	chunkCount []uint64
+	metaHash   []string
+	mux        sync.Mutex
 }
 
 type OngoingSearch struct {
-	tickers  []*time.Ticker
-	searches []*SearchRequest
-	mux      sync.Mutex
+	tickers    []*time.Ticker
+	searches   []*SearchRequest
+	matches    []uint8
+	seenHashes [][]string
+	mux        sync.Mutex
 }
 
 type RoutingTableEntry struct {

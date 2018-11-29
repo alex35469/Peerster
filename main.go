@@ -16,8 +16,6 @@ import (
 	"net"
 	"strings"
 	"time"
-
-	"github.com/dedis/protobuf"
 )
 
 var myGossiper *Gossiper
@@ -143,7 +141,213 @@ func proccessPacketAndSend(newPacket *GossipPacket, receivedFrom string) {
 // ##### PROCESSING SEARCH REPLY
 
 func processSearchReply(packet *SearchReply) {
-	fmt.Println("RECEIVING SEARCH REPLY ", packet)
+
+	// Need to forward if not intended to us
+	if packet.Destination != myGossiper.Name {
+		// We don't know where to forward the PrivateMessage
+		if myGossiper.routingTable[packet.Destination] == nil {
+			return
+		}
+
+		// We can send it
+		if hl := packet.HopLimit - 1; hl > 0 {
+			packet.HopLimit = hl
+			sendTo(&GossipPacket{SearchReply: packet}, myGossiper.routingTable[packet.Destination].link)
+		}
+
+		// Need to proceed
+		fmt.Println("$RECEIVING SEARCH REPLY AND SENDING IT ", packet)
+		return
+	}
+
+	myGossiper.safeSearchesSeen.mux.Lock()
+	defer myGossiper.safeSearchesSeen.mux.Unlock()
+
+	// Removing unmatching names or alreadyseen ones
+
+	for _, result := range packet.Results {
+		for dIndex, metaHash := range myGossiper.safeDownloadingFile.metaHash {
+
+			// it matches an existing file
+			if hex.EncodeToString(result.MetafileHash) == metaHash {
+
+				updateDownloadingFile(result, dIndex, packet.Origin)
+
+				// We pass to the next search result since it is supper
+				break
+			}
+
+		}
+		// It doesn't match any existing downloading file so we create the record
+		createDownloadingFile(result, packet.Origin)
+
+	}
+
+	updateOngoingSearch()
+
+	// Verify if with this search we have a match and if REQUIRED
+
+}
+
+// We then remove the ongoing search, and remove
+// See if a Ongoing search is finished.
+// Also if it is finished, we put the downloading
+func updateOngoingSearch() {
+
+	dSuppressed := 0
+	oSuppressed := 0
+
+	for dGlobal := range myGossiper.safeDownloadingFile.fname {
+		dIndex := dGlobal - dSuppressed
+
+		// We have to pass if the download is not finished yet
+		if myGossiper.safeDownloadingFile.chunkCount[dIndex] != uint64(len(myGossiper.safeDownloadingFile.chunkMap[dIndex])) {
+			fmt.Printf("$While cleaning, a Download was not finished name: %s\n  chunkcount= %d and len(chunkMap) = %d", myGossiper.safeDownloadingFile.fname[dIndex], myGossiper.safeDownloadingFile.chunkCount[dIndex], uint64(len(myGossiper.safeDownloadingFile.chunkMap[dIndex])))
+			continue
+		}
+
+		// Seeking in the searches where we found a match
+		for oGlobal := range myGossiper.safeOngoingSearch.searches {
+			// Directly pass if we already seen that hash for that search
+			oIndex := oGlobal - oSuppressed
+
+			if alreadySeenThisHash(myGossiper.safeDownloadingFile.metaHash[dIndex], myGossiper.safeOngoingSearch.seenHashes[oIndex]) {
+				continue
+			}
+
+			for _, k := range myGossiper.safeOngoingSearch.searches[oIndex].Keywords {
+
+				if matchName(myGossiper.safeDownloadingFile.fname[dIndex], k) {
+					// We have a match!!
+					myGossiper.safeOngoingSearch.matches[oIndex]++
+					myGossiper.safeOngoingSearch.seenHashes[oIndex] = append(myGossiper.safeOngoingSearch.seenHashes[oIndex], myGossiper.safeDownloadingFile.metaHash[dIndex])
+
+					if myGossiper.safeOngoingSearch.matches[oIndex] >= REQUIRED_MATCH {
+						// The Search is finished. Removing safeOngoing
+						fmt.Println("SEARCH FINISHED")
+						autodestruct(myGossiper.safeOngoingSearch.searches[oIndex], "ongoing")
+						oSuppressed++
+					}
+					break
+				}
+			}
+		}
+		// We need to supprime dIndex since it's already downloaded
+		// Moving the Downloading file to the ReadyToDownload Repo
+		moveToReadyAndSuppress(dIndex)
+		fmt.Println("$Did we really suppressed it?  Downloading", myGossiper.safeDownloadingFile)
+		fmt.Println("$Did we really suppressed it?  ReadyToDownload", myGossiper.safeReadyToDownload)
+
+		dSuppressed++
+	}
+
+}
+
+func alreadySeenThisHash(thisHash string, alreadySeenHashes []string) bool {
+	for _, h := range alreadySeenHashes {
+		if h == thisHash {
+			return true
+		}
+	}
+	return false
+}
+
+func moveToReadyAndSuppress(dIndex int) {
+	// Copying Part
+
+	// See if the metahash already exist
+	dMetaHash := myGossiper.safeDownloadingFile.metaHash[dIndex]
+	moved := false
+	for rIndex, rMetaHash := range myGossiper.safeReadyToDownload.metaHash {
+		if rMetaHash == dMetaHash {
+			// it already exist so we can simply update the infos here
+			myGossiper.safeReadyToDownload.fname[rIndex] = myGossiper.safeDownloadingFile.fname[dIndex]
+			myGossiper.safeReadyToDownload.chunkCount[rIndex] = myGossiper.safeDownloadingFile.chunkCount[dIndex]
+			myGossiper.safeReadyToDownload.chunkMap[rIndex] = myGossiper.safeDownloadingFile.chunkMap[dIndex]
+			myGossiper.safeReadyToDownload.metaHash[rIndex] = myGossiper.safeDownloadingFile.metaHash[dIndex]
+			moved = true
+		}
+	}
+
+	if !moved {
+		// We have to create a new record for the file that has been downloaded
+		myGossiper.safeReadyToDownload.fname = append(myGossiper.safeReadyToDownload.fname, myGossiper.safeDownloadingFile.fname[dIndex])
+		myGossiper.safeReadyToDownload.chunkCount = append(myGossiper.safeReadyToDownload.chunkCount, myGossiper.safeDownloadingFile.chunkCount[dIndex])
+		myGossiper.safeReadyToDownload.chunkMap = append(myGossiper.safeReadyToDownload.chunkMap, myGossiper.safeDownloadingFile.chunkMap[dIndex])
+		myGossiper.safeReadyToDownload.metaHash = append(myGossiper.safeReadyToDownload.metaHash, myGossiper.safeDownloadingFile.metaHash[dIndex])
+	}
+
+	// Removing Part
+	copy(myGossiper.safeDownloadingFile.fname[dIndex:], myGossiper.safeDownloadingFile.fname[dIndex+1:])
+	myGossiper.safeDownloadingFile.fname[len(myGossiper.safeDownloadingFile.fname)-1] = "" // or the zero value of T
+	myGossiper.safeDownloadingFile.fname = myGossiper.safeDownloadingFile.fname[:len(myGossiper.safeDownloadingFile.fname)-1]
+
+	copy(myGossiper.safeDownloadingFile.chunkMap[dIndex:], myGossiper.safeDownloadingFile.chunkMap[dIndex+1:])
+	myGossiper.safeDownloadingFile.chunkMap[len(myGossiper.safeDownloadingFile.chunkMap)-1] = nil // or the zero value of T
+	myGossiper.safeDownloadingFile.chunkMap = myGossiper.safeDownloadingFile.chunkMap[:len(myGossiper.safeDownloadingFile.chunkMap)-1]
+
+	copy(myGossiper.safeDownloadingFile.chunkCount[dIndex:], myGossiper.safeDownloadingFile.chunkCount[dIndex+1:])
+	myGossiper.safeDownloadingFile.chunkCount[len(myGossiper.safeDownloadingFile.chunkCount)-1] = 0 // or the zero value of T
+	myGossiper.safeDownloadingFile.chunkCount = myGossiper.safeDownloadingFile.chunkCount[:len(myGossiper.safeDownloadingFile.chunkCount)-1]
+
+	copy(myGossiper.safeDownloadingFile.metaHash[dIndex:], myGossiper.safeDownloadingFile.metaHash[dIndex+1:])
+	myGossiper.safeDownloadingFile.metaHash[len(myGossiper.safeDownloadingFile.metaHash)-1] = "" // or the zero value of T
+	myGossiper.safeDownloadingFile.metaHash = myGossiper.safeDownloadingFile.metaHash[:len(myGossiper.safeDownloadingFile.metaHash)-1]
+}
+
+func createDownloadingFile(sr *SearchResult, origin string) {
+
+	thisHash := hex.EncodeToString(sr.MetafileHash)
+	everybodySeenThisBefore := true
+	for _, alreadySeenHashes := range myGossiper.safeOngoingSearch.seenHashes {
+		// We only create a Downloading file if we did not see it beforehand on the ongoing searches
+		if !alreadySeenThisHash(thisHash, alreadySeenHashes) {
+			everybodySeenThisBefore = false
+			break
+		}
+	}
+
+	if everybodySeenThisBefore {
+		return
+	}
+
+	// We update all of the records	// We update all of the records
+	myGossiper.safeDownloadingFile.fname = append(myGossiper.safeDownloadingFile.fname, sr.FileName)
+	myGossiper.safeDownloadingFile.chunkCount = append(myGossiper.safeDownloadingFile.chunkCount, sr.ChunkCount)
+	myGossiper.safeDownloadingFile.metaHash = append(myGossiper.safeDownloadingFile.metaHash, thisHash)
+
+	chunkmap := make(map[uint64]string, len(sr.ChunkMap))
+	for _, i := range sr.ChunkMap {
+		chunkmap[i] = origin
+	}
+
+	// https://stackoverflow.com/questions/37532255/one-liner-to-transform-int-into-string/37533144
+	chunks := strings.Trim(strings.Replace(fmt.Sprint(sr.ChunkMap), " ", ",", -1), "[]")
+
+	fmt.Printf("FOUND match %s at %s metafile=%x ​chunks=%s\n", sr.FileName, origin, sr.MetafileHash, chunks)
+	myGossiper.safeDownloadingFile.chunkMap = append(myGossiper.safeDownloadingFile.chunkMap, chunkmap)
+
+}
+
+func updateDownloadingFile(sr *SearchResult, dindex int, origin string) bool {
+	updated := false
+	for _, i := range sr.ChunkMap {
+		_, ok := myGossiper.safeDownloadingFile.chunkMap[dindex][i]
+		if !ok {
+			myGossiper.safeDownloadingFile.chunkMap[dindex][i] = origin
+			updated = true
+		}
+
+	}
+
+	if updated {
+		// https://stackoverflow.com/questions/37532255/one-liner-to-transform-int-into-string/37533144
+		chunks := strings.Trim(strings.Replace(fmt.Sprint(sr.ChunkMap), " ", ",", -1), "[]")
+		fmt.Printf("FOUND match %s at %s metafile=%x ​chunks=%s\n", sr.FileName, origin, sr.MetafileHash, chunks)
+	}
+
+	return uint64(len(myGossiper.safeDownloadingFile.chunkMap[dindex])) == myGossiper.safeDownloadingFile.chunkCount[dindex]
+
 }
 
 func processSearchRequest(packet *SearchRequest, link string) {
@@ -159,9 +363,8 @@ func processSearchRequest(packet *SearchRequest, link string) {
 	myGossiper.safeSearchesSeen.mux.Lock()
 
 	// Firstly see if it's a duplicated searchRequests
-	keywords := strings.Join(packet.Keywords, "")
 	for _, sR := range myGossiper.safeSearchesSeen.searchesSeen {
-		if keywords == strings.Join(sR.Keywords, "") && packet.Origin == sR.Origin {
+		if sameStringSlice(packet.Keywords, sR.Keywords) && packet.Origin == sR.Origin {
 			// Duplicate Search request
 			fmt.Println("$YESSSS! FOUND DUPLICATES!")
 			myGossiper.safeSearchesSeen.mux.Unlock()
@@ -178,7 +381,6 @@ func processSearchRequest(packet *SearchRequest, link string) {
 		for _, key := range packet.Keywords {
 
 			if matchName(f.Name, key) {
-
 				// ChunkMap is simply the list from 0 to
 				metaHashByte, err := hex.DecodeString(f.MetaHash)
 				checkError(err, true)
@@ -187,8 +389,9 @@ func processSearchRequest(packet *SearchRequest, link string) {
 					FileName:     f.Name,
 					ChunkMap:     makeRange(1, f.NbChunk),
 					MetafileHash: metaHashByte,
+					ChunkCount:   uint64(len(f.MetaFile)),
 				}
-
+				fmt.Printf("len(MetaFile) = %d, NbChunk= %d", len(f.MetaFile), f.NbChunk)
 				results = append(results, r)
 
 				// We found a match we proceed directly the next file
@@ -209,19 +412,54 @@ func processSearchRequest(packet *SearchRequest, link string) {
 
 }
 
-func autodestruct(packet *SearchRequest) {
-	fmt.Println("$Before Deleting : Searches seen: ", myGossiper.safeSearchesSeen.searchesSeen)
-	myGossiper.safeSearchesSeen.mux.Lock()
-	for i, sseen := range myGossiper.safeSearchesSeen.searchesSeen {
-		if sseen == packet {
-			copy(myGossiper.safeSearchesSeen.searchesSeen[i:], myGossiper.safeSearchesSeen.searchesSeen[i+1:])
-			myGossiper.safeSearchesSeen.searchesSeen[len(myGossiper.safeSearchesSeen.searchesSeen)-1] = nil // or the zero value of T
-			myGossiper.safeSearchesSeen.searchesSeen = myGossiper.safeSearchesSeen.searchesSeen[:len(myGossiper.safeSearchesSeen.searchesSeen)-1]
-		}
-	}
-	fmt.Println("$After Deleting : Searches seen: ", myGossiper.safeSearchesSeen.searchesSeen)
+func autodestruct(packet *SearchRequest, mode string) {
 
-	myGossiper.safeSearchesSeen.mux.Unlock()
+	if mode == "searchSeen" {
+
+		fmt.Println("$Before Deleting : Searches seen: ", myGossiper.safeSearchesSeen.searchesSeen)
+		for i, sseen := range myGossiper.safeSearchesSeen.searchesSeen {
+			if sameStringSlice(sseen.Keywords, packet.Keywords) {
+				copy(myGossiper.safeSearchesSeen.searchesSeen[i:], myGossiper.safeSearchesSeen.searchesSeen[i+1:])
+				myGossiper.safeSearchesSeen.searchesSeen[len(myGossiper.safeSearchesSeen.searchesSeen)-1] = nil // or the zero value of T
+				myGossiper.safeSearchesSeen.searchesSeen = myGossiper.safeSearchesSeen.searchesSeen[:len(myGossiper.safeSearchesSeen.searchesSeen)-1]
+			}
+		}
+		fmt.Println("$After Deleting : Searches seen: ", myGossiper.safeSearchesSeen.searchesSeen)
+
+	}
+	if mode == "ongoing" {
+
+		fmt.Println("$Before Deleting : Ongoing search: ", myGossiper.safeOngoingSearch.searches)
+
+		for i, ongoing := range myGossiper.safeOngoingSearch.searches {
+			if sameStringSlice(ongoing.Keywords, packet.Keywords) {
+
+				// Stopping and deleting ticker
+				myGossiper.safeOngoingSearch.tickers[i].Stop()
+				copy(myGossiper.safeOngoingSearch.tickers[i:], myGossiper.safeOngoingSearch.tickers[i+1:])
+				myGossiper.safeOngoingSearch.tickers[len(myGossiper.safeOngoingSearch.tickers)-1] = nil // or the zero value of T
+				myGossiper.safeOngoingSearch.tickers = myGossiper.safeOngoingSearch.tickers[:len(myGossiper.safeOngoingSearch.tickers)-1]
+
+				// Deleting on going searches
+				copy(myGossiper.safeOngoingSearch.searches[i:], myGossiper.safeOngoingSearch.searches[i+1:])
+				myGossiper.safeOngoingSearch.searches[len(myGossiper.safeOngoingSearch.searches)-1] = nil // or the zero value of T
+				myGossiper.safeOngoingSearch.searches = myGossiper.safeOngoingSearch.searches[:len(myGossiper.safeOngoingSearch.searches)-1]
+
+				// Deleting on going searches
+				copy(myGossiper.safeOngoingSearch.matches[i:], myGossiper.safeOngoingSearch.matches[i+1:])
+				myGossiper.safeOngoingSearch.matches[len(myGossiper.safeOngoingSearch.matches)-1] = 0 // or the zero value of T
+				myGossiper.safeOngoingSearch.matches = myGossiper.safeOngoingSearch.matches[:len(myGossiper.safeOngoingSearch.matches)-1]
+
+				// Deleting seenHashed
+				copy(myGossiper.safeOngoingSearch.seenHashes[i:], myGossiper.safeOngoingSearch.seenHashes[i+1:])
+				myGossiper.safeOngoingSearch.seenHashes[len(myGossiper.safeOngoingSearch.seenHashes)-1] = nil // or the zero value of T
+				myGossiper.safeOngoingSearch.seenHashes = myGossiper.safeOngoingSearch.seenHashes[:len(myGossiper.safeOngoingSearch.seenHashes)-1]
+
+			}
+		}
+		fmt.Println("$After Deleting : Ongoing search: ", myGossiper.safeOngoingSearch.searches)
+
+	}
 
 }
 
@@ -236,7 +474,9 @@ func markSearchRequest(packet *SearchRequest) {
 		<-t.C
 		// notSupposeToSendTo field = "" Because if there is a time out occure
 		// for a peer, we might want to retry to send the message back to him
-		autodestruct(packet)
+		myGossiper.safeSearchesSeen.mux.Lock()
+		autodestruct(packet, "searchSeen")
+		myGossiper.safeSearchesSeen.mux.Unlock()
 	}()
 }
 
@@ -271,7 +511,7 @@ func distributeSearchRequest(packet SearchRequest) {
 			sendTo(&GossipPacket{SearchRequest: &packet}, myGossiper.neighbors[i])
 
 			if k == (n - b%n - 1) {
-				packet.Budget += 1
+				packet.Budget++
 			}
 
 		}
@@ -286,7 +526,7 @@ func craftAndSendSearchReply(results []*SearchResult, packet *SearchRequest) {
 
 	// no need to create a search reply if we have no result
 	// Or we don't know where to send the result
-	if len(results) != 0 || record == nil {
+	if len(results) == 0 || record == nil {
 		return
 	}
 
@@ -299,314 +539,6 @@ func craftAndSendSearchReply(results []*SearchResult, packet *SearchRequest) {
 	}
 
 	sendTo(&GossipPacket{SearchReply: sr}, link)
-
-}
-
-// ###### PROCESSING STATUS MESSAGE
-func processStatusMsgGossiper(otherVC *StatusPacket, receivedFrom string) {
-	// perform the sort just after receiving the packet (Cannot rely on others to send sorted VC in a decentralized system ;))
-	otherVC.SortVC()
-
-	fmt.Print("STATUS from ", receivedFrom)
-	for i, _ := range otherVC.Want {
-		fmt.Printf(" peer %s nextID %d", otherVC.Want[i].Identifier, otherVC.Want[i].NextID)
-	}
-	fmt.Println()
-	fmt.Println("PEERS " + strings.Join(myGossiper.neighbors[:], ","))
-
-	myGossiper.safeTimersRecord.mux.Lock()
-
-	timerForAcks, ok := myGossiper.safeTimersRecord.timersRecord[receivedFrom]
-	wasAnAck := false
-	var rumor = &RumorMessage{}
-
-	if ok {
-		rumor, wasAnAck = stopCorrespondingTimerAndTargetedRumor(timerForAcks, otherVC, receivedFrom)
-	}
-
-	myGossiper.safeTimersRecord.mux.Unlock()
-
-	outcome, identifier, nextID := myGossiper.myVC.CompareStatusPacket(otherVC)
-
-	if outcome == 0 {
-		fmt.Printf("IN SYNC WITH %v​", receivedFrom)
-		fmt.Println()
-		if wasAnAck {
-			flipACoinAndSend(rumor, receivedFrom)
-		}
-	}
-
-	if outcome == -1 {
-		sendTo(&GossipPacket{Status: myGossiper.myVC}, receivedFrom)
-	}
-
-	if outcome == 1 {
-
-		msg := myGossiper.messagesHistory[identifier].history[nextID-1]
-
-		// Restart the Rumongering process by sending a message
-		// the other peer doesn't have
-		sendTo(&GossipPacket{Rumor: msg}, receivedFrom)
-		setTimer(msg, receivedFrom)
-	}
-}
-
-// ###### PROCESSING RUMOR MESSAGE
-
-func processRumorMsgGossiper(packet *RumorMessage, receivedFrom string) {
-
-	updateRoutingTable(packet, receivedFrom)
-
-	myGossiper.mux.Lock()
-
-	safeHist, knownRecord := myGossiper.messagesHistory[packet.Origin]
-
-	if !knownRecord {
-		// Not very efficient to lock on the whole gossiper struct, should have put a mutex inside the message history and just
-		// lock it for this part
-		//  i.e. myGossiper.messagesHistory.mux.Lock()
-		myGossiper.messagesHistory[packet.Origin] = &SafeMsgsOrginHistory{}
-	}
-
-	// We lock on a specific origin so that packets from different origin can still go
-	// through. Only to packet that has two be process from the same origin have to wait
-	myGossiper.messagesHistory[packet.Origin].mux.Lock()
-	myGossiper.mux.Unlock()
-	defer myGossiper.messagesHistory[packet.Origin].mux.Unlock()
-
-	// Ignor message if it is a old or too new one (i.e. if it is out of order)
-	if (!knownRecord && packet.ID == 1) || (knownRecord && packet.ID == uint32(len(safeHist.history)+1)) {
-
-		if packet.Text != "" {
-			fmt.Printf("RUMOR origin %s from %s ID %d contents %s", packet.Origin, receivedFrom, packet.ID, packet.Text)
-			fmt.Println()
-			fmt.Println("PEERS " + strings.Join(myGossiper.neighbors[:], ","))
-		}
-		//fmt.Printf("We have : known record = %v,  msgs = %v and we received: %v", knownRecord, msgs, packet)
-		// keep trace of that incoming packet
-		updateRecord(packet, knownRecord, receivedFrom)
-		//myGossiper.messagesHistory[packet.Origin].mux.Unlock()
-
-		// Send The Satus Packet as an Ack to sender
-		sendTo(&GossipPacket{Status: myGossiper.myVC}, receivedFrom)
-
-		// Send Rumor packet ( Handle timer, flip coin etc..)
-		// No sense to send the rumor back (which will append the peer is isolated i.e len(neigbors) = 1)
-
-		if len(myGossiper.neighbors) > 1 {
-			sendRumor(packet, receivedFrom)
-		}
-	}
-
-}
-
-// ###### PROCESSING PRIVATE MESSAGE
-
-func processPrivateMsgGossiper(packet *PrivateMessage) {
-
-	if packet.Destination == myGossiper.Name {
-		fmt.Printf("PRIVATE origin %s hop-limit %d contents %s\n", packet.Origin, packet.HopLimit, packet.Text)
-
-		// Fill the stack
-		stack = append(stack, StackElem{Origin: packet.Origin, Msg: packet.Text, Dest: packet.Destination, Mode: "Private"})
-		return
-	}
-
-	// We don't know where to forward the PrivateMessage
-	if myGossiper.routingTable[packet.Destination] == nil {
-		return
-	}
-
-	// We can send it
-	if hl := packet.HopLimit - 1; hl > 0 {
-		packet.HopLimit = hl
-		sendTo(&GossipPacket{Private: packet}, myGossiper.routingTable[packet.Destination].link)
-	}
-}
-
-func processSimpleMsgGossiper(newPacket *GossipPacket) {
-	fmt.Printf("SIMPLE MESSAGE origin %s from %s contents %s\n",
-		newPacket.Simple.OriginalName,
-		newPacket.Simple.RelayPeerAddr,
-		newPacket.Simple.Contents,
-	)
-
-	sendMsgFromGossiperSimpleMode(newPacket)
-	fmt.Println("PEERS " + strings.Join(myGossiper.neighbors[:], ","))
-}
-
-// Find associated timer of a partcicular Ack
-// Return the corresponding Rumor Message of the ACK and True of it VC was here because of an Ack
-// Return an empty Rumor Message and False if the VC is not related to an ACK (Comes from independent ticker on the other peer's machine)
-func stopCorrespondingTimerAndTargetedRumor(timersForAcks []*TimerForAck, packet *StatusPacket, addr string) (*RumorMessage, bool) {
-
-	// This loop shouldn't take a lot of time
-	// Since for one peer, we delete the timers
-	for j, t := range timersForAcks {
-
-		// Find where the ID of the message
-		in, i := packet.seekInVC(t.rumor.Origin)
-
-		if in && packet.Want[i].NextID == t.rumor.ID+1 {
-
-			// Stop the timer and Delete from the array
-			// If we can stop it, we have to consider it as an ack
-			stopped := t.timer.Stop()
-			//fmt.Println("Stopped it")
-			timersForAcks = append(timersForAcks[:j], timersForAcks[j+1:]...)
-
-			myGossiper.safeTimersRecord.timersRecord[addr] = timersForAcks
-
-			return &t.rumor, stopped
-		}
-	}
-
-	return &RumorMessage{}, false
-
-}
-
-// Sending a rumor (Mongering with addr about packet)
-// In charge of picking the neighbor, not sending to the address
-// Setting the timer
-func sendRumor(packet *RumorMessage, addr string) {
-
-	addrNeighbor := pickOneNeighbor(addr)
-
-	if addrNeighbor == "" {
-		return
-	}
-
-	fmt.Println("MONGERING with", addrNeighbor)
-
-	sendTo(&GossipPacket{Rumor: packet}, addrNeighbor)
-
-	setTimer(packet, addrNeighbor)
-
-}
-
-// Start & store the timer of the peer we are sending message to
-// Store the sending packet in the record (to have a mean for stopping it)
-func setTimer(packet *RumorMessage, addrNeighbor string) {
-
-	t := time.NewTimer(TIME_OUT)
-	myGossiper.safeTimersRecord.mux.Lock()
-	myGossiper.safeTimersRecord.timersRecord[addrNeighbor] = append(myGossiper.safeTimersRecord.timersRecord[addrNeighbor], &TimerForAck{timer: t, rumor: *packet})
-	myGossiper.safeTimersRecord.mux.Unlock()
-
-	go func() {
-		<-t.C
-		// notSupposeToSendTo field = "" Because if there is a time out occure
-		// for a peer, we might want to retry to send the message back to him
-		flipACoinAndSend(packet, "")
-	}()
-
-}
-
-func updateRoutingTable(packet *RumorMessage, receivedFrom string) {
-
-	// We don't care about our own routing origin
-	if packet.Origin == myGossiper.Name {
-		return
-	}
-
-	// Updating the routing table
-	// Create a record if new
-	if myGossiper.routingTable[packet.Origin] == nil {
-		myGossiper.routingTable[packet.Origin] = &RoutingTableEntry{freshest: packet.ID, link: receivedFrom}
-		fmt.Println("DSDV " + packet.Origin + " " + receivedFrom)
-		return
-	}
-
-	// Skip if same records
-	if myGossiper.routingTable[packet.Origin].link == receivedFrom && myGossiper.routingTable[packet.Origin].freshest < packet.ID {
-		myGossiper.routingTable[packet.Origin].freshest = packet.ID
-		return
-	}
-
-	// Update if the packet is fresher
-	if packet.ID > myGossiper.routingTable[packet.Origin].freshest {
-		myGossiper.routingTable[packet.Origin].freshest = packet.ID
-		myGossiper.routingTable[packet.Origin].link = receivedFrom
-		fmt.Println("DSDV " + packet.Origin + " " + receivedFrom)
-	}
-}
-
-func updateRecord(packet *RumorMessage, knownRecord bool, receivedFrom string) {
-	// If we end up here it means it's a packet we have never seen before
-
-	ps := PeerStatus{Identifier: packet.Origin, NextID: packet.ID + 1}
-	//fmt.Printf("Inside updateRecord, outside if : %v  And VC %v with len %v", myGossiper.messagesHistory, myGossiper.myVC.Want, len(myGossiper.myVC.Want))
-	if len(myGossiper.myVC.Want) == 0 {
-		myGossiper.myVC.Want = append(myGossiper.myVC.Want, ps)
-		myGossiper.messagesHistory[packet.Origin] = &SafeMsgsOrginHistory{}
-		myGossiper.messagesHistory[packet.Origin].history = append(myGossiper.messagesHistory[packet.Origin].history, packet)
-
-		if packet.Text != "" {
-			stack = append(stack, StackElem{Origin: packet.Origin, Msg: packet.Text, Dest: "", Mode: "All"})
-		}
-
-		//fmt.Printf("Inside updateRecord: %v  And VC %v", myGossiper.messagesHistory, myGossiper.myVC.Want)
-		return
-
-	}
-	// Use binary search to find where is located the orgin in the VC array
-	// Or where it should go (if it doesn't exist)
-
-	_, i := myGossiper.myVC.seekInVC(packet.Origin)
-
-	// We have to insert at the end of the list
-	if i == len(myGossiper.myVC.Want) {
-		myGossiper.myVC.Want = append(myGossiper.myVC.Want, ps)
-	}
-
-	if myGossiper.myVC.Want[i].Identifier != packet.Origin {
-		// Little trick to insert an element at position i in an array
-		myGossiper.myVC.Want = append(myGossiper.myVC.Want, ps)
-		copy(myGossiper.myVC.Want[i+1:], myGossiper.myVC.Want[i:])
-	}
-
-	if packet.Text != "" {
-		stack = append(stack, StackElem{Origin: packet.Origin, Msg: packet.Text, Dest: "", Mode: "All"})
-	}
-
-	myGossiper.myVC.Want[i] = ps
-
-	myGossiper.messagesHistory[packet.Origin].history = append(myGossiper.messagesHistory[packet.Origin].history, packet)
-}
-
-// packet is the packet we are
-// notSupposeToSendTo is the peer we dont want to send the message:
-// 	Typically the peer from which we received the message from¨
-// 	Or the peer which send us an ACK
-func flipACoinAndSend(packet *RumorMessage, notSupposeToSendTo string) {
-	// If there is no neighbors
-	if len(myGossiper.neighbors) < 1 {
-		return
-	}
-	var s = rand.NewSource(time.Now().UnixNano())
-	var R = rand.New(s)
-
-	if R.Int()%2 == 0 {
-		addrNeighbor := pickOneNeighbor(notSupposeToSendTo)
-
-		fmt.Println("FLIPPED COIN sending rumor to", addrNeighbor)
-
-		if addrNeighbor == "" {
-			return
-		}
-		sendTo(&GossipPacket{Rumor: packet}, addrNeighbor)
-		setTimer(packet, addrNeighbor)
-
-	}
-}
-
-// Send a message comming from another peer (not UI Client) port to all the peers
-func sendMsgFromGossiperSimpleMode(packetToSend *GossipPacket) {
-	// Add the relayer to the peers'field
-	relayer := packetToSend.Simple.RelayPeerAddr
-	addNeighbor(relayer)
-	packetToSend.Simple.RelayPeerAddr = myGossiper.address.String()
-	sendToAllNeighbors(packetToSend, relayer)
 
 }
 
@@ -681,7 +613,7 @@ func processMsgFromClient(newPacket *ClientPacket) {
 
 			// If we found the corresponding metafile record and the downoad is complete
 			// we can already send back what the client ask
-			if i != -1 && myGossiper.safeFiles.files[i].NbChunk == len(myGossiper.safeFiles.files[i].MetaFile) {
+			if i != -1 && myGossiper.safeFiles.files[i].NbChunk == uint64(len(myGossiper.safeFiles.files[i].MetaFile)) {
 
 				fmt.Println("FILE FOUND IN THE INDEX")
 				storeFile(packet.File, request, myGossiper, -1)
@@ -729,7 +661,7 @@ func processSearchMsgFromClient(packet *ClientSearch) {
 	myGossiper.safeOngoingSearch.mux.Lock()
 
 	if duplicateClientSearch(sr) {
-		infos = append(infos, InfoElem{Desc: "Duplicate Search", Event: "search"})
+		infos = append(infos, InfoElem{Desc: "Duplicate Search for matches or budget exceeded", Event: "search"})
 		fmt.Println("CLIENT DUPLICATE SEARCH")
 		myGossiper.safeOngoingSearch.mux.Unlock()
 		return
@@ -743,11 +675,8 @@ func processSearchMsgFromClient(packet *ClientSearch) {
 	ticker := time.NewTicker(SEARCH_CLIENT_TIMEOUT)
 	myGossiper.safeOngoingSearch.tickers = append(myGossiper.safeOngoingSearch.tickers, ticker)
 	myGossiper.safeOngoingSearch.searches = append(myGossiper.safeOngoingSearch.searches, sr)
-
-	// Mark the Search even if it comes from client
-	myGossiper.safeSearchesSeen.mux.Lock()
-	markSearchRequest(sr)
-	myGossiper.safeSearchesSeen.mux.Unlock()
+	myGossiper.safeOngoingSearch.matches = append(myGossiper.safeOngoingSearch.matches, 0)
+	myGossiper.safeOngoingSearch.seenHashes = append(myGossiper.safeOngoingSearch.seenHashes, make([]string, 0))
 
 	if packet.Budget == 0 {
 		// Performing the increasing search request
@@ -757,7 +686,8 @@ func processSearchMsgFromClient(packet *ClientSearch) {
 
 				// we can delete the Search
 				if sr.Budget > MAX_BUDGET {
-					ticker.Stop()
+
+					autodestruct(sr, "ongoing")
 					//Not even delete here but put it in the
 
 					return
@@ -768,120 +698,27 @@ func processSearchMsgFromClient(packet *ClientSearch) {
 			}
 		}()
 	} else {
-		// Perfoming the simple seach request (No need for ticker but we keep it in the list)
-		ticker.Stop()
-		distributeSearchRequest(*sr)
+		// Perfoming the simple seach request (Still with the timer)
+		go func() {
+			for range ticker.C {
+				ticker.Stop()
+				distributeSearchRequest(*sr)
+				autodestruct(sr, "ongoing")
+			}
+		}()
+
 	}
 
 	myGossiper.safeOngoingSearch.mux.Unlock()
 }
 
 func duplicateClientSearch(packet *SearchRequest) bool {
-
-	keywords := strings.Join(packet.Keywords, "")
-
 	for _, sr := range myGossiper.safeOngoingSearch.searches {
-		if strings.Join(sr.Keywords, "") == keywords {
+		if sameStringSlice(packet.Keywords, sr.Keywords) {
 			return true
 		}
 	}
+
 	return false
-}
 
-func processPrivateMsgFromClient(packetToSend *PrivateMessage) {
-
-	// We drop the packet if we don't have a proper entry in the table
-	if rtEntry := myGossiper.routingTable[packetToSend.Destination]; rtEntry != nil {
-		packetToSend.HopLimit = HOP_LIMIT
-		packetToSend.ID = 0
-		packetToSend.Origin = myGossiper.Name
-		sendTo(&GossipPacket{Private: packetToSend}, rtEntry.link)
-
-		// Fill the stack
-		stack = append(stack, StackElem{Origin: packetToSend.Origin, Msg: packetToSend.Text, Dest: packetToSend.Destination, Mode: "Private"})
-	}
-	// We can also pick one random neighbor in the hop that he has an entry for that dest
-
-}
-
-func initiateRumorFromClient(newPacket *GossipPacket) {
-
-	msgList, knownRecord := myGossiper.messagesHistory[myGossiper.Name]
-
-	msgList.mux.Lock()
-
-	id := len(msgList.history) + 1
-
-	packet := &RumorMessage{Origin: myGossiper.Name, ID: uint32(id), Text: newPacket.Simple.Contents}
-
-	updateRecord(packet, knownRecord, myGossiper.address.String())
-	msgList.mux.Unlock()
-
-	sendRumor(packet, myGossiper.address.String())
-
-}
-
-// Send a message comming from the UIport to all the peers
-func sendMsgFromClientSimpleMode(packetToSend *GossipPacket) {
-	if packetToSend.Simple != nil {
-		packetToSend.Simple.OriginalName = myGossiper.Name
-		packetToSend.Simple.RelayPeerAddr = myGossiper.address.String()
-
-		// it's comming from the client so the send field should have no effects
-		sendToAllNeighbors(packetToSend, "client")
-	}
-
-}
-
-//################## HELPER Functions (Might be call in all above section) ###################
-
-// Fetch a message that has been sent through a particular connection
-func fetchMessagesGossiper(udpConn *net.UDPConn) (*GossipPacket, *net.UDPAddr) {
-	var newPacket GossipPacket
-	buffer := make([]byte, UDP_PACKET_SIZE)
-
-	n, addr, err := udpConn.ReadFromUDP(buffer)
-	checkError(err, true)
-	err = protobuf.Decode(buffer[0:n], &newPacket)
-	checkError(err, true)
-
-	return &newPacket, addr
-}
-
-// Fetch a message that has been sent through a particular connection
-func fetchMessagesClient(udpConn *net.UDPConn) (*ClientPacket, *net.UDPAddr) {
-	var newPacket ClientPacket
-	buffer := make([]byte, UDP_PACKET_SIZE)
-
-	n, addr, err := udpConn.ReadFromUDP(buffer)
-	checkError(err, true)
-	err = protobuf.Decode(buffer[0:n], &newPacket)
-	checkError(err, true)
-
-	return &newPacket, addr
-}
-
-// Send a packet to every peers known by the gossiper (except the relayer)
-func sendToAllNeighbors(packet *GossipPacket, relayer string) {
-
-	// Extracting the peers
-
-	for _, neighbor := range myGossiper.neighbors {
-		if neighbor != relayer {
-			sendTo(packet, neighbor)
-		}
-	}
-}
-
-func sendTo(packet *GossipPacket, addr string) {
-	packetBytes, err := protobuf.Encode(packet)
-	checkError(err, true)
-
-	remoteGossiperAddr, err := net.ResolveUDPAddr("udp4", addr)
-	checkError(err, true)
-
-	_, err = myGossiper.conn.WriteTo(packetBytes, remoteGossiperAddr)
-	if err != nil {
-		fmt.Printf("Error: UDP write error: %v", err)
-	}
 }

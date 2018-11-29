@@ -18,13 +18,6 @@ const CHUNCK_SIZE = 8 * 1024 // 8KB for the chunck size
 const HASH_SIZE = 32
 const MAX_NB_CHUNK = CHUNCK_SIZE / HASH_SIZE
 
-type FileRecord struct {
-	Name     string
-	NbChunk  int
-	MetaFile []string
-	MetaHash string
-}
-
 func ScanFile(fname string) (*FileRecord, error) {
 
 	fr := &FileRecord{Name: fname}
@@ -53,7 +46,7 @@ func ScanFile(fname string) (*FileRecord, error) {
 		n, _ := r.Read(buf)
 
 		h := sha256.New()
-		tot += 1
+		tot++
 
 		if n == 0 {
 
@@ -63,7 +56,7 @@ func ScanFile(fname string) (*FileRecord, error) {
 
 			// store the information
 
-			fr.NbChunk = tot
+			fr.NbChunk = uint64(tot)
 			fr.MetaFile = hexs
 
 			metaBytes, err := hex.DecodeString(strings.Join(hexs, ""))
@@ -76,16 +69,14 @@ func ScanFile(fname string) (*FileRecord, error) {
 
 			return fr, nil
 
-		} else {
-			h.Write(buf[0:n])
-			b := h.Sum(nil)
-			fmt.Printf("n = %d, sha = %x\n", n, b)
-
-			// If we need bytes uncomment this
-			concats = append(concats, b...)
-			hexs = append(hexs, hex.EncodeToString(b))
-
 		}
+		h.Write(buf[0:n])
+		b := h.Sum(nil)
+		fmt.Printf("n = %d, sha = %x\n", n, b)
+
+		// If we need bytes uncomment this
+		concats = append(concats, b...)
+		hexs = append(hexs, hex.EncodeToString(b))
 	}
 }
 
@@ -153,7 +144,7 @@ func getDataAndHash(i int, j int, myGossiper *Gossiper) ([]byte, []byte) {
 
 	}
 
-	if j >= myGossiper.safeFiles.files[i].NbChunk {
+	if uint64(j) >= myGossiper.safeFiles.files[i].NbChunk {
 		fmt.Println("Error : Chunk bigger than NbChunk was requested (fshare.go l.129)")
 		os.Exit(1)
 	}

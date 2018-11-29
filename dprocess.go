@@ -97,12 +97,12 @@ func processDataReply(packet *DataReply) {
 				}
 				fmt.Println("Writing to file")
 				WriteChunk(fname, packet.Data)
-				myGossiper.safeFiles.files[k].NbChunk += 1
+				myGossiper.safeFiles.files[k].NbChunk++
 
 				// Add the new chunk in the to dwonload list
 
 				// We finished to download the whole file
-				if myGossiper.safeFiles.files[k].NbChunk == len(myGossiper.safeFiles.files[k].MetaFile) {
+				if int(myGossiper.safeFiles.files[k].NbChunk) == len(myGossiper.safeFiles.files[k].MetaFile) {
 					// Remove the hashes
 
 					fmt.Printf("RECONSTRUCTED file %s\n", fname)
@@ -116,17 +116,16 @@ func processDataReply(packet *DataReply) {
 
 					// Delete the entry
 
-				} else {
-
-					// Setup the ticker for next chunk and send the packet
-					hexaChunk := myGossiper.safeFiles.files[k].MetaFile[myGossiper.safeFiles.files[k].NbChunk]
-					hashChunck, _ := hex.DecodeString(hexaChunk)
-
-					fmt.Printf("DOWNLOADING %s chunk %d from %s\n", fname, myGossiper.safeFiles.files[k].NbChunk+1, packet.Origin)
-					requestNextChunk(fname, hashChunck, myGossiper.safeCtd.metas[i], packet.Origin, i)
-					cleaningCtd(c, hashChunck)
-
 				}
+
+				// Setup the ticker for next chunk and send the packet
+				hexaChunk := myGossiper.safeFiles.files[k].MetaFile[myGossiper.safeFiles.files[k].NbChunk]
+				hashChunck, _ := hex.DecodeString(hexaChunk)
+
+				fmt.Printf("DOWNLOADING %s chunk %d from %s\n", fname, myGossiper.safeFiles.files[k].NbChunk+1, packet.Origin)
+				requestNextChunk(fname, hashChunck, myGossiper.safeCtd.metas[i], packet.Origin, i)
+				cleaningCtd(c, hashChunck)
+
 			}
 		}
 
@@ -147,7 +146,7 @@ func cleaningCtd(oldHash []byte, newHash []byte) {
 		newFname :=   []string
 	*/
 
-	for i, _ := range myGossiper.safeCtd.chunks {
+	for i := range myGossiper.safeCtd.chunks {
 
 		if newHash != nil {
 			if bytes.Equal(myGossiper.safeCtd.chunks[i], oldHash) {
@@ -246,7 +245,7 @@ func processDataRequest(packet *DataRequest) {
 	i, j := chunkSeek(packet.HashValue, myGossiper)
 
 	// We don't have the chunk
-	if i == -1 || j >= myGossiper.safeFiles.files[i].NbChunk {
+	if i == -1 || j >= int(myGossiper.safeFiles.files[i].NbChunk) {
 		return
 	}
 
