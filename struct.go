@@ -17,8 +17,21 @@ const SEARCH_CLIENT_TIMEOUT time.Duration = time.Second
 
 const UDP_PACKET_SIZE = 10000
 const HOP_LIMIT = 10
+const HOP_LIMIT_BLOCK = 20
 const MAX_BUDGET = 32
 const REQUIRED_MATCH = 2
+const MINING_BYTES = 2
+
+var myGossiper *Gossiper
+
+var UIPort, gossipAddr, name, neighborsInit string
+var simple bool
+var rtimer int
+
+var stack = make([]StackElem, 0)
+var infos = make([]InfoElem, 0)
+
+// MESSAGES
 
 type SimpleMessage struct {
 	OriginalName  string
@@ -84,6 +97,28 @@ type SearchResult struct {
 	ChunkCount   uint64
 }
 
+type TxPublish struct {
+	File     File
+	HopLimit uint32
+}
+
+type BlockPublish struct {
+	Block    Block
+	HopLimit uint32
+}
+
+type File struct {
+	Name         string
+	Size         int64
+	MetafileHash []byte
+}
+
+type Block struct {
+	PrevHash     [32]byte
+	Nonce        [32]byte
+	Transactions []TxPublish
+}
+
 type GossipPacket struct {
 	Simple        *SimpleMessage
 	Rumor         *RumorMessage
@@ -93,6 +128,8 @@ type GossipPacket struct {
 	DataReply     *DataReply
 	SearchRequest *SearchRequest
 	SearchReply   *SearchReply
+	TxPublish     *TxPublish
+	BlockPublish  *BlockPublish
 }
 
 // COMUNICATION WITH CLIENT
@@ -183,6 +220,29 @@ type Gossiper struct {
 	safeOngoingSearch   OngoingSearch
 	safeDownloadingFile DownloadingFile
 	safeReadyToDownload ReadyToDownload
+	pendingTransactions pendingTransactions
+	blockchain          Blockchain
+	blockChannel        chan Block
+}
+
+type Blockchain struct {
+	// The chain is represent by a map hash -> block
+	blocks map[string]Block
+
+	head               Block
+	lengthLongestChain int
+	nameHashMapping    map[string]string
+
+	forksHead        []Block
+	forksHashMapping []map[string]string
+	forksLength      []int
+
+	mux sync.Mutex
+}
+
+type pendingTransactions struct {
+	transactions []TxPublish
+	mux          sync.Mutex
 }
 
 type DownloadingFile struct {
@@ -206,7 +266,8 @@ type OngoingSearch struct {
 	searches   []*SearchRequest
 	matches    []uint8
 	seenHashes [][]string
-	mux        sync.Mutex
+	//seenNames  [][]string
+	mux sync.Mutex
 }
 
 type RoutingTableEntry struct {

@@ -18,7 +18,7 @@ const CHUNCK_SIZE = 8 * 1024 // 8KB for the chunck size
 const HASH_SIZE = 32
 const MAX_NB_CHUNK = CHUNCK_SIZE / HASH_SIZE
 
-func ScanFile(fname string) (*FileRecord, error) {
+func ScanFile(fname string) (*FileRecord, int64, error) {
 
 	fr := &FileRecord{Name: fname}
 
@@ -27,7 +27,7 @@ func ScanFile(fname string) (*FileRecord, error) {
 	// If there is no path just ignore it
 	if err != nil {
 
-		return nil, err
+		return nil, 0, err
 	}
 
 	defer f.Close()
@@ -35,6 +35,7 @@ func ScanFile(fname string) (*FileRecord, error) {
 	buf := make([]byte, CHUNCK_SIZE)
 
 	tot := -1
+	size := 0
 
 	r := bufio.NewReader(f)
 
@@ -47,11 +48,12 @@ func ScanFile(fname string) (*FileRecord, error) {
 
 		h := sha256.New()
 		tot++
+		size += n
 
 		if n == 0 {
 
 			if tot > MAX_NB_CHUNK {
-				return nil, errors.New("File too large to be indexed")
+				return nil, 0, errors.New("File too large to be indexed")
 			}
 
 			// store the information
@@ -65,9 +67,9 @@ func ScanFile(fname string) (*FileRecord, error) {
 
 			fr.MetaHash = hex.EncodeToString(h.Sum(nil))
 
-			fmt.Println("MetaHash = ", fr.MetaHash)
+			fmt.Printf("MetaHash = %s, Chunks = %d ,Size = %d\n", fr.MetaHash, tot, size)
 
-			return fr, nil
+			return fr, int64(size), nil
 
 		}
 		h.Write(buf[0:n])
@@ -226,6 +228,9 @@ func storeFile(fname string, request []byte, myGossiper *Gossiper, i int) {
 		checkError(err, false)
 	}
 
+}
+func prepareFile(fname string) {
+	os.Create(SPATH + fname)
 }
 
 func WriteChunk(fname string, data []byte) {

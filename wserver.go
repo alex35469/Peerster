@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"os"
 	"reflect"
 	"strconv"
 	"strings"
@@ -106,26 +105,11 @@ func fileRequest(w http.ResponseWriter, r *http.Request) {
 	budget := r.FormValue("budget")
 
 	if mode == "share" {
-
-		if _, err := os.Stat("./_SharedFiles/" + fname); os.IsNotExist(err) {
-			fmt.Println("The file doesn't exist in the shared folder")
-		} else {
-			rf, err := ScanFile(fname)
-
-			if err != nil {
-				fmt.Println(err.Error())
-				infos = append(infos, InfoElem{Fname: fname, Event: "error", Desc: err.Error(), Hash: ""})
-				return
-			}
-
-			infos = append(infos, InfoElem{Fname: fname, Event: "indexed", Desc: "MetaHash = ", Hash: rf.MetaHash})
-
-			err = addFileRecord(rf, myGossiper)
-
-			if err != nil {
-				infos = append(infos, InfoElem{Fname: fname, Event: "duplicate", Desc: err.Error(), Hash: ""})
-			}
+		cm := ClientMessage{
+			File: fname,
 		}
+		processMsgFromClient(&ClientPacket{CMessage: &cm})
+
 	}
 
 	if mode == "download" {
@@ -154,33 +138,18 @@ func fileRequest(w http.ResponseWriter, r *http.Request) {
 			Budget:   uint64(budgetUint),
 		}
 		processMsgFromClient(&ClientPacket{CSearch: &cm})
-		//infos = append(infos, InfoElem{Event: "search", Desc: "Searching " + keywords + " with budget " + budget})
-
 	}
 
-	// In case we want to upload the file
-	/*
-		  r.ParseForm()
-			fmt.Println(r.MultipartForm)
-			fname := r.FormValue("name")
-			mode := r.FormValue("mode")
-			fmt.Println(fname)
-			fmt.Println(mode)
+	if mode == "downloadable" {
 
-		  fmt.Println("Good path")
-		  fmt.Println(r.ContentLength)
-		  fmt.Println(r.Header["Content-Type"]["boundary"])
+		fmt.Printf("Got a request: download: name = %s, hash = %s \n", fname, hash)
+		cm := ClientMessage{
+			File:    fname,
+			Request: hash,
+		}
+		processMsgFromClient(&ClientPacket{CMessage: &cm})
 
-			buf := new(bytes.Buffer)
-			buf.ReadFrom(r.Body)
-
-		  mp := r.MultipartReader()
-
-		  p, err := mp.NextPart()
-			b := buf.Bytes()
-			s := *(*string)(unsafe.Pointer(&b))
-			fmt.Println(s)
-	*/
+	}
 
 }
 

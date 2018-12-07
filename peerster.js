@@ -10,6 +10,9 @@ let msgs = [];
 let nodes = new Set(["All"])
 let myId = ""
 let stats = new Set()
+let fileSelected = "None"
+let filesToDownload = new Set()
+
 /*
 	Run the action when we are sure the DOM has been loaded (FROM dataviz course)
 */
@@ -138,6 +141,14 @@ function openChat(id){
 	select = id
 	updateChatBox()
 }
+
+function fileSelector(name){
+	$("#file-selected").html($("#"+name).text())
+	fileSelected = name
+
+}
+
+
 
 var getNewMsg = function(){
 	// get new msgs
@@ -289,7 +300,29 @@ whenDocumentLoaded(() => {
 	let search = document.getElementById("search-btn");
 	search.addEventListener("click", () => searchFile())
 
+	let downloadable = document.getElementById("downloadable-btn");
+	downloadable.addEventListener("click", () => downloadSelected())
+
+
+
 });
+
+
+function downloadSelected(){
+	if (fileSelected == "None"){
+		return
+	}
+	$("#"+name).text()
+
+	$.post(
+		backendAddr+FILE_PATH,
+		{name:$("#"+fileSelected).text(), metaHash:fileSelected ,mode:"downloadable"},
+		'jsonp'
+	)
+	$("#info-box").append("Downloading "+fileSelected +" ...<br />");
+
+}
+
 
 function downloadFile(){
 	let fname = document.getElementsByName("fname-input")[0].value;
@@ -375,6 +408,20 @@ function getInfos(){
 
 				if (info["Event"] == "search"){
 					$("#search-box").append(info["Desc"] +"...<br />");
+
+				}
+
+				if (info["Event"] == "downloadable"){
+					$("#search-box").append(info["Desc"] +".<br />");
+
+					// See if we already have the same hash:
+					if (filesToDownload.has(info["Hash"])){
+						$("#"+info["Hash"]).html(info["Fname"])
+						return
+					}
+					filesToDownload.add(info["Hash"])
+					$("#downloadable-box").append("<span class='option' onclick='fileSelector(this.id)' id = '"+info["Hash"]+"'>"+info["Fname"]+"</span>, ")
+
 
 				}
 

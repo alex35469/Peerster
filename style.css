@@ -9,6 +9,7 @@ html, body, figure {
 	padding: 0;
 	margin: 0;
 	border: 0;
+	padding-bottom: 3rem;
 
 }
 
@@ -150,7 +151,11 @@ button {
 #info-box{
 	min-height: 200px;
 	max-height: 200px;
+}
 
+#downloadable-box{
+	min-height: 160px;
+	max-height: 160px;
 }
 
 h6 {
@@ -173,12 +178,9 @@ h5 {
 
 }
 
-.option {
-
-
-}
 
 .option:hover {
+	font-size:20px;
 	color: white;
   background-color : rgb(10, 100, 150);
 	cursor: pointer;

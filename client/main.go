@@ -71,9 +71,9 @@ func main() {
 	flag.Parse()
 	packetToSend := ClientPacket{}
 
-	if dest != "" && file != "" && request != "" {
+	if file != "" && request != "" {
 		// The client is downloading a file
-
+		fmt.Printf("Senfing to gossiper file : %s  request %s\n", file, request)
 		// Telling the gossiper we want to download the file -file.
 		packetToSend.CMessage = &ClientMessage{File: file, Request: request, Dest: dest}
 		sendToGossiper(&packetToSend)
@@ -97,7 +97,7 @@ func main() {
 	// It's an indexing
 	if file != "" && request == "" {
 		fmt.Println("indexing")
-		packetToSend.CMessage = &ClientMessage{File: file, Request: "", Dest: "Hello"}
+		packetToSend.CMessage = &ClientMessage{File: file, Request: "", Dest: ""}
 
 	}
 

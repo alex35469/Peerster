@@ -1,6 +1,9 @@
 package main
 
 import (
+	"bytes"
+	"crypto/sha256"
+	"encoding/binary"
 	"fmt"
 	"math/rand"
 	"net"
@@ -282,6 +285,17 @@ func NewGossiper(address, name, neighborsInit string) *Gossiper {
 	routingTableInit := make(map[string]*RoutingTableEntry)
 	FileRecordInit := make([]*FileRecord, 0)
 
+	blockChannel := make(chan Block, 1)
+
+	// Init the blockchain
+
+	blockchain := Blockchain{
+		blocks:           make(map[string]Block),
+		nameHashMapping:  make(map[string]string),
+		forksHead:        make([]Block, 0),
+		forksHashMapping: make([]map[string]string, 0),
+	}
+
 	nghInit := make([]string, 0)
 	if neighborsInit != "" {
 		nghInit = strings.Split(neighborsInit, ",")
@@ -296,16 +310,19 @@ func NewGossiper(address, name, neighborsInit string) *Gossiper {
 	}
 
 	return &Gossiper{
-		address:          udpAddr,
-		conn:             udpConn,
-		Name:             name,
-		neighbors:        nghInit,
-		myVC:             &sp,
-		messagesHistory:  messagesHistoryInit,
-		safeTimersRecord: safetimersRecord,
-		routingTable:     routingTableInit,
-		safeFiles:        SafeFileRecords{files: FileRecordInit},
-		safeCtd:          sCtd,
+		address:             udpAddr,
+		conn:                udpConn,
+		Name:                name,
+		neighbors:           nghInit,
+		myVC:                &sp,
+		messagesHistory:     messagesHistoryInit,
+		safeTimersRecord:    safetimersRecord,
+		routingTable:        routingTableInit,
+		safeFiles:           SafeFileRecords{files: FileRecordInit},
+		safeCtd:             sCtd,
+		blockChannel:        blockChannel,
+		blockchain:          blockchain,
+		pendingTransactions: pendingTransactions{transactions: make([]TxPublish, 0)},
 	}
 }
 
@@ -318,7 +335,7 @@ func makeRange(min, max uint64) []uint64 {
 	return r
 }
 
-// https://stackoverflow.com/questions/36000487/check-for-equality-on-slices-without-order
+// retrieved on https://stackoverflow.com/questions/36000487/check-for-equality-on-slices-without-order
 func sameStringSlice(x, y []string) bool {
 	if len(x) != len(y) {
 		return false
@@ -343,4 +360,34 @@ func sameStringSlice(x, y []string) bool {
 		return true
 	}
 	return false
+}
+
+func (t *TxPublish) Hash() (out [32]byte) {
+	h := sha256.New()
+	binary.Write(h, binary.LittleEndian,
+		uint32(len(t.File.Name)))
+	h.Write([]byte(t.File.Name))
+	h.Write(t.File.MetafileHash)
+	copy(out[:], h.Sum(nil))
+	return
+}
+
+func (b *Block) Hash() (out [32]byte) {
+	h := sha256.New()
+	h.Write(b.PrevHash[:])
+	h.Write(b.Nonce[:])
+	binary.Write(h, binary.LittleEndian,
+		uint32(len(b.Transactions)))
+	for _, t := range b.Transactions {
+		th := t.Hash()
+		h.Write(th[:])
+	}
+	copy(out[:], h.Sum(nil))
+	return
+}
+
+func (b *Block) Valid() bool {
+	hash := b.Hash()
+	return bytes.Compare(hash[:MINING_BYTES], make([]byte, MINING_BYTES, MINING_BYTES)) == 0
+
 }

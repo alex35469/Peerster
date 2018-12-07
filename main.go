@@ -14,18 +14,10 @@ import (
 	"fmt"
 	"math/rand"
 	"net"
+	"os"
 	"strings"
 	"time"
 )
-
-var myGossiper *Gossiper
-
-var UIPort, gossipAddr, name, neighborsInit string
-var simple bool
-var rtimer int
-
-var stack = make([]StackElem, 0)
-var infos = make([]InfoElem, 0)
 
 //######################################## INIT #####################################
 
@@ -63,6 +55,12 @@ func main() {
 
 	}
 
+	go startMining()
+
+	// Start the thread that will accept the block
+	// One by one using the channel myGossiper.
+	go processBlock()
+
 	go listenToGUI()
 
 	go listenToGossipers()
@@ -96,6 +94,17 @@ func proccessPacketAndSend(newPacket *GossipPacket, receivedFrom string) {
 
 	if packet := newPacket.Simple; packet != nil && simple {
 		processSimpleMsgGossiper(newPacket)
+	}
+
+	//  ############################## NEW TxPublish ###################
+
+	if packet := newPacket.TxPublish; packet != nil {
+		processTxPublish(packet, receivedFrom)
+	}
+
+	//  ############################## NEW TxPublish ###################
+	if packet := newPacket.BlockPublish; packet != nil {
+		processBlockPublish(packet, receivedFrom)
 	}
 
 	// ############################## NEW SEARCH MSG #################
@@ -169,7 +178,7 @@ func processSearchReply(packet *SearchReply) {
 		for dIndex, metaHash := range myGossiper.safeDownloadingFile.metaHash {
 
 			// it matches an existing file
-			if hex.EncodeToString(result.MetafileHash) == metaHash {
+			if hex.EncodeToString(result.MetafileHash) == metaHash && result.FileName == myGossiper.safeDownloadingFile.fname[dIndex] {
 
 				updateDownloadingFile(result, dIndex, packet.Origin)
 
@@ -211,7 +220,7 @@ func updateOngoingSearch() {
 			// Directly pass if we already seen that hash for that search
 			oIndex := oGlobal - oSuppressed
 
-			if alreadySeenThisHash(myGossiper.safeDownloadingFile.metaHash[dIndex], myGossiper.safeOngoingSearch.seenHashes[oIndex]) {
+			if alreadySeenThis(myGossiper.safeDownloadingFile.metaHash[dIndex], myGossiper.safeOngoingSearch.seenHashes[oIndex]) /*&& alreadySeenThis(myGossiper.safeDownloadingFile.fname[dIndex], myGossiper.safeOngoingSearch.seenNames[oIndex])*/ {
 				continue
 			}
 
@@ -221,6 +230,7 @@ func updateOngoingSearch() {
 					// We have a match!!
 					myGossiper.safeOngoingSearch.matches[oIndex]++
 					myGossiper.safeOngoingSearch.seenHashes[oIndex] = append(myGossiper.safeOngoingSearch.seenHashes[oIndex], myGossiper.safeDownloadingFile.metaHash[dIndex])
+					//myGossiper.safeOngoingSearch.seenNames[oIndex] = append(myGossiper.safeOngoingSearch.seenNames[oIndex], myGossiper.safeDownloadingFile.metaHash[dIndex])
 
 					if myGossiper.safeOngoingSearch.matches[oIndex] >= REQUIRED_MATCH {
 						// The Search is finished. Removing safeOngoing
@@ -243,9 +253,9 @@ func updateOngoingSearch() {
 
 }
 
-func alreadySeenThisHash(thisHash string, alreadySeenHashes []string) bool {
-	for _, h := range alreadySeenHashes {
-		if h == thisHash {
+func alreadySeenThis(this string, alreadySeen []string) bool {
+	for _, h := range alreadySeen {
+		if h == this {
 			return true
 		}
 	}
@@ -257,14 +267,27 @@ func moveToReadyAndSuppress(dIndex int) {
 
 	// See if the metahash already exist
 	dMetaHash := myGossiper.safeDownloadingFile.metaHash[dIndex]
+	//seenNames dName := myGossiper.safeDownloadingFile.fname[dIndex]
+
 	moved := false
 	for rIndex, rMetaHash := range myGossiper.safeReadyToDownload.metaHash {
-		if rMetaHash == dMetaHash {
+		//seenNames rName := myGossiper.safeReadyToDownload.fname[rIndex]
+		if rMetaHash == dMetaHash /*&& rName == dName*/ {
 			// it already exist so we can simply update the infos here
+
+			rName := myGossiper.safeReadyToDownload.fname[rIndex]
+			dName := myGossiper.safeDownloadingFile.fname[dIndex]
+
 			myGossiper.safeReadyToDownload.fname[rIndex] = myGossiper.safeDownloadingFile.fname[dIndex]
 			myGossiper.safeReadyToDownload.chunkCount[rIndex] = myGossiper.safeDownloadingFile.chunkCount[dIndex]
 			myGossiper.safeReadyToDownload.chunkMap[rIndex] = myGossiper.safeDownloadingFile.chunkMap[dIndex]
 			myGossiper.safeReadyToDownload.metaHash[rIndex] = myGossiper.safeDownloadingFile.metaHash[dIndex]
+
+			if dName != rName {
+				// Only notify front-end if there is a noticable changement
+				infos = append(infos, InfoElem{Fname: myGossiper.safeDownloadingFile.fname[dIndex], Event: "downloadable", Desc: "Found existing file under different name, (old: <span style='color:red;'>" + rName + "</span>, new: <span style='color:red;'>" + dName + "</span>)", Hash: myGossiper.safeDownloadingFile.metaHash[dIndex]})
+			}
+
 			moved = true
 		}
 	}
@@ -275,6 +298,9 @@ func moveToReadyAndSuppress(dIndex int) {
 		myGossiper.safeReadyToDownload.chunkCount = append(myGossiper.safeReadyToDownload.chunkCount, myGossiper.safeDownloadingFile.chunkCount[dIndex])
 		myGossiper.safeReadyToDownload.chunkMap = append(myGossiper.safeReadyToDownload.chunkMap, myGossiper.safeDownloadingFile.chunkMap[dIndex])
 		myGossiper.safeReadyToDownload.metaHash = append(myGossiper.safeReadyToDownload.metaHash, myGossiper.safeDownloadingFile.metaHash[dIndex])
+
+		// Advertising the newly file ready to download to the front-end
+		infos = append(infos, InfoElem{Fname: myGossiper.safeDownloadingFile.fname[dIndex], Event: "downloadable", Desc: "New file ready to be downloaded: <span style='color:red;'>" + myGossiper.safeDownloadingFile.fname[dIndex] + "</span>", Hash: myGossiper.safeDownloadingFile.metaHash[dIndex]})
 	}
 
 	// Removing Part
@@ -298,16 +324,18 @@ func moveToReadyAndSuppress(dIndex int) {
 func createDownloadingFile(sr *SearchResult, origin string) {
 
 	thisHash := hex.EncodeToString(sr.MetafileHash)
-	everybodySeenThisBefore := true
+	//seenNames thisName := sr.FileName
+	seen := false
 	for _, alreadySeenHashes := range myGossiper.safeOngoingSearch.seenHashes {
 		// We only create a Downloading file if we did not see it beforehand on the ongoing searches
-		if !alreadySeenThisHash(thisHash, alreadySeenHashes) {
-			everybodySeenThisBefore = false
+		if alreadySeenThis(thisHash, alreadySeenHashes) /*&& alreadySeenThis(thisName, myGossiper.safeOngoingSearch.seenNames[k])*/ {
+			seen = true
+			fmt.Println("SEEEEEEENNNNNNNN!!!!")
 			break
 		}
 	}
 
-	if everybodySeenThisBefore {
+	if seen {
 		return
 	}
 
@@ -455,6 +483,12 @@ func autodestruct(packet *SearchRequest, mode string) {
 				myGossiper.safeOngoingSearch.seenHashes[len(myGossiper.safeOngoingSearch.seenHashes)-1] = nil // or the zero value of T
 				myGossiper.safeOngoingSearch.seenHashes = myGossiper.safeOngoingSearch.seenHashes[:len(myGossiper.safeOngoingSearch.seenHashes)-1]
 
+				// Deleting seenNames
+				/*
+					copy(myGossiper.safeOngoingSearch.seenNames[i:], myGossiper.safeOngoingSearch.seenNames[i+1:])
+					myGossiper.safeOngoingSearch.seenNames[len(myGossiper.safeOngoingSearch.seenNames)-1] = nil // or the zero value of T
+					myGossiper.safeOngoingSearch.seenNames = myGossiper.safeOngoingSearch.seenNames[:len(myGossiper.safeOngoingSearch.seenNames)-1]
+				*/
 			}
 		}
 		fmt.Println("$After Deleting : Ongoing search: ", myGossiper.safeOngoingSearch.searches)
@@ -563,18 +597,19 @@ func listenToClient() {
 
 func processMsgFromClient(newPacket *ClientPacket) {
 
-	// PROCESSING SIMPLE
+	// PROCESSING BROADCAST MSG
 	if packet := newPacket.Broadcast; packet != nil {
 		fmt.Println("CLIENT MESSAGE " + packet.Contents)
 
+		// SIMPLE MODE
 		if simple {
 			sendMsgFromClientSimpleMode(&GossipPacket{Simple: packet})
 		}
 
+		// NORMAL MODE
 		if !simple {
 			initiateRumorFromClient(&GossipPacket{Simple: packet})
 		}
-
 	}
 
 	// PROCESSIN PRIVATE
@@ -584,22 +619,20 @@ func processMsgFromClient(newPacket *ClientPacket) {
 
 	}
 
-	// PROCESSING FILE INDEXING AND FILE DOWNLOAD
+	// PROCESSING FILE INDEXING -- FILE DOWNLOAD WITH DEST -- FILE DOWNLOAD W/O DEST
 	if packet := newPacket.CMessage; packet != nil {
-		if packet.Request == "" {
-			fr, err := ScanFile(packet.File)
 
-			if err != nil {
-				fmt.Println(err.Error())
-				return
-			}
+		fmt.Println("HERE10: ", packet)
 
-			addFileRecord(fr, myGossiper)
+		// PROCESSING FILE INDEXING
+		if packet.Request == "" && packet.File != "" && packet.Dest == "" {
 
+			fmt.Println("HERE2")
+			indexFile(packet)
 			//fmt.Println(myGossiper.safeFiles.files)
 		}
 
-		if packet.Dest != "" && packet.File != "" && packet.Request != "" {
+		if packet.File != "" && packet.Request != "" {
 
 			// First, check if the file is already downloaded
 			request, err := hex.DecodeString(packet.Request)
@@ -616,24 +649,36 @@ func processMsgFromClient(newPacket *ClientPacket) {
 			if i != -1 && myGossiper.safeFiles.files[i].NbChunk == uint64(len(myGossiper.safeFiles.files[i].MetaFile)) {
 
 				fmt.Println("FILE FOUND IN THE INDEX")
+				infos = append(infos, InfoElem{Event: "download", Fname: packet.File, Desc: " has metahash already found in index"})
 				storeFile(packet.File, request, myGossiper, -1)
 				return
 			}
 
-			// We don't know where to route it
-			if myGossiper.routingTable[packet.Dest] == nil {
-				return
+			// FILE DOWNLOAD WITH DEST
+			if packet.Dest != "" {
+
+				// We don't know where to route it
+				if myGossiper.routingTable[packet.Dest] == nil {
+					return
+				}
+
+				// We Craft the dataRequest and send it
+
+				// Filling the SafeChunkToDownload
+				//myGossiper.safeCtd.mux.Lock()
+
+				// Sending it
+				//sendTo(&GossipPacket{DataRequest: &DataRequest{Origin: myGossiper.Name, Destination: packet.Dest, HashValue: request, HopLimit: HOP_LIMIT}}, link)
+				fmt.Printf("DOWNLOADING metafile of %s from %s\n", packet.File, packet.Dest)
+				requestNextChunk(packet.File, request, request, packet.Dest, len(myGossiper.safeCtd.tickers))
 			}
 
-			// We Craft the dataRequest and send it
+			// FILE DOWNLOAD W/O DEST
+			if packet.Dest == "" {
 
-			// Filling the SafeChunkToDownload
-			//myGossiper.safeCtd.mux.Lock()
+				downloadFromReadyToDownload(packet.File, packet.Request)
 
-			// Sending it
-			//sendTo(&GossipPacket{DataRequest: &DataRequest{Origin: myGossiper.Name, Destination: packet.Dest, HashValue: request, HopLimit: HOP_LIMIT}}, link)
-			fmt.Printf("DOWNLOADING metafile of %s from %s\n", packet.File, packet.Dest)
-			requestNextChunk(packet.File, request, request, packet.Dest, len(myGossiper.safeCtd.tickers))
+			}
 
 		}
 
@@ -643,6 +688,51 @@ func processMsgFromClient(newPacket *ClientPacket) {
 	if packet := newPacket.CSearch; packet != nil {
 		fmt.Printf("We received a file Search request with : kw= %s en len(kw) = %d , and bdgt = %d\n", packet.Keywords, len(packet.Keywords), packet.Budget)
 		processSearchMsgFromClient(packet)
+	}
+
+}
+
+func indexFile(packet *ClientMessage) {
+	fname := packet.File
+
+	// Check if the name is not already in the blockchain
+	myGossiper.blockchain.mux.Lock()
+
+	_, ok := myGossiper.blockchain.nameHashMapping[fname]
+	myGossiper.blockchain.mux.Unlock()
+
+	if ok {
+		infos = append(infos, InfoElem{Fname: fname, Event: "indexed", Desc: "Please chose another filename: this one is not unique"})
+		return
+	}
+
+	if _, err := os.Stat("./_SharedFiles/" + fname); os.IsNotExist(err) {
+		fmt.Println("The file doesn't exist in the shared folder")
+		return
+	}
+
+	fr, size, err := ScanFile(fname)
+
+	metaHashByte, err := hex.DecodeString(fr.MetaHash)
+	checkError(err, true)
+
+	// We handle this the same way as if we received a Transaction from another Peer
+	f := File{Name: fr.Name, Size: size, MetafileHash: metaHashByte}
+	processTxPublish(&TxPublish{File: f, HopLimit: HOP_LIMIT + 1}, "")
+
+	if err != nil {
+		fmt.Println(err.Error())
+		infos = append(infos, InfoElem{Fname: fname, Event: "error", Desc: err.Error(), Hash: ""})
+		return
+	}
+
+	infos = append(infos, InfoElem{Fname: fname, Event: "indexed", Desc: "MetaHash = ", Hash: fr.MetaHash})
+
+	err = addFileRecord(fr, myGossiper)
+
+	if err != nil {
+		infos = append(infos, InfoElem{Fname: fname, Event: "duplicate", Desc: err.Error(), Hash: ""})
+		return
 	}
 
 }
@@ -677,6 +767,7 @@ func processSearchMsgFromClient(packet *ClientSearch) {
 	myGossiper.safeOngoingSearch.searches = append(myGossiper.safeOngoingSearch.searches, sr)
 	myGossiper.safeOngoingSearch.matches = append(myGossiper.safeOngoingSearch.matches, 0)
 	myGossiper.safeOngoingSearch.seenHashes = append(myGossiper.safeOngoingSearch.seenHashes, make([]string, 0))
+	//myGossiper.safeOngoingSearch.seenNames = append(myGossiper.safeOngoingSearch.seenNames, make([]string, 0))
 
 	if packet.Budget == 0 {
 		// Performing the increasing search request
@@ -700,16 +791,67 @@ func processSearchMsgFromClient(packet *ClientSearch) {
 	} else {
 		// Perfoming the simple seach request (Still with the timer)
 		go func() {
-			for range ticker.C {
-				ticker.Stop()
-				distributeSearchRequest(*sr)
-				autodestruct(sr, "ongoing")
-			}
+			distributeSearchRequest(*sr)
+			<-ticker.C
+			autodestruct(sr, "ongoing")
+
 		}()
 
 	}
 
 	myGossiper.safeOngoingSearch.mux.Unlock()
+}
+
+func downloadFromReadyToDownload(name, metahash string) {
+
+	var targetChunkMap map[uint64]string
+
+	myGossiper.safeReadyToDownload.mux.Lock()
+	defer myGossiper.safeReadyToDownload.mux.Unlock()
+
+	noTarget := true
+	for dIndex, chunkMap := range myGossiper.safeReadyToDownload.chunkMap {
+		if name == myGossiper.safeReadyToDownload.fname[dIndex] && metahash == myGossiper.safeReadyToDownload.metaHash[dIndex] {
+			targetChunkMap = chunkMap
+			noTarget = false
+			break
+		}
+	}
+
+	if noTarget {
+		fmt.Printf("$ name = %s, request = %s not in ReadyToDownload\n", name, metahash)
+		return
+	}
+
+	dests := extractDest(targetChunkMap)
+
+	fmt.Println(dests)
+
+	//initiate the requests over all destinations
+	metahashByte, err := hex.DecodeString(metahash)
+	checkError(err, true)
+
+	for _, dest := range dests {
+		requestNextChunk(name, metahashByte, metahashByte, dest, len(myGossiper.safeCtd.tickers))
+	}
+
+}
+
+func extractDest(targetChunkMap map[uint64]string) []string {
+	set := make(map[string]bool)
+
+	for _, v := range targetChunkMap {
+		set[v] = true
+	}
+
+	dests := make([]string, 0)
+
+	for k := range set {
+		dests = append(dests, k)
+	}
+
+	return dests
+
 }
 
 func duplicateClientSearch(packet *SearchRequest) bool {

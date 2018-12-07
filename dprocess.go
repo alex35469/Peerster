@@ -80,6 +80,8 @@ func processDataReply(packet *DataReply) {
 				// Setup the ticker for next chunk and send the packet
 				fmt.Printf("DOWNLOADING %s chunk 1 from %s\n", fname, packet.Origin)
 
+				prepareFile(fname)
+
 				requestNextChunk(fname, hashChunck, myGossiper.safeCtd.metas[i], packet.Origin, i)
 				// We clean the old hashes: and update them to the current hash that we want
 				cleaningCtd(c, hashChunck)
@@ -88,6 +90,8 @@ func processDataReply(packet *DataReply) {
 
 			} else {
 				// The metafile is already here
+
+				//myGossiper.safeFiles.mux.Lock()
 				k, l := chunkSeek(c, myGossiper)
 
 				if l == -1 {
@@ -111,6 +115,7 @@ func processDataReply(packet *DataReply) {
 					infos = append(infos, InfoElem{Fname: fname, Event: "download", Desc: "downloaded", Hash: ""})
 
 					myGossiper.safeCtd.mux.Unlock()
+					//myGossiper.safeFiles.mux.Unlock()
 					// We found the match, we cleaned everything we can leave
 					return
 
@@ -125,6 +130,8 @@ func processDataReply(packet *DataReply) {
 				fmt.Printf("DOWNLOADING %s chunk %d from %s\n", fname, myGossiper.safeFiles.files[k].NbChunk+1, packet.Origin)
 				requestNextChunk(fname, hashChunck, myGossiper.safeCtd.metas[i], packet.Origin, i)
 				cleaningCtd(c, hashChunck)
+
+				//myGossiper.safeFiles.mux.Lock()
 
 			}
 		}

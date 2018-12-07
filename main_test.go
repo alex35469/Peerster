@@ -10,13 +10,13 @@ import (
 func TestScanFileAndCheckSum(t *testing.T) {
 
 	myGossiper := NewGossiper("127.0.0.1:6000", "nodeTest", "127.0.0.1:6002,127.0.0.1:6003,127.0.0.1:6004")
-	rf1, _ := ScanFile("file.txt")
+	rf1, _, _ := ScanFile("file.txt")
 	fmt.Println(rf1)
 
-	rf2, _ := ScanFile("carlton.txt")
+	rf2, _, _ := ScanFile("carlton.txt")
 	fmt.Println(rf2)
 
-	rf3, _ := ScanFile("im1.jpg")
+	rf3, _, _ := ScanFile("im1.jpg")
 	fmt.Println(rf3)
 
 	myGossiper.safeFiles.files = append(myGossiper.safeFiles.files, rf1)
