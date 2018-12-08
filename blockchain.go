@@ -5,7 +5,8 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
-	"time"
+
+	"github.com/jinzhu/copier"
 )
 
 func processTxPublish(packet *TxPublish, recievedFrom string) {
@@ -17,7 +18,7 @@ func processTxPublish(packet *TxPublish, recievedFrom string) {
 
 	// We have to flood it as well
 
-	valide := transfereInPendingTx(packet)
+	valide := transfereInPendingTx(*packet)
 
 	if !valide {
 		fmt.Println("Not valide transaction. File with name : ", packet.File.Name)
@@ -34,7 +35,7 @@ func processTxPublish(packet *TxPublish, recievedFrom string) {
 
 // transfereInPendingTx return true if it moves the file to pendingTransaction
 // flase if the transaction is not valide
-func transfereInPendingTx(transaction *TxPublish) bool {
+func transfereInPendingTx(transaction TxPublish) bool {
 
 	myGossiper.blockchain.mux.Lock()
 	defer myGossiper.blockchain.mux.Unlock()
@@ -46,7 +47,7 @@ func transfereInPendingTx(transaction *TxPublish) bool {
 		return false
 	}
 
-	myGossiper.pendingTransactions.transactions = append(myGossiper.pendingTransactions.transactions, *transaction)
+	myGossiper.pendingTransactions.transactions = append(myGossiper.pendingTransactions.transactions, transaction)
 	return true
 }
 
@@ -56,6 +57,8 @@ func processBlockPublish(packet *BlockPublish, recievedFrom string) {
 	if !packet.Block.Valid() {
 		return
 	}
+
+	fmt.Println("$RECEIVED BLOCKPUBLISH")
 
 	// Send the block to the channel such that processBlock Can handle it
 	myGossiper.blockChannel <- packet.Block
@@ -93,6 +96,7 @@ BLOCKLOOP:
 		// We add a block to the blockchain only if we've never seen that block before
 		if !(!seenBlock && seenParent || bytes.Equal(ph[:], make([]byte, 32, 32))) {
 			fmt.Printf("Warning: seenBlock = %t seenParent = %t\n", seenBlock, seenParent)
+			myGossiper.blockchain.printChain()
 			myGossiper.blockchain.mux.Unlock()
 			continue
 		}
@@ -122,15 +126,16 @@ BLOCKLOOP:
 				toWithdraw = append(toWithdraw, tx)
 			}
 
-			fmt.Println("toWithDraw: ", toWithdraw)
-			fmt.Println("transaction in the current mined block : ", currentBlock.Transactions)
+			//fmt.Println("toWithDraw: ", toWithdraw)
+			//fmt.Println("transaction in the current mined block : ", currentBlock.Transactions)
+
 			withDrawFromPending(toWithdraw)
 
-			myGossiper.blockchain.head = currentBlock
+			copier.Copy(&myGossiper.blockchain.head, &currentBlock)
+
 			myGossiper.blockchain.lengthLongestChain++
 			myGossiper.blockchain.printChain()
 			fmt.Println(myGossiper.blockchain.lengthLongestChain)
-
 			myGossiper.blockchain.mux.Unlock()
 			continue
 		}
@@ -163,49 +168,118 @@ BLOCKLOOP:
 				// Adding the trasaction to the relevant mapping
 
 				if myGossiper.blockchain.forksLength[i] > myGossiper.blockchain.lengthLongestChain {
-					rewind(i)
-					fmt.Println("FORK-LONGER rewind % blocks")
+					rewindNumber := rewind(i)
+					fmt.Printf("FORK-LONGER rewind %d blocks\n", rewindNumber)
 				} else {
 
 					fmt.Printf("FORK-SHORTER %s\n", currentHash)
 				}
 
 				myGossiper.blockchain.mux.Unlock()
-				continue
+				continue BLOCKLOOP
 			}
-
-			// HANDLING THE CREATION OF A NEW FOR
-
 		}
+
+		// HANDLING THE CREATION OF A NEW FORK
+		createNewFork(currentBlock)
+
 		myGossiper.blockchain.mux.Unlock()
+	}
+}
+
+func createNewFork(forkHead Block) {
+	myGossiper.blockchain.forksHead = append(myGossiper.blockchain.forksHead, forkHead)
+
+	forksHashMapping := make(map[string]string)
+	for _, tx := range forkHead.Transactions {
+		forksHashMapping[tx.File.Name] = hex.EncodeToString(tx.File.MetafileHash)
+	}
+
+	myGossiper.blockchain.forksHashMapping = append(myGossiper.blockchain.forksHashMapping, forksHashMapping)
+
+	myGossiper.blockchain.forksLength = append(myGossiper.blockchain.forksLength, findLength(forkHead))
+	fmt.Println("$Forkcreated")
+	fmt.Printf("FORK-SHORTER %x\n", forkHead.Hash())
+
+}
+
+func findLength(head Block) int {
+
+	length := 1
+	fmt.Println()
+	for {
+		if bytes.Equal(head.PrevHash[:], make([]byte, 32, 32)) {
+			return length
+		}
+
+		head = myGossiper.blockchain.blocks[hex.EncodeToString(head.PrevHash[:])]
+		length++
 	}
 
 }
 
-func rewind(fork int) {
+func FindRewindNumb(fork int) int {
+	rewindNumber := 1
+	head := myGossiper.blockchain.head
+	forkHead := myGossiper.blockchain.forksHead[fork]
+
+	fmt.Println("Entering to the rewind loop")
+
+	for {
+		for {
+
+			if bytes.Equal(head.PrevHash[:], forkHead.PrevHash[:]) {
+				fmt.Println("Found rewind")
+				return rewindNumber
+			}
+
+			if bytes.Equal(head.PrevHash[:], make([]byte, 32, 32)) {
+				head = myGossiper.blockchain.head
+				break
+			}
+
+			head = myGossiper.blockchain.blocks[hex.EncodeToString(head.PrevHash[:])]
+
+		}
+		if bytes.Equal(forkHead.PrevHash[:], make([]byte, 32, 32)) {
+			break
+		}
+		forkHead = myGossiper.blockchain.blocks[hex.EncodeToString(forkHead.PrevHash[:])]
+		rewindNumber++
+	}
+
+	return rewindNumber
+}
+
+func rewind(fork int) int {
+	//
+	rewindNumb := FindRewindNumb(fork)
 
 	// Swapping
 	myGossiper.blockchain.head, myGossiper.blockchain.forksHead[fork] = myGossiper.blockchain.forksHead[fork], myGossiper.blockchain.head
 	myGossiper.blockchain.lengthLongestChain, myGossiper.blockchain.forksLength[fork] = myGossiper.blockchain.forksLength[fork], myGossiper.blockchain.lengthLongestChain
 	myGossiper.blockchain.nameHashMapping, myGossiper.blockchain.forksHashMapping[fork] = myGossiper.blockchain.forksHashMapping[fork], myGossiper.blockchain.nameHashMapping
 
+	return rewindNumb
 }
 
 func (blockchain *Blockchain) printChain() {
 
-	s := "CHAIN"
-	//firstBlock := findFirstBlock()
+	s := "CHAIN\n"
+	// s :="CHAIN"
 
 	b := myGossiper.blockchain.head
 	for {
-		s += " " + b.DescribeBlock()
+		s += b.DescribeBlock() + "\n"
+		// s+= " " +b.DescribeBlock()
 		if bytes.Equal(b.PrevHash[:], make([]byte, 32, 32)) {
 			break
 		}
 		b = myGossiper.blockchain.blocks[hex.EncodeToString(b.PrevHash[:])]
 		fmt.Println("Trans : ", b.Transactions)
 	}
-	fmt.Println(s)
+	fmt.Println(s[:len(s)-1])
+	// fmt.Println(s)
 }
 
 func (block Block) DescribeBlock() string {
@@ -215,19 +289,12 @@ func (block Block) DescribeBlock() string {
 
 	s := currentHashString + ":" + prevHashString + ":"
 
-	fmt.Println(block.Transactions)
-
 	for _, tx := range block.Transactions {
 		s += tx.File.Name + ","
 	}
 
 	s = s[:len(s)-1]
 	return s
-}
-
-func findFirstBlock() {
-
-	//for prevHash
 }
 
 func withDrawFromPending(toWithDraw []TxPublish) {
@@ -254,6 +321,8 @@ func startMining() {
 
 	// First block to mine
 	block := Block{PrevHash: [32]byte{}, Transactions: nil}
+	//start := time.Now()
+
 	for {
 
 		// Generate random Nonce
@@ -265,11 +334,17 @@ func startMining() {
 		block.Nonce = nonce
 		//fmt.Println(nonce)
 
-		if block.Valid() {
+		if block.Valid() && len(block.Transactions) != 0 {
 			fmt.Printf("FOUND-BLOCK %x\n", block.Hash())
 			fmt.Println("With transactions: ", block.Transactions)
 			myGossiper.blockChannel <- block
-			time.Sleep(1000 * time.Millisecond)
+
+			//time.Sleep(10000 * time.Millisecond)
+
+			broadcastBlock(&BlockPublish{
+				HopLimit: HOP_LIMIT_BLOCK,
+				Block:    block,
+			}, "")
 
 		}
 
@@ -278,7 +353,7 @@ func startMining() {
 		myGossiper.blockchain.mux.Lock()
 		myGossiper.pendingTransactions.mux.Lock()
 
-		block.Transactions = myGossiper.pendingTransactions.transactions
+		block.Transactions = copieTransaction(myGossiper.pendingTransactions.transactions)
 		if myGossiper.blockchain.lengthLongestChain != 0 {
 			block.PrevHash = myGossiper.blockchain.head.Hash()
 		}
@@ -287,6 +362,20 @@ func startMining() {
 		myGossiper.blockchain.mux.Unlock()
 
 	}
+}
+
+func copieTransaction(txs []TxPublish) []TxPublish {
+	newTx := make([]TxPublish, len(txs))
+	for i := range txs {
+		newTx[i] = TxPublish{
+			File: File{
+				Name:         txs[i].File.Name,
+				Size:         txs[i].File.Size,
+				MetafileHash: txs[i].File.MetafileHash},
+			HopLimit: txs[i].HopLimit}
+	}
+
+	return newTx
 }
 
 // nameOk verify if the name we want to index is not

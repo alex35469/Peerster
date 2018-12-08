@@ -119,7 +119,7 @@ func proccessPacketAndSend(newPacket *GossipPacket, receivedFrom string) {
 	// ############################## NEW DATA MSG #################
 
 	if packet := newPacket.DataReply; packet != nil {
-		fmt.Println("$RECEIVING DATA REPLY")
+		fmt.Printf("$RECEIVING DATA REPLY with HashValue = %x and Data = %x\n", packet.HashValue, packet.Data)
 		processDataReply(packet)
 	}
 

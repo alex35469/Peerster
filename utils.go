@@ -67,10 +67,10 @@ func sendToAllNeighbors(packet *GossipPacket, relayer string) {
 
 func sendTo(packet *GossipPacket, addr string) {
 	packetBytes, err := protobuf.Encode(packet)
-	checkError(err, true)
+	checkError(err, false)
 
 	remoteGossiperAddr, err := net.ResolveUDPAddr("udp4", addr)
-	checkError(err, true)
+	checkError(err, false)
 
 	_, err = myGossiper.conn.WriteTo(packetBytes, remoteGossiperAddr)
 	if err != nil {
@@ -388,6 +388,6 @@ func (b *Block) Hash() (out [32]byte) {
 
 func (b *Block) Valid() bool {
 	hash := b.Hash()
-	return bytes.Compare(hash[:MINING_BYTES], make([]byte, MINING_BYTES, MINING_BYTES)) == 0
+	return bytes.Equal(hash[:MINING_BYTES], make([]byte, MINING_BYTES, MINING_BYTES))
 
 }
