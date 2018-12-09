@@ -7,6 +7,13 @@ import (
 	"testing"
 )
 
+/*
+func TestFindRewindNumb(t *testing.T) {
+	myGossiper := NewGossiper("127.0.0.1:6000", "nodeTest", "127.0.0.1:6002,127.0.0.1:6003,127.0.0.1:6004")
+
+}
+*/
+
 func TestScanFileAndCheckSum(t *testing.T) {
 
 	myGossiper := NewGossiper("127.0.0.1:6000", "nodeTest", "127.0.0.1:6002,127.0.0.1:6003,127.0.0.1:6004")

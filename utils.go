@@ -294,6 +294,7 @@ func NewGossiper(address, name, neighborsInit string) *Gossiper {
 		nameHashMapping:  make(map[string]string),
 		forksHead:        make([]Block, 0),
 		forksHashMapping: make([]map[string]string, 0),
+		orphansBlock:     make(map[string]Block),
 	}
 
 	nghInit := make([]string, 0)

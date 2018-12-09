@@ -6,6 +6,8 @@ import (
 	"encoding/hex"
 	"fmt"
 
+	"time"
+
 	"github.com/jinzhu/copier"
 )
 
@@ -58,7 +60,7 @@ func processBlockPublish(packet *BlockPublish, recievedFrom string) {
 		return
 	}
 
-	fmt.Println("$RECEIVED BLOCKPUBLISH")
+	fmt.Println("$RECEIVED BLOCKPUBLISH with hopLimit: ", packet.HopLimit)
 
 	// Send the block to the channel such that processBlock Can handle it
 	myGossiper.blockChannel <- packet.Block
@@ -78,11 +80,61 @@ func broadcastBlock(packet *BlockPublish, recievedFrom string) {
 	}
 }
 
+// function that resolves Orphans, ticker solution for simplicity
+func resolveOrphans() {
+	ticker := time.NewTicker(ORPHAN_RESOLUTION)
+	for range ticker.C {
+
+		fmt.Println("$Trying to Resolve Orphans")
+
+		luckyOrphans := make([]Block, 0)
+
+		myGossiper.blockchain.mux.Lock()
+
+		foundLuckyOrphan := true // Fake -- only to trick the following loop ;)
+
+		for foundLuckyOrphan {
+			foundLuckyOrphan = false
+
+			for _, orphan := range myGossiper.blockchain.orphansBlock {
+				_, foundParent := myGossiper.blockchain.blocks[hex.EncodeToString(orphan.PrevHash[:])]
+
+				if foundParent {
+					luckyOrphans = append(luckyOrphans, orphan)
+					foundLuckyOrphan = true
+					fmt.Println("$We found an orphan")
+				} else {
+					fmt.Println("$No Orphans found")
+				}
+			}
+
+			myGossiper.blockchain.mux.Unlock()
+
+			for _, luckyOrphan := range luckyOrphans {
+				h := luckyOrphan.Hash()
+				delete(myGossiper.blockchain.orphansBlock, hex.EncodeToString(h[:]))
+
+				// letting the orphan joining her parents
+				myGossiper.blockChannel <- luckyOrphan
+
+			}
+			// Let time fot the Orphan Found to get processed
+			fmt.Println("Next Round")
+			time.Sleep(30 * time.Millisecond)
+			luckyOrphans = make([]Block, 0)
+			myGossiper.blockchain.mux.Lock()
+
+		}
+
+		myGossiper.blockchain.mux.Unlock()
+	}
+
+}
+
 func processBlock() {
 
 BLOCKLOOP:
 	for currentBlock := range myGossiper.blockChannel {
-
 		h := currentBlock.Hash()
 		ph := currentBlock.PrevHash
 		currentHash := hex.EncodeToString(h[:])
@@ -96,6 +148,12 @@ BLOCKLOOP:
 		// We add a block to the blockchain only if we've never seen that block before
 		if !(!seenBlock && seenParent || bytes.Equal(ph[:], make([]byte, 32, 32))) {
 			fmt.Printf("Warning: seenBlock = %t seenParent = %t\n", seenBlock, seenParent)
+
+			if !seenParent {
+				// orphans blocks
+				fmt.Printf("$Orphans! : %s and prev: %x", currentHash, currentBlock.Hash())
+				myGossiper.blockchain.orphansBlock[currentHash] = currentBlock
+			}
 			myGossiper.blockchain.printChain()
 			myGossiper.blockchain.mux.Unlock()
 			continue
@@ -128,8 +186,9 @@ BLOCKLOOP:
 
 			//fmt.Println("toWithDraw: ", toWithdraw)
 			//fmt.Println("transaction in the current mined block : ", currentBlock.Transactions)
-
+			myGossiper.pendingTransactions.mux.Lock()
 			withDrawFromPending(toWithdraw)
+			myGossiper.pendingTransactions.mux.Unlock()
 
 			copier.Copy(&myGossiper.blockchain.head, &currentBlock)
 
@@ -170,6 +229,21 @@ BLOCKLOOP:
 				if myGossiper.blockchain.forksLength[i] > myGossiper.blockchain.lengthLongestChain {
 					rewindNumber := rewind(i)
 					fmt.Printf("FORK-LONGER rewind %d blocks\n", rewindNumber)
+
+					// Withdraw the transaction that are in pendings but now are on the blockchain due to the fork
+					myGossiper.pendingTransactions.mux.Lock()
+					toWithdraw := make([]TxPublish, 0)
+					for _, tx := range myGossiper.pendingTransactions.transactions {
+						_, seen := myGossiper.blockchain.nameHashMapping[tx.File.Name]
+						if seen {
+							toWithdraw = append(toWithdraw, tx)
+						}
+					}
+
+					withDrawFromPending(toWithdraw)
+					myGossiper.pendingTransactions.mux.Unlock()
+
+					myGossiper.blockchain.printChain()
 				} else {
 
 					fmt.Printf("FORK-SHORTER %s\n", currentHash)
@@ -191,8 +265,21 @@ func createNewFork(forkHead Block) {
 	myGossiper.blockchain.forksHead = append(myGossiper.blockchain.forksHead, forkHead)
 
 	forksHashMapping := make(map[string]string)
-	for _, tx := range forkHead.Transactions {
-		forksHashMapping[tx.File.Name] = hex.EncodeToString(tx.File.MetafileHash)
+
+	// Adding the previous trasactions contrain in the chain
+	recursiveBlock := forkHead
+	for {
+		// Adding the block's transaction
+		for _, tx := range recursiveBlock.Transactions {
+			forksHashMapping[tx.File.Name] = hex.EncodeToString(tx.File.MetafileHash)
+		}
+
+		if bytes.Equal(recursiveBlock.PrevHash[:], make([]byte, 32, 32)) {
+			break
+		}
+
+		recursiveBlock = myGossiper.blockchain.blocks[hex.EncodeToString(recursiveBlock.PrevHash[:])]
+
 	}
 
 	myGossiper.blockchain.forksHashMapping = append(myGossiper.blockchain.forksHashMapping, forksHashMapping)
@@ -276,7 +363,6 @@ func (blockchain *Blockchain) printChain() {
 			break
 		}
 		b = myGossiper.blockchain.blocks[hex.EncodeToString(b.PrevHash[:])]
-		fmt.Println("Trans : ", b.Transactions)
 	}
 	fmt.Println(s[:len(s)-1])
 	// fmt.Println(s)
@@ -293,13 +379,13 @@ func (block Block) DescribeBlock() string {
 		s += tx.File.Name + ","
 	}
 
-	s = s[:len(s)-1]
+	if len(block.Transactions) != 0 {
+		s = s[:len(s)-1]
+	}
 	return s
 }
 
 func withDrawFromPending(toWithDraw []TxPublish) {
-	myGossiper.pendingTransactions.mux.Lock()
-	defer myGossiper.pendingTransactions.mux.Unlock()
 
 	for _, twd := range toWithDraw {
 		for i := len(myGossiper.pendingTransactions.transactions) - 1; i >= 0; i-- {
@@ -323,6 +409,12 @@ func startMining() {
 	block := Block{PrevHash: [32]byte{}, Transactions: nil}
 	//start := time.Now()
 
+	start := time.Now()
+
+	// ONLY FOR TEST PURPOSES (If a block comes before another block)
+	retain := 5
+	i := 0
+
 	for {
 
 		// Generate random Nonce
@@ -334,17 +426,51 @@ func startMining() {
 		block.Nonce = nonce
 		//fmt.Println(nonce)
 
-		if block.Valid() && len(block.Transactions) != 0 {
+		if block.Valid() /* && len(block.Transactions) != 0 */ {
+			i++
 			fmt.Printf("FOUND-BLOCK %x\n", block.Hash())
 			fmt.Println("With transactions: ", block.Transactions)
 			myGossiper.blockChannel <- block
 
 			//time.Sleep(10000 * time.Millisecond)
 
-			broadcastBlock(&BlockPublish{
-				HopLimit: HOP_LIMIT_BLOCK,
-				Block:    block,
-			}, "")
+			if bytes.Equal(block.PrevHash[:], make([]byte, 32, 32)) {
+				fmt.Println("Wainting for the Genesis")
+				time.Sleep(MINEUR_SLEEPING_TIME)
+			} else {
+				elapsed := time.Since(start)
+				fmt.Println("Mineur sleeping time :", elapsed)
+				time.Sleep(2 * elapsed)
+			}
+
+			if i == retain {
+
+				blockRetarded := Block{}
+				copier.Copy(&blockRetarded, &block)
+
+				fmt.Printf("$Keeping the block! %x  with prev %x\n", block.Hash(), blockRetarded.PrevHash)
+
+				go func() {
+					t := time.NewTimer(500 * time.Millisecond)
+
+					<-t.C
+
+					fmt.Printf("$Releasing the block! %x  with prev %x\n", blockRetarded.Hash(), blockRetarded.PrevHash)
+
+					broadcastBlock(&BlockPublish{
+						HopLimit: HOP_LIMIT_BLOCK,
+						Block:    blockRetarded,
+					}, "")
+
+				}()
+
+			} else {
+				broadcastBlock(&BlockPublish{
+					HopLimit: HOP_LIMIT_BLOCK,
+					Block:    block,
+				}, "")
+			}
+			start = time.Now()
 
 		}
 

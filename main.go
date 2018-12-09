@@ -5,6 +5,8 @@
 //  - peers : coma separated list of peers of the form ip:UIPort
 //  - simple : run gossiper in simple broadcast modified
 // VC = Vector Clock
+//
+// Author : Alexandre Dumur
 
 package main
 
@@ -60,6 +62,8 @@ func main() {
 	// Start the thread that will accept the block
 	// One by one using the channel myGossiper.
 	go processBlock()
+
+	go resolveOrphans()
 
 	go listenToGUI()
 

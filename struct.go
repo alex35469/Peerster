@@ -12,6 +12,8 @@ const ANTI_ENTROPY_DURATION time.Duration = time.Second
 const FILE_DURATION time.Duration = 5 * time.Second
 const SEEN_SEARCH_REQUEST_TIMEOUT time.Duration = 500 * time.Millisecond
 const SEARCH_CLIENT_TIMEOUT time.Duration = time.Second
+const MINEUR_SLEEPING_TIME = 5 * time.Second
+const ORPHAN_RESOLUTION = 800 * time.Millisecond
 
 //###### PEERSTER MESSAGES TYPES   #######
 
@@ -236,6 +238,8 @@ type Blockchain struct {
 	forksHead        []Block
 	forksHashMapping []map[string]string
 	forksLength      []int
+
+	orphansBlock map[string]Block
 
 	mux sync.Mutex
 }
