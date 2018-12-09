@@ -57,13 +57,13 @@ func main() {
 
 	}
 
-	go startMining()
+	//go startMining()
 
 	// Start the thread that will accept the block
 	// One by one using the channel myGossiper.
-	go processBlock()
+	//go processBlock()
 
-	go resolveOrphans()
+	//go resolveOrphans()
 
 	go listenToGUI()
 
@@ -123,7 +123,7 @@ func proccessPacketAndSend(newPacket *GossipPacket, receivedFrom string) {
 	// ############################## NEW DATA MSG #################
 
 	if packet := newPacket.DataReply; packet != nil {
-		fmt.Printf("$RECEIVING DATA REPLY with HashValue = %x and Data = %x\n", packet.HashValue, packet.Data)
+		//fmt.Printf("$RECEIVING DATA REPLY with HashValue = %x and Data = %x\n", packet.HashValue, packet.Data)
 		processDataReply(packet)
 	}
 
@@ -169,7 +169,7 @@ func processSearchReply(packet *SearchReply) {
 		}
 
 		// Need to proceed
-		fmt.Println("$RECEIVING SEARCH REPLY AND SENDING IT ", packet)
+		//fmt.Println("$RECEIVING SEARCH REPLY AND SENDING IT ", packet)
 		return
 	}
 
@@ -215,7 +215,7 @@ func updateOngoingSearch() {
 
 		// We have to pass if the download is not finished yet
 		if myGossiper.safeDownloadingFile.chunkCount[dIndex] != uint64(len(myGossiper.safeDownloadingFile.chunkMap[dIndex])) {
-			fmt.Printf("$While cleaning, a Download was not finished name: %s\n  chunkcount= %d and len(chunkMap) = %d", myGossiper.safeDownloadingFile.fname[dIndex], myGossiper.safeDownloadingFile.chunkCount[dIndex], uint64(len(myGossiper.safeDownloadingFile.chunkMap[dIndex])))
+			//fmt.Printf("$While cleaning, a Download was not finished name: %s\n  chunkcount= %d and len(chunkMap) = %d", myGossiper.safeDownloadingFile.fname[dIndex], myGossiper.safeDownloadingFile.chunkCount[dIndex], uint64(len(myGossiper.safeDownloadingFile.chunkMap[dIndex])))
 			continue
 		}
 
@@ -249,8 +249,8 @@ func updateOngoingSearch() {
 		// We need to supprime dIndex since it's already downloaded
 		// Moving the Downloading file to the ReadyToDownload Repo
 		moveToReadyAndSuppress(dIndex)
-		fmt.Println("$Did we really suppressed it?  Downloading", myGossiper.safeDownloadingFile)
-		fmt.Println("$Did we really suppressed it?  ReadyToDownload", myGossiper.safeReadyToDownload)
+		//fmt.Println("$Did we really suppressed it?  Downloading", myGossiper.safeDownloadingFile)
+		//fmt.Println("$Did we really suppressed it?  ReadyToDownload", myGossiper.safeReadyToDownload)
 
 		dSuppressed++
 	}
@@ -334,7 +334,7 @@ func createDownloadingFile(sr *SearchResult, origin string) {
 		// We only create a Downloading file if we did not see it beforehand on the ongoing searches
 		if alreadySeenThis(thisHash, alreadySeenHashes) /*&& alreadySeenThis(thisName, myGossiper.safeOngoingSearch.seenNames[k])*/ {
 			seen = true
-			fmt.Println("SEEEEEEENNNNNNNN!!!!")
+			//fmt.Println("SEEEEEEENNNNNNNN!!!!")
 			break
 		}
 	}
@@ -388,7 +388,7 @@ func processSearchRequest(packet *SearchRequest, link string) {
 
 	// If the search come back to us simply ignore it.ANTI_ENTROPY_DURATION
 	if packet.Origin == myGossiper.Name {
-		fmt.Println("$Ignoring")
+		//fmt.Println("$Ignoring")
 		return
 	}
 
@@ -398,7 +398,7 @@ func processSearchRequest(packet *SearchRequest, link string) {
 	for _, sR := range myGossiper.safeSearchesSeen.searchesSeen {
 		if sameStringSlice(packet.Keywords, sR.Keywords) && packet.Origin == sR.Origin {
 			// Duplicate Search request
-			fmt.Println("$YESSSS! FOUND DUPLICATES!")
+			//fmt.Println("$YESSSS! FOUND DUPLICATES!")
 			myGossiper.safeSearchesSeen.mux.Unlock()
 			return
 		}
@@ -448,23 +448,23 @@ func autodestruct(packet *SearchRequest, mode string) {
 
 	if mode == "searchSeen" {
 
-		fmt.Println("$Before Deleting : Searches seen: ", myGossiper.safeSearchesSeen.searchesSeen)
-		for i, sseen := range myGossiper.safeSearchesSeen.searchesSeen {
-			if sameStringSlice(sseen.Keywords, packet.Keywords) {
+		//fmt.Println("$Before Deleting : Searches seen: ", myGossiper.safeSearchesSeen.searchesSeen)
+		for i := len(myGossiper.safeSearchesSeen.searchesSeen) - 1; i >= 0; i-- {
+			if sameStringSlice(myGossiper.safeSearchesSeen.searchesSeen[i].Keywords, packet.Keywords) {
 				copy(myGossiper.safeSearchesSeen.searchesSeen[i:], myGossiper.safeSearchesSeen.searchesSeen[i+1:])
 				myGossiper.safeSearchesSeen.searchesSeen[len(myGossiper.safeSearchesSeen.searchesSeen)-1] = nil // or the zero value of T
 				myGossiper.safeSearchesSeen.searchesSeen = myGossiper.safeSearchesSeen.searchesSeen[:len(myGossiper.safeSearchesSeen.searchesSeen)-1]
 			}
 		}
-		fmt.Println("$After Deleting : Searches seen: ", myGossiper.safeSearchesSeen.searchesSeen)
+		//fmt.Println("$After Deleting : Searches seen: ", myGossiper.safeSearchesSeen.searchesSeen)
 
 	}
 	if mode == "ongoing" {
 
-		fmt.Println("$Before Deleting : Ongoing search: ", myGossiper.safeOngoingSearch.searches)
+		//fmt.Println("$Before Deleting : Ongoing search: ", myGossiper.safeOngoingSearch.searches)
 
-		for i, ongoing := range myGossiper.safeOngoingSearch.searches {
-			if sameStringSlice(ongoing.Keywords, packet.Keywords) {
+		for i := len(myGossiper.safeOngoingSearch.searches) - 1; i >= 0; i-- {
+			if sameStringSlice(myGossiper.safeOngoingSearch.searches[i].Keywords, packet.Keywords) {
 
 				// Stopping and deleting ticker
 				myGossiper.safeOngoingSearch.tickers[i].Stop()
@@ -495,7 +495,7 @@ func autodestruct(packet *SearchRequest, mode string) {
 				*/
 			}
 		}
-		fmt.Println("$After Deleting : Ongoing search: ", myGossiper.safeOngoingSearch.searches)
+		//fmt.Println("$After Deleting : Ongoing search: ", myGossiper.safeOngoingSearch.searches)
 
 	}
 
@@ -626,12 +626,12 @@ func processMsgFromClient(newPacket *ClientPacket) {
 	// PROCESSING FILE INDEXING -- FILE DOWNLOAD WITH DEST -- FILE DOWNLOAD W/O DEST
 	if packet := newPacket.CMessage; packet != nil {
 
-		fmt.Println("HERE10: ", packet)
+		//fmt.Println("HERE10: ", packet)
 
 		// PROCESSING FILE INDEXING
 		if packet.Request == "" && packet.File != "" && packet.Dest == "" {
 
-			fmt.Println("HERE2")
+			//fmt.Println("HERE2")
 			indexFile(packet)
 			//fmt.Println(myGossiper.safeFiles.files)
 		}
@@ -690,7 +690,7 @@ func processMsgFromClient(newPacket *ClientPacket) {
 
 	// PROCESSING FILE SEARCH
 	if packet := newPacket.CSearch; packet != nil {
-		fmt.Printf("We received a file Search request with : kw= %s en len(kw) = %d , and bdgt = %d\n", packet.Keywords, len(packet.Keywords), packet.Budget)
+		//fmt.Printf("We received a file Search request with : kw= %s en len(kw) = %d , and bdgt = %d\n", packet.Keywords, len(packet.Keywords), packet.Budget)
 		processSearchMsgFromClient(packet)
 	}
 
@@ -823,7 +823,7 @@ func downloadFromReadyToDownload(name, metahash string) {
 	}
 
 	if noTarget {
-		fmt.Printf("$ name = %s, request = %s not in ReadyToDownload\n", name, metahash)
+		//fmt.Printf("$ name = %s, request = %s not in ReadyToDownload\n", name, metahash)
 		return
 	}
 

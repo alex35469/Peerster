@@ -67,14 +67,14 @@ func ScanFile(fname string) (*FileRecord, int64, error) {
 
 			fr.MetaHash = hex.EncodeToString(h.Sum(nil))
 
-			fmt.Printf("MetaHash = %s, Chunks = %d ,Size = %d\n", fr.MetaHash, tot, size)
+			fmt.Printf("FILE INDEXED MetaHash = %s, Chunks = %d ,Size = %d\n", fr.MetaHash, tot, size)
 
 			return fr, int64(size), nil
 
 		}
 		h.Write(buf[0:n])
 		b := h.Sum(nil)
-		fmt.Printf("n = %d, sha = %x\n", n, b)
+		//fmt.Printf("n = %d, sha = %x\n", n, b)
 
 		// If we need bytes uncomment this
 		concats = append(concats, b...)

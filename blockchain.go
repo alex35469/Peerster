@@ -85,7 +85,7 @@ func resolveOrphans() {
 	ticker := time.NewTicker(ORPHAN_RESOLUTION)
 	for range ticker.C {
 
-		fmt.Println("$Trying to Resolve Orphans")
+		//fmt.Println("$Trying to Resolve Orphans")
 
 		luckyOrphans := make([]Block, 0)
 
@@ -102,9 +102,9 @@ func resolveOrphans() {
 				if foundParent {
 					luckyOrphans = append(luckyOrphans, orphan)
 					foundLuckyOrphan = true
-					fmt.Println("$We found an orphan")
+					//fmt.Println("$We found an orphan")
 				} else {
-					fmt.Println("$No Orphans found")
+					//fmt.Println("$No Orphans found")
 				}
 			}
 
@@ -119,7 +119,7 @@ func resolveOrphans() {
 
 			}
 			// Let time fot the Orphan Found to get processed
-			fmt.Println("Next Round")
+			//fmt.Println("Next Round")
 			time.Sleep(30 * time.Millisecond)
 			luckyOrphans = make([]Block, 0)
 			myGossiper.blockchain.mux.Lock()
@@ -147,14 +147,14 @@ BLOCKLOOP:
 
 		// We add a block to the blockchain only if we've never seen that block before
 		if !(!seenBlock && seenParent || bytes.Equal(ph[:], make([]byte, 32, 32))) {
-			fmt.Printf("Warning: seenBlock = %t seenParent = %t\n", seenBlock, seenParent)
+			//fmt.Printf("Warning: seenBlock = %t seenParent = %t\n", seenBlock, seenParent)
 
 			if !seenParent {
 				// orphans blocks
 				fmt.Printf("$Orphans! : %s and prev: %x", currentHash, currentBlock.Hash())
 				myGossiper.blockchain.orphansBlock[currentHash] = currentBlock
 			}
-			myGossiper.blockchain.printChain()
+
 			myGossiper.blockchain.mux.Unlock()
 			continue
 		}
@@ -246,7 +246,7 @@ BLOCKLOOP:
 					myGossiper.blockchain.printChain()
 				} else {
 
-					fmt.Printf("FORK-SHORTER %s\n", currentHash)
+					//fmt.Printf("FORK-SHORTER %s\n", currentHash)
 				}
 
 				myGossiper.blockchain.mux.Unlock()
@@ -310,13 +310,10 @@ func FindRewindNumb(fork int) int {
 	head := myGossiper.blockchain.head
 	forkHead := myGossiper.blockchain.forksHead[fork]
 
-	fmt.Println("Entering to the rewind loop")
-
 	for {
 		for {
 
 			if bytes.Equal(head.PrevHash[:], forkHead.PrevHash[:]) {
-				fmt.Println("Found rewind")
 				return rewindNumber
 			}
 
@@ -352,12 +349,12 @@ func rewind(fork int) int {
 
 func (blockchain *Blockchain) printChain() {
 
-	s := "CHAIN\n"
+	s := "CHAIN "
 	// s :="CHAIN"
 
 	b := myGossiper.blockchain.head
 	for {
-		s += b.DescribeBlock() + "\n"
+		s += b.DescribeBlock() + " "
 		// s+= " " +b.DescribeBlock()
 		if bytes.Equal(b.PrevHash[:], make([]byte, 32, 32)) {
 			break
@@ -412,7 +409,7 @@ func startMining() {
 	start := time.Now()
 
 	// ONLY FOR TEST PURPOSES (If a block comes before another block)
-	retain := 5
+	retain := -1
 	i := 0
 
 	for {
@@ -429,7 +426,6 @@ func startMining() {
 		if block.Valid() /* && len(block.Transactions) != 0 */ {
 			i++
 			fmt.Printf("FOUND-BLOCK %x\n", block.Hash())
-			fmt.Println("With transactions: ", block.Transactions)
 			myGossiper.blockChannel <- block
 
 			//time.Sleep(10000 * time.Millisecond)
@@ -439,7 +435,7 @@ func startMining() {
 				time.Sleep(MINEUR_SLEEPING_TIME)
 			} else {
 				elapsed := time.Since(start)
-				fmt.Println("Mineur sleeping time :", elapsed)
+				//fmt.Println("Mineur sleeping time :", elapsed)
 				time.Sleep(2 * elapsed)
 			}
 
@@ -470,6 +466,7 @@ func startMining() {
 					Block:    block,
 				}, "")
 			}
+
 			start = time.Now()
 
 		}

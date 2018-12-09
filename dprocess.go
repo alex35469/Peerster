@@ -184,7 +184,7 @@ func cleaningCtd(oldHash []byte, newHash []byte) {
 		}
 	}
 
-	fmt.Printf("<---- After cleaning: dests = %s and hashes = %x\n", myGossiper.safeCtd.dests, myGossiper.safeCtd.chunks)
+	//fmt.Printf("<---- After cleaning: dests = %s and hashes = %x\n", myGossiper.safeCtd.dests, myGossiper.safeCtd.chunks)
 
 }
 
@@ -224,7 +224,7 @@ func requestNextChunk(fname string, hashChunck []byte, meta []byte, dest string,
 			}
 		}
 	}()
-	fmt.Println("Finished")
+	//fmt.Println("Finished")
 }
 
 // ########## DATA REQUEST
